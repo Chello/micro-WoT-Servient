@@ -14,9 +14,15 @@
     "tutorial",
     "demo"
   ],
+  "content_security_policy": "default-src 'self' style-src 'self' 'unsafe-inline';",
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^8.3.0"
+  },
+  "dependencies": {
+    "@angular/cli": "^9.1.6",
+    "jquery": "^3.3.1",
+    "@json-editor/json-editor": "^2.2.1"
   }
 }
