@@ -44,27 +44,28 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // The schema for the editor
     schema: {
-      type: "array",
-      title: "People",
-      format: "tabs",
-      items: {
-        title: "Person",
-        headerTemplate: "{{i}} - {{self.name}}",
-        oneOf: [
-          {
-            $ref: "basic_person.json",
-            title: "Basic Person"
-          },
-          {
-            $ref: "person.json",
-            title: "Complex Person"
-          }
-        ]
-      }
+      type: "object",
+      // title: "People",
+      // format: "tabs",
+      $ref: "basic_person.json",
+      // properties: {
+      //   title: "Person",
+        // headerTemplate: "{{i}} - {{self.name}}",
+        // oneOf: [
+        //   {
+        //     $ref: "basic_person.json",
+        //     title: "Basic Person"
+        //   },
+        //   {
+        //     $ref: "person.json",
+        //     title: "Complex Person"
+        //   }
+        // ]
+      // }
     },
     
     // Seed the form with a starting value
-    startval: starting_value,
+    //startval: starting_value,
     
     // Disable additional properties
     no_additional_properties: true,

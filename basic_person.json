@@ -1,27 +1,69 @@
 {
-    "title": "Person",
-    "type": "object",
-    "id": "person",
-    "properties": {
-      "name": {
+  "title": "Thing",
+  "type": "object",
+  "id": "person",
+  "required": ["title", "id", "forms"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the Thing",
+      "minLength": 4
+    },
+    "id": {
+      "type": "string",
+      "description": "URI of the Thing",
+      "minLength": 4
+    },
+    "@context": {
+      "type": "array",
+      "format": "table",
+      
+      "description": "JSON schema(s) for Thing",
+      "items": {
         "type": "string",
-        "description": "First and Last name",
-        "minLength": 4
+        "properties": {
+          "name": "thing_schema"
+        }
       },
-      "age": {
-        "type": "integer",
-        "default": 21,
-        "minimum": 18,
-        "maximum": 99
+      "options": {
+        "collapsed": true
       },
-      "gender": {
-        "type": "string",
-        "enum": [
-          "male",
-          "female",
-          "other"
-        ]
+      "default": ["https://www.w3.org/2019/wot/td/v1"]
+    },
+    "forms": {
+      "type": "array",
+      "format": "table",
+      "minItems": 1, 
+      "maxItems": 1,
+      "items": {
+        "title": "Operations",
+        "type": "object",
+        "required": ["op"],
+        "properties": {
+          "contentType": {
+            "const": "application/json", 
+            "default": "application/json",
+            "options": {
+              "hidden": true
+            }
+          },
+          "href": {
+            "default": "",
+            "const": "",
+            "options": {
+              "hidden": true
+            }
+          },
+          "op": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": ["readallproperties", "writeallproperties", "readmultipleproperties", "writemultipleproperties"]
+            }
+          }
+        }
       }
     }
   }
-  
+}
