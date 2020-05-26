@@ -1,0 +1,23 @@
+{
+    "title": "Build",
+    "type": "object",
+    "id": "build",
+    "required": ["ssid"],
+    "properties": {
+      "ssid": {
+        "type": "string",
+        "description": "Network SSID to which the Embedded-System will connect",
+        "minLength": 4
+      },
+      "password": {
+          "type": "string",
+          "description": "Network password",
+          "minlength": 4
+      },
+      "webServer_port": {
+          "type": "integer",
+          "description": "WebServer port",
+          "default": 80
+      }
+    }
+}

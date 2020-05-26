@@ -1,7 +1,7 @@
 {
   "title": "Thing",
   "type": "object",
-  "id": "person",
+  "id": "thing",
   "required": ["title", "id", "forms"],
   "properties": {
     "title": {
@@ -55,7 +55,9 @@
             }
           },
           "op": {
+            "name": "operations",
             "type": "array",
+            "description": "Operation supported by the Thing",
             "uniqueItems": true,
             "items": {
               "type": "string",
@@ -64,6 +66,12 @@
           }
         }
       }
-    }
+    },
+    "description": {"type": "string"},
+    "version": {"type": "string"},
+    "support": {"type": "string"},
+    "base": {"type": "string"},
+    "created": {"type": "string", "format": "date"},
+    "modified": {"type": "string", "format": "date"}
   }
 }
