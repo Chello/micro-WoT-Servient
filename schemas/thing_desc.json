@@ -2,7 +2,7 @@
   "title": "Thing",
   "type": "object",
   "id": "thing",
-  "required": ["title", "id", "forms"],
+  "required": ["title", "id", "forms", "@context", "security", "securityDefinitions"],
   "properties": {
     "title": {
       "type": "string",
@@ -30,22 +30,44 @@
       },
       "default": ["https://www.w3.org/2019/wot/td/v1"]
     },
+    "security": {
+      "type": "string",
+      "default": "nosec_sc",
+      "options":{ "hidden": true }
+
+    },
+    "securityDefinitions": {
+      "type": "object",
+      "required": ["nosec_sc"],
+      "options":{ "hidden": true },
+      "properties": {
+        "nosec_sc": {
+          "type": "object",
+          "required": ["scheme"],
+          "properties": {
+            "scheme": {
+              "type": "string",
+              "default": "nosec"
+            }
+          }
+        }
+
+      }
+    },
     "forms": {
       "type": "array",
       "format": "table",
       "minItems": 1, 
-      "maxItems": 1,
+      "maxItems": 2,
       "items": {
         "title": "Operations",
         "type": "object",
-        "required": ["op"],
+        "required": ["op", "contentType", "href"],
         "properties": {
           "contentType": {
             "const": "application/json", 
             "default": "application/json",
-            "options": {
-              "hidden": true
-            }
+            "options": { "hidden": true }
           },
           "href": {
             "default": "",
@@ -55,10 +77,12 @@
             }
           },
           "op": {
-            "name": "operations",
             "type": "array",
+            "format": "categories",
+            "name": "operations",
             "description": "Operation supported by the Thing",
             "uniqueItems": true,
+            "minItems": 1,
             "items": {
               "type": "string",
               "enum": ["readallproperties", "writeallproperties", "readmultipleproperties", "writemultipleproperties"]

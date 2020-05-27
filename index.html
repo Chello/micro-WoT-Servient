@@ -16,19 +16,23 @@
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
 
-
+    <select name="board" id="board">
+      <option value="esp32.txt">ESP32</option>
+      <option value="esp8266.txt">ESP8266</option>
+    </select>
 
     <div id='editor_holder'></div>
 
-    <button id="submit_button">Submit in console</button>
-
     <div id='build_holder'></div>
+    
+    <button id="submit_button">Submit in console</button>
 
     <div id='terminal_holder'></div>
 
     <!-- You can also require other files to run in this process -->
     <script>window.$ = window.jQuery = require('jquery');</script>
     <script>const { exec } = require("child_process");</script>
+    <script>const path = require('path');</script>
     <script src="./renderer.js"></script>
     <script src="./js/terminal.js"></script>    
     <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>

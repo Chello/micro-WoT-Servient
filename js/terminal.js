@@ -1,6 +1,5 @@
 var CustomTerminal = function () { 
 
-
     this.terminal = new Terminal();
     this.terminal.open(document.getElementById('terminal_holder'));
     this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
@@ -12,8 +11,11 @@ var CustomTerminal = function () {
             this.terminal.write('\n');
         this.terminal.write(key.key);
     })
-    
-    const ls = exec('ls -l', function (error, stdout, stderr) {
+
+}
+
+CustomTerminal.prototype.exec = function(command) {
+    this.cmd = exec(command, function (error, stdout, stderr) {
         if (error) {
           console.log(error.stack);
           console.log('Error code: '+error.code);
@@ -25,7 +27,8 @@ var CustomTerminal = function () {
         });
     }.bind(this));
 
-    ls.on('exit', function (code) {
+
+    this.cmd.on('exit', function (code) {
         console.log('Child process exited with exit code '+code);
     });
 }

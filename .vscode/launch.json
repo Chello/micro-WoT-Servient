@@ -8,9 +8,9 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["build", 
-                "-T", "WoT-microcontroller-servient/embeddedWoTServient/cosa/cosa.json",
+                "-T", "asdf/asdf.json",
                 "-t", "esp32.txt",
-                "-o", "WoT-microcontroller-servient/embeddedWoTServient/options.json"]
+                "-o", "asdf/opt_asdf.json"]
         },
         {
             "name": "Debug Node Main Process",
