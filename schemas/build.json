@@ -2,7 +2,7 @@
     "title": "Build",
     "type": "object",
     "id": "build",
-    "required": ["ssid"],
+    "required": ["ssid", "portserver", "portsocket", "libraries"],
     "properties": {
       "ssid": {
         "type": "string",
@@ -14,10 +14,43 @@
           "description": "Network password",
           "minlength": 4
       },
-      "webServer_port": {
-          "type": "integer",
+      "portserver": {
+          "type": "string",
           "description": "WebServer port",
-          "default": 80
+          "pattern": "[0-9]",
+          "default": "80"
+      },
+      "portsocket": {
+          "type": "string",
+          "description": "WebSocket port",
+          "pattern": "[0-9]",
+          "default": "80"
+      },
+      "libraries": {
+        "type": "array",
+        "format": "table",
+        "description": "Additional Arduino libraries",
+        "uniqueItems": true,
+        "items": {
+          "title": "libraries",
+          "type": "array"
+        },
+        "options": {
+          "collapsed": true
+        }
+      },
+      "constants": {
+        "type": "array",
+        "format": "table",
+        "description": "Additional constants",
+        "uniqueItems": true,
+        "items": {
+          "title": "constants",
+          "type": "array"
+        },
+        "options": {
+          "collapsed": true
+        }
       }
     }
 }

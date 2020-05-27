@@ -22,13 +22,6 @@ window.onload = function() {
             $ref: "schemas/thing_desc.json",
         },
         
-        // Seed the form with a starting value
-        //startval: starting_value,
-        
-        // Disable additional properties
-        //no_additional_properties: false,
-        
-        // Require all properties by default
         required_by_default: true,
         //show checkbox for non-required opt
         show_opt_in: true
