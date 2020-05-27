@@ -25,13 +25,13 @@
 
     <div id='build_holder'></div>
     
-    <button id="submit_button">Submit in console</button>
+    <button id="submit_button">Compile and build</button>
 
     <div id='terminal_holder'></div>
 
     <!-- You can also require other files to run in this process -->
     <script>window.$ = window.jQuery = require('jquery');</script>
-    <script>const { exec } = require("child_process");</script>
+    <script>const cp = require("child_process");</script>
     <script>const path = require('path');</script>
     <script src="./renderer.js"></script>
     <script src="./js/terminal.js"></script>    

@@ -15,20 +15,29 @@ var CustomTerminal = function () {
 }
 
 CustomTerminal.prototype.exec = function(command) {
-    this.cmd = exec(command, function (error, stdout, stderr) {
-        if (error) {
-          console.log(error.stack);
-          console.log('Error code: '+error.code);
-          console.log('Signal received: '+error.signal);
-        }
-        stdout = stdout.split('\n')
-        stdout.forEach(element => {
-            this.terminal.writeln(element)
-        });
+    this.cmd = cp.exec(command, []);
+    var line = '';
+    this.cmd.stdout.on('data', function(data) {
+        console.log(data.toString())
+        this.terminal.writeln(data.toString());
     }.bind(this));
-
-
-    this.cmd.on('exit', function (code) {
-        console.log('Child process exited with exit code '+code);
-    });
 }
+
+// CustomTerminal.prototype.exec = function(command) {
+//     this.cmd = cp.execFile(command, function (error, stdout, stderr) {
+//         if (error) {
+//           console.log(error.stack);
+//           console.log('Error code: '+error.code);
+//           console.log('Signal received: '+error.signal);
+//         }
+//         stdout = stdout.split('\n')
+//         stdout.forEach(element => {
+//             this.terminal.writeln(element)
+//         });
+//     }.bind(this));
+
+
+//     this.cmd.on('exit', function (code) {
+//         console.log('Child process exited with exit code '+code);
+//     });
+// }
