@@ -5,22 +5,45 @@ var CustomTerminal = function () {
     this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
     this.terminal.writeln('ll');
     
-    this.terminal.onKey( (key, ev) => {
-        console.log(key.key.charCodeAt(0));
-        if (key.key.charCodeAt(0) == 13)
-            this.terminal.write('\n');
-        this.terminal.write(key.key);
-    })
+    // this.terminal.onKey( (key, ev) => {
+    //     console.log(key.key.charCodeAt(0));
+    //     if (key.key.charCodeAt(0) == 13)
+    //         this.terminal.write('\n');
+    //     this.terminal.write(key.key);
+    // })
 
 }
 
 CustomTerminal.prototype.exec = function(command) {
     this.cmd = cp.exec(command, []);
-    var line = '';
+
+    //handle stdout
     this.cmd.stdout.on('data', function(data) {
         console.log(data.toString())
-        this.terminal.writeln(data.toString());
+        data.toString().split('\n').forEach(element => {
+            this.terminal.writeln(element);
+        });
     }.bind(this));
+
+    this.stdLine = '';
+    //handle stdin
+    this.terminal.onKey( (key, ev) => {
+        this.stdLine += key.key;
+        this.terminal.write(key.key);
+        if (key.key.charCodeAt(0) == 13) {
+            this.stdLine += '\n';
+            this.cmd.stdin.write(this.stdLine);
+            this.stdLine = '';
+        }
+        else if (key.key.charCodeAt(0) == 127) {
+            this.terminal.write("\b \b");
+            this.stdLine = this.stdLine.slice(0, -1);
+        }
+    })
+    //on exit
+    this.cmd.on('exit', (code) => {
+        this.terminal.writeln('Child process exited with exit code '+code);
+    });
 }
 
 // CustomTerminal.prototype.exec = function(command) {
@@ -37,7 +60,4 @@ CustomTerminal.prototype.exec = function(command) {
 //     }.bind(this));
 
 
-//     this.cmd.on('exit', function (code) {
-//         console.log('Child process exited with exit code '+code);
-//     });
 // }
