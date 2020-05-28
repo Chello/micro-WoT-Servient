@@ -20,7 +20,11 @@ window.onload = function() {
         //show checkbox for non-required opt
         show_opt_in: true,
         //show errors in editor
-        show_errors: "change"
+        show_errors: "change",
+        //set theme
+        theme: 'bootstrap4',
+        //set icon library
+        iconlib: "fontawesome3"
     });
 
     builder = new JSONEditor(document.getElementById('build_holder'),{
