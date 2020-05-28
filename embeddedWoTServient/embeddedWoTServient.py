@@ -1033,6 +1033,7 @@ env.lstrip_blocks = True
 env.rstrip_blocks = True
 
 template = env.get_template('esp8266.txt')
+#template = ""
 
 # THING Informations
 thingProperties = []
@@ -1347,12 +1348,16 @@ def start(ctx, **kwargs):
 def build(ctx, templateFile, optionsFile, thing_desctription):
     '''Build executable Embedded-C File'''
     click.echo('Start building...\n')
-    if templateFile != None:
-        template = env.get_template(templateFile)
     global thingProperties
     global thingActions
     global thingEvents
     global websocket
+    global template
+
+    if templateFile != None:
+        template = env.get_template(templateFile)
+    else:
+        template = env.get_template('esp8266.txt')
     if((ctx.obj is None) or ('td' not in ctx.obj)):
         #Check td file on args
         if thing_desctription is None:
@@ -1675,6 +1680,8 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
 def compile(ctx):
     '''Compile Embedded-C File'''
     global environmentPrepared
+    global template
+
     if(not(environmentPrepared)):
         prepareArduinoEnvironment(ctx)
     click.echo('\nStart compiling...\n') 
@@ -1685,8 +1692,13 @@ def compile(ctx):
         ctx.obj['sketchdir'] = sketchDir
     else:
         sketchDir = ctx.obj['td']['title'].lower()   
-    click.echo()     
-    c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+    click.echo(template.name)     
+    c = ''
+    if template.name == "esp32.txt":
+        c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
+    elif template.name == "esp8266.txt":
+        c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     output = pr.communicate()[0]   
     click.echo(output)
@@ -1722,14 +1734,28 @@ def flash(ctx):
     click.echo(pr.communicate()[0])
     serialPort = click.prompt('Serial Port to flash', type=str)
     click.echo()
-    c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+
+    # SET ARCHITECTURE
+    c = ''
+    if template.name == "esp32.txt":
+        c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
+    elif template.name == "esp8266.txt":
+        c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     output = pr.communicate()[0]   
     click.echo(output)
     if('error' in output):
         sys.exit()
     click.echo()
-    c = 'arduino-cli upload -p %s --fqbn esp8266:esp8266:nodemcuv2 %s' % (serialPort, sketchDir)
+
+    # SET ARCHITECTURE
+    c = ''
+    if template.name == "esp32.txt":
+        #c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
+        c = 'arduino-cli upload -p %s --fqbn esp32:esp32:esp32 %s' % (serialPort, sketchDir)
+    elif template.name == "esp8266.txt":
+        c = 'arduino-cli upload -p %s --fqbn esp8266:esp8266:nodemcuv2 %s' % (serialPort, sketchDir)
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     while True:
         output = pr.stdout.readline()
