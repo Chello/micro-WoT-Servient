@@ -3,14 +3,7 @@ var CustomTerminal = function () {
     this.terminal = new Terminal();
     this.terminal.open(document.getElementById('terminal_holder'));
     this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
-    this.terminal.writeln('ll');
-    
-    // this.terminal.onKey( (key, ev) => {
-    //     console.log(key.key.charCodeAt(0));
-    //     if (key.key.charCodeAt(0) == 13)
-    //         this.terminal.write('\n');
-    //     this.terminal.write(key.key);
-    // })
+
 
 }
 
@@ -22,6 +15,14 @@ CustomTerminal.prototype.exec = function(command) {
         console.log(data.toString())
         data.toString().split('\n').forEach(element => {
             this.terminal.writeln(element);
+        });
+    }.bind(this));
+
+    //handle stderr
+    this.cmd.stderr.on('data', function(data) {
+        console.log(data.toString())
+        data.toString().split('\n').forEach(element => {
+            this.terminal.writeln('\x1B[1;3;31m'+element+'\x1B[0m');
         });
     }.bind(this));
 

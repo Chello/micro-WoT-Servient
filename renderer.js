@@ -33,12 +33,6 @@ window.onload = function() {
             $ref: "schemas/build.json",
         },
         
-        // Seed the form with a starting value
-        //startval: starting_value,
-        
-        // Disable additional properties
-        //no_additional_properties: false,
-        
         // Require all properties by default
         required_by_default: false,
         //show checkbox for non-required opt

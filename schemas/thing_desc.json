@@ -19,7 +19,6 @@
     "@context": {
       "type": "array",
       "format": "table",
-      
       "description": "JSON schema(s) for Thing",
       "items": {
         "type": "string",

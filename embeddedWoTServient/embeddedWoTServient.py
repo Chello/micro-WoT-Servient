@@ -924,7 +924,8 @@ def writeFile(filePath, fileContent):
 
 
 def prepareArduinoEnvironment(ctx):
-    click.echo('Hint: Before compiling or flashing, be sure that the ESP8266 board which the Embedded-C File will be compiled on is connected to the Serial Port')
+    global template
+    click.echo('Hint: Before compiling or flashing, be sure that the board which the Embedded-C File will be compiled on is connected to the Serial Port')
     click.echo('The compile and flash operations are made up with arduino-cli software')
     home = os.path.expanduser('~')
     cwd = os.getcwd()
@@ -949,8 +950,12 @@ def prepareArduinoEnvironment(ctx):
         c = 'arduino-cli config init'
         pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
         click.echo(pr.communicate()[0])
-    # verify that the esp8266 core is installed in arduino-cli    
-    coreUrl = 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'
+    # verify that the esp core is installed in arduino-cli    
+    coreUrl = ''
+    if template.name == "esp32.txt":
+        coreUrl = 'https://raw.githubusercontent.com/espressif/arduino-esp32/master/package/package_esp32_index.template.json'
+    elif template.name == "esp8266.txt":
+        coreUrl = 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'
     yamlDict = yaml.load(open(configFile, 'r'), Loader=yaml.FullLoader)   
     coreFound = False
     for item in yamlDict['board_manager']['additional_urls']:
@@ -971,7 +976,11 @@ def prepareArduinoEnvironment(ctx):
         if output:
             click.echo(output.strip())
     # install esp8266 core
-    c = 'arduino-cli core install esp8266:esp8266'    
+    c = ''
+    if template.name == "esp32.txt":
+        c = 'arduino-cli core install esp32:esp32'    
+    elif template.name == "esp8266.txt":
+        c = 'arduino-cli core install esp8266:esp8266'    
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     while True:
         output = pr.stdout.readline()
@@ -1341,9 +1350,9 @@ def start(ctx, **kwargs):
 
 
 @cli.command()
-@click.option('-t', '--template', 'templateFile')
-@click.option('-o', '--options', 'optionsFile')
-@click.option('-T', '--thingdesc', 'thing_desctription')
+@click.option('-t', '--template', 'templateFile', help='Specify compiling template.')
+@click.option('-o', '--options', 'optionsFile', help='Specify options via JSON file.')
+@click.option('-T', '--thingdesc', 'thing_desctription', help='Specify thing description')
 @click.pass_context
 def build(ctx, templateFile, optionsFile, thing_desctription):
     '''Build executable Embedded-C File'''
@@ -1681,9 +1690,17 @@ def compile(ctx):
     '''Compile Embedded-C File'''
     global environmentPrepared
     global template
+    global boardFQBN
 
     if(not(environmentPrepared)):
         prepareArduinoEnvironment(ctx)
+    # SET FQBN STRING FOR COMPILING AND FLASHING
+
+    if template.name == "esp32.txt":
+        boardFQBN = '--fqbn esp32:esp32:esp32'
+    elif template.name == "esp8266.txt":
+        boardFQBN = '--fqbn esp8266:esp8266:nodemcuv2'
+
     click.echo('\nStart compiling...\n') 
     sketchDir = ''
     if((ctx.obj is None) or ('td' not in ctx.obj)):
@@ -1692,12 +1709,8 @@ def compile(ctx):
         ctx.obj['sketchdir'] = sketchDir
     else:
         sketchDir = ctx.obj['td']['title'].lower()   
-    click.echo(template.name)     
-    c = ''
-    if template.name == "esp32.txt":
-        c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
-    elif template.name == "esp8266.txt":
-        c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+    
+    c = 'arduino-cli compile %s %s' % (boardFQBN, sketchDir)
 
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     output = pr.communicate()[0]   
@@ -1715,6 +1728,7 @@ def compile(ctx):
 def flash(ctx):
     '''Flash Embedded-C File'''
     global environmentPrepared
+    global boardFQBN
 
     if(not(environmentPrepared)):
         prepareArduinoEnvironment(ctx)
@@ -1735,12 +1749,7 @@ def flash(ctx):
     serialPort = click.prompt('Serial Port to flash', type=str)
     click.echo()
 
-    # SET ARCHITECTURE
-    c = ''
-    if template.name == "esp32.txt":
-        c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
-    elif template.name == "esp8266.txt":
-        c = 'arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 %s' % sketchDir
+    c = 'arduino-cli compile %s %s' % (boardFQBN, sketchDir)
 
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     output = pr.communicate()[0]   
@@ -1749,13 +1758,8 @@ def flash(ctx):
         sys.exit()
     click.echo()
 
-    # SET ARCHITECTURE
-    c = ''
-    if template.name == "esp32.txt":
-        #c = 'arduino-cli compile --fqbn esp32:esp32:esp32 %s' % sketchDir
-        c = 'arduino-cli upload -p %s --fqbn esp32:esp32:esp32 %s' % (serialPort, sketchDir)
-    elif template.name == "esp8266.txt":
-        c = 'arduino-cli upload -p %s --fqbn esp8266:esp8266:nodemcuv2 %s' % (serialPort, sketchDir)
+    c = 'arduino-cli upload -p %s %s %s' % (serialPort, boardFQBN, sketchDir)
+
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
     while True:
         output = pr.stdout.readline()

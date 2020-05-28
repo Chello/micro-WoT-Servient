@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 
 const char* ssid = "asdf";
-const char* password =
+const char* password = "";
 String protocolServer = "http";
 int portServer = 80;
 String urlServer = "";
@@ -39,7 +39,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writemultipleproperties\"]}]}";
+    td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]}]}";
 
     // Server requests
     server.on(req1,HTTP_GET,handleReq1);

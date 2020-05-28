@@ -2,7 +2,7 @@
     "title": "Build",
     "type": "object",
     "id": "build",
-    "required": ["ssid", "portserver", "portsocket", "libraries"],
+    "required": ["ssid", "password", "portserver", "portsocket", "libraries"],
     "properties": {
       "ssid": {
         "type": "string",
