@@ -2,7 +2,7 @@ var CustomTerminal = function () {
 
     this.terminal = new Terminal();
     this.terminal.open(document.getElementById('terminal_holder'));
-    this.terminal.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ');
+    this.terminal.write('WoTServient$ ');
 
 
 }

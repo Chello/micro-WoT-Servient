@@ -2,10 +2,6 @@ const fs = require('fs');
 var term = {};
 
 window.onload = function() {
-
-    console.log($)
-    
-    //const element = document.getElementById('editor_holder');
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -14,6 +10,7 @@ window.onload = function() {
         schema: {
             type: "object",
             $ref: "schemas/thing_desc.json",
+            //$ref: "embeddedWoTServient/thing-schema.json"
         },
         //are fields all required? no
         required_by_default: false,
@@ -24,9 +21,31 @@ window.onload = function() {
         //set theme
         theme: 'bootstrap4',
         //set icon library
-        iconlib: "fontawesome3"
+        iconlib: "fontawesome4"
     });
-
+/*
+    properties = new JSONEditor(document.getElementById('properties_holder'),{
+        // Enable fetching schemas via ajax
+        ajax: true,
+        
+        // The schema for the editor
+        schema: {
+            type: "object",
+            $ref: "schemas/properties.json",
+            //$ref: "embeddedWoTServient/thing-schema.json"
+        },
+        //are fields all required? no
+        required_by_default: false,
+        //show checkbox for non-required opt
+        show_opt_in: true,
+        //show errors in editor
+        show_errors: "change",
+        //set theme
+        theme: 'bootstrap4',
+        //set icon library
+        iconlib: "fontawesome4"
+    });
+*/
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -40,7 +59,11 @@ window.onload = function() {
         // Require all properties by default
         required_by_default: false,
         //show checkbox for non-required opt
-        show_opt_in: true
+        show_opt_in: true,
+        //set theme
+        theme: 'bootstrap4',
+        //set icon library
+        iconlib: "fontawesome4"
     });
 
     term = new CustomTerminal();

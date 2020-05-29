@@ -23,6 +23,8 @@
     "@angular/cli": "^9.1.6",
     "@json-editor/json-editor": "^2.2.1",
     "jquery": "^3.5.1",
-    "xterm": "^4.6.0"
+    "xterm": "^4.6.0",
+    "bootstrap": "4.5.0",
+    "font-awesome": "4.7.0"
   }
 }

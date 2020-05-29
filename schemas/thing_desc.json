@@ -97,6 +97,26 @@
     "support": {"type": "string"},
     "base": {"type": "string"},
     "created": {"type": "string", "format": "date"},
-    "modified": {"type": "string", "format": "date"}
+    "modified": {"type": "string", "format": "date"},
+    "links": {
+      "options": {
+        "collapsed": true
+      },
+      "type": "array",
+      "name": "Links",
+      "items": {
+        "type": "object",
+        "properties": {
+          "href": {"type": "string"},
+          "type": {"type": "string"},
+          "rel": {"type": "string"},
+          "anchor": {"type": "string"}
+        }
+      }
+    },
+    "properties": {
+      "name": "Properties",
+      "$ref": "properties.json"
+    }
   }
 }

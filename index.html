@@ -2,19 +2,25 @@
 <html>
   <head> 	
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP 
     <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net/">
-    
+    -->
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="node_modules/xterm/css/xterm.css" />
-    <script src="node_modules/xterm/lib/xterm.js"></script>
-    <title>Hello World!</title>
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.css">
+    
+    <title>Embedded WoT Servient</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <h1>Embedded WoT Servient</h1>
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
+
+    <br />
+    Choose target board: 
 
     <select name="board" id="board">
       <option value="esp32.txt">ESP32</option>
@@ -22,6 +28,7 @@
     </select>
 
     <div id='editor_holder'></div>
+    <div id='properties_holder'></div>
 
     <div id='build_holder'></div>
     
@@ -34,8 +41,12 @@
     <script>const cp = require("child_process");</script>
     <script>const path = require('path');</script>
     <script src="./js/renderer.js"></script>
-    <script src="./js/terminal.js"></script>    
+    <script src="./js/terminal.js"></script>
+    <!--
     <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+    -->
+    <script src="node_modules/xterm/lib/xterm.js"></script>
+    <script src="./node_modules/@json-editor/json-editor/dist/jsoneditor.js"></script>
     
   </body>
 </html>

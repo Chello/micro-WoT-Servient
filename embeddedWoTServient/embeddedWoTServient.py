@@ -1351,7 +1351,7 @@ def start(ctx, **kwargs):
 
 @cli.command()
 @click.option('-t', '--template', 'templateFile', help='Specify compiling template.')
-@click.option('-o', '--options', 'optionsFile', help='Specify options via JSON file.')
+@click.option('-o', '--options', 'optionsFile', help='Specify options via JSON file. If provided, will next compile and flash code.')
 @click.option('-T', '--thingdesc', 'thing_desctription', help='Specify thing description')
 @click.pass_context
 def build(ctx, templateFile, optionsFile, thing_desctription):
@@ -1676,7 +1676,7 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
     filePath = ctx.obj['td']['title'].lower() + '/' + ctx.obj['td']['title'].lower() + '.ino'
     writeFile(filePath, output)
     click.echo('\n\nCOMPILING')
-    if(click.confirm('Compile the Embedded-C File?', default=True)):
+    if(optionsFile != None or click.confirm('Compile the Embedded-C File?', default=True)):
         prepareArduinoEnvironment(ctx)
         click.echo()
         ctx.invoke(compile)
@@ -1713,11 +1713,10 @@ def compile(ctx):
     c = 'arduino-cli compile %s %s' % (boardFQBN, sketchDir)
 
     pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    output = pr.communicate()[0]   
-    click.echo(output)
+    output = pr.communicate()[0]
     if('error' in output):
         sys.exit()
-    click.echo('\n\nFLASHING')        
+    click.echo('\nSTART FLASHING')        
     if(click.confirm('Flash the Embedded-C File?', default=True)):
         click.echo()
         ctx.invoke(flash)

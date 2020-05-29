@@ -1,0 +1,65 @@
+{
+    "title": "Properties",
+    "type": "object",
+    "format": "table",
+    "id": "properties",
+    "properties": {
+        "properties": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "headerTemplate": "{{self.propertyName}}",
+                "required": ["propertyName"],
+                "properties": {
+                    "propertyName": { "type": "string" },
+                    "forms": {
+                        "type": "array",
+                        "format": "table",
+                        "items": {
+                            "title": "Operations",
+                            "type": "object",
+                            "required": ["op", "contentType", "href", "observable", "readOnly", "writeOnly"],
+                            "properties": {
+                                "contentType": {
+                                    "const": "application/json", 
+                                    "default": "application/json",
+                                    "options": { "hidden": true }
+                                },
+                                "href": {
+                                    "default": "",
+                                    "const": "",
+                                    "options": {
+                                        "hidden": true
+                                    }
+                                },
+                                "op": {
+                                    "type": "array",
+                                    "format": "categories",
+                                    "name": "operations",
+                                    "description": "Operation supported by the Thing",
+                                    "uniqueItems": true,
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "string",
+                                        "enum": ["readproperty", "writeproperty"]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "type": { "type": "string" },
+                    "format": { "type": "string"},
+                    "@type": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                    },
+                    "observable": { "type": "boolean", "default": false },
+                    "readOnly": { "type": "boolean", "default": true },
+                    "writeOnly": { "type": "boolean", "default": true },
+                    "title": { "type": "string" },
+                    "description": { "type": "string" }
+                }
+            }
+        }
+    }
+}
