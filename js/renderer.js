@@ -69,6 +69,20 @@ window.onload = function() {
     term = new CustomTerminal();
 };
     
+var composeTD = function() {
+    td = editor.getValue();
+    //properties arr becomes object of objects
+    if (td["properties"]) {
+        var arr = td['properties']['properties'];
+        arr.forEach(element => {
+            var name = element.propertyName
+            td['properties'][name] = element;
+        });
+    }
+    td['properties']['properties'] = undefined;
+    return td;
+
+}
 
 
 $('#submit_button').on('click', function() {
@@ -76,7 +90,7 @@ $('#submit_button').on('click', function() {
     console.log(editor.validate() /*? "true": "false"*/)
     console.log(builder.validate() /*? "true": "false"*/)
 
-    thing_prop = editor.getValue();
+    thing_prop = composeTD();
     build_prop = builder.getValue();
     // console.log(editor.getValue());
     // console.log(builder.getValue());

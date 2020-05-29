@@ -1,15 +1,15 @@
 {
-    "title": "Properties",
+    "title": "Properties list",
     "type": "object",
     "format": "table",
-    "id": "properties",
+    "required": ["properties"],
     "properties": {
         "properties": {
             "type": "array",
             "items": {
                 "type": "object",
                 "headerTemplate": "{{self.propertyName}}",
-                "required": ["propertyName"],
+                "required": ["propertyName", "type", "forms"],
                 "properties": {
                     "propertyName": { "type": "string" },
                     "forms": {
@@ -47,7 +47,10 @@
                             }
                         }
                     },
-                    "type": { "type": "string" },
+                    "type": { 
+                        "type": "string",
+                        "enum": ["boolean", "integer", "number", "string", "object", "array", "null"]
+                    },
                     "format": { "type": "string"},
                     "@type": {
                         "type": "array",
