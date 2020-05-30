@@ -652,7 +652,7 @@ def handleEventData(ctx, dataTypeS, eventName, index):
                 click.echo('\nHint: Term value is which that users have to assign to the Term itself to make sure that their messages are compatible with the Schema and consequently be accepted')
                 if(inpType == 'boolean'):
                     inpValue = click.prompt('Term %d value' % i, type=bool)
-                    inpValue = inpValue.lower()
+                    # inpValue = inpValue.lower()
                 elif(inpType == 'integer'):
                     inpValue = click.prompt('Term %d value' % i, type=int) 
                 elif(inpType == 'number'):

@@ -14,14 +14,14 @@
     <title>Embedded WoT Servient</title>
   </head>
   <body>
+    <!--
     <h1>Embedded WoT Servient</h1>
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
-
-    <br />
+  -->
+    
     Choose target board: 
-
     <select name="board" id="board">
       <option value="esp32.txt">ESP32</option>
       <option value="esp8266.txt">ESP8266</option>
@@ -32,9 +32,11 @@
 
     <div id='build_holder'></div>
     
-    <button id="submit_button">Compile and build</button>
-
-    <div id='terminal_holder'></div>
+    
+    <!-- <div class="fixed-bottom"> -->
+      <button id="submit_button">Compile and build</button>
+      <div id='terminal_holder'></div>
+    <!-- </div> -->
 
     <!-- You can also require other files to run in this process -->
     <script>window.$ = window.jQuery = require('jquery');</script>

@@ -1,0 +1,167 @@
+{
+    "title": "cosaccia",
+    "id": "cosaccia",
+    "@context": "https://www.w3.org/2019/wot/td/v1",
+    "security": "nosec_sc",
+    "securityDefinitions": {
+        "nosec_sc": {
+            "scheme": "nosec"
+        }
+    },
+    "forms": [
+        {
+            "href": "",
+            "contentType": "application/json",
+            "op": [
+                "readallproperties",
+                "writeallproperties",
+                "readmultipleproperties",
+                "writemultipleproperties"
+            ]
+        }
+    ],
+    "properties": {
+        "prop1": {
+            "forms": [
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": [
+                        "readproperty",
+                        "writeproperty"
+                    ]
+                },
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": [
+                        "readproperty",
+                        "writeproperty"
+                    ]
+                }
+            ],
+            "type": "boolean",
+            "observable": false,
+            "readOnly": true,
+            "writeOnly": true
+        }
+    },
+    "actions": {
+        "act1": {
+            "forms": [
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": "invokeaction",
+                    "httptermname": "httptermelem"
+                },
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": "invokeaction",
+                    "wstermelem": "wstermeleeem"
+                }
+            ],
+            "input": {
+                "act1in1": {
+                    "type": "boolean"
+                },
+                "act1in2": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                }
+            },
+            "output": {
+                "type": "string"
+            },
+            "safe": true,
+            "idempotent": false,
+            "@type": [
+                "meta/type1",
+                "meta/type2"
+            ],
+            "title": "acttitle",
+            "description": "actdesc",
+            "term1name": "term1elem"
+        },
+        "act2": {
+            "forms": [
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": "invokeaction"
+                }
+            ],
+            "input": {
+                "in": {
+                    "type": "boolean"
+                }
+            },
+            "safe": false,
+            "idempotent": false
+        }
+    },
+    "events": {
+        "evt1": {
+            "forms": [
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": [
+                        "subscribeevent",
+                        "unsubscribeevent"
+                    ],
+                    "additionalformterm": "termelem"
+                }
+            ],
+            "subscription": {
+                "evt1subschema": {
+                    "type": "boolean",
+                    "value": true
+                },
+                "evt1subschemaname2": {
+                    "type": "boolean",
+                    "value": true
+                }
+            },
+            "data": {
+                "term1name": {
+                    "type": "boolean",
+                    "value": true
+                },
+                "term2name": {
+                    "type": "boolean",
+                    "value": true
+                }
+            },
+            "cancellation": {
+                "cancschema1": {
+                    "type": "boolean",
+                    "value": true
+                },
+                "cancschema2": {
+                    "type": "boolean",
+                    "value": false
+                }
+            },
+            "@type": [
+                "meta/type1evt1",
+                "meta/type1evt1/2"
+            ],
+            "title": "evttitle",
+            "description": "evtdesc"
+        },
+        "evt2": {
+            "forms": [
+                {
+                    "href": "",
+                    "contentType": "application/json",
+                    "op": [
+                        "subscribeevent"
+                    ]
+                }
+            ]
+        }
+    }
+}

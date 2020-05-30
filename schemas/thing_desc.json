@@ -2,21 +2,31 @@
   "title": "Thing",
   "type": "object",
   "id": "thing",
-  "required": ["title", "id", "forms", "@context", "security", "securityDefinitions"],
+  "required": [
+    "title",
+    "id",
+    "forms",
+    "@context",
+    "security",
+    "securityDefinitions"
+  ],
   "properties": {
     "title": {
       "type": "string",
+      "title": "Thing title",
       "description": "Title of the Thing",
       "minLength": 4,
       "default": "asdf"
     },
     "id": {
       "type": "string",
+      "title": "Thing URI",
       "description": "URI of the Thing",
       "minLength": 4,
       "default": "asdf"
     },
     "@context": {
+      "title": "Thing context",
       "type": "array",
       "format": "table",
       "description": "JSON schema(s) for Thing",
@@ -29,22 +39,31 @@
       "options": {
         "collapsed": true
       },
-      "default": ["https://www.w3.org/2019/wot/td/v1"]
+      "default": [
+        "https://www.w3.org/2019/wot/td/v1"
+      ]
     },
     "security": {
       "type": "string",
       "default": "nosec_sc",
-      "options":{ "hidden": true }
-
+      "options": {
+        "hidden": true
+      }
     },
     "securityDefinitions": {
       "type": "object",
-      "required": ["nosec_sc"],
-      "options":{ "hidden": true },
+      "required": [
+        "nosec_sc"
+      ],
+      "options": {
+        "hidden": true
+      },
       "properties": {
         "nosec_sc": {
           "type": "object",
-          "required": ["scheme"],
+          "required": [
+            "scheme"
+          ],
           "properties": {
             "scheme": {
               "type": "string",
@@ -52,23 +71,29 @@
             }
           }
         }
-
       }
     },
     "forms": {
       "type": "array",
+      "title": "Operations",
       "format": "table",
-      "minItems": 1, 
+      "minItems": 1,
       "maxItems": 2,
       "items": {
-        "title": "Operations",
+        "title": "",
         "type": "object",
-        "required": ["op", "contentType", "href"],
+        "required": [
+          "op",
+          "contentType",
+          "href"
+        ],
         "properties": {
           "contentType": {
-            "const": "application/json", 
+            "const": "application/json",
             "default": "application/json",
-            "options": { "hidden": true }
+            "options": {
+              "hidden": true
+            }
           },
           "href": {
             "default": "",
@@ -86,37 +111,380 @@
             "minItems": 1,
             "items": {
               "type": "string",
-              "enum": ["readallproperties", "writeallproperties", "readmultipleproperties", "writemultipleproperties"]
+              "enum": [
+                "readallproperties",
+                "writeallproperties",
+                "readmultipleproperties",
+                "writemultipleproperties"
+              ]
             }
           }
         }
       }
     },
-    "description": {"type": "string"},
-    "version": {"type": "string"},
-    "support": {"type": "string"},
-    "base": {"type": "string"},
-    "created": {"type": "string", "format": "date"},
-    "modified": {"type": "string", "format": "date"},
+    "description": {
+      "type": "string",
+      "title": "Description",
+      "description": "Thing description"
+    },
+    "version": {
+      "type": "string",
+      "title": "Version",
+      "description": "Thing version"
+    },
+    "support": {
+      "type": "string",
+      "title": "Thing support URI"
+    },
+    "base": {
+      "type": "string",
+      "title": "Thing base URI"
+    },
+    "created": {
+      "type": "string",
+      "format": "date",
+      "title": "Thing creation date"
+    },
+    "modified": {
+      "type": "string",
+      "format": "date",
+      "title": "Thing modification date"
+    },
     "links": {
       "options": {
         "collapsed": true
       },
       "type": "array",
-      "name": "Links",
+      "title": "Links",
+      "headerTemplate": "Link {{i}}",
       "items": {
         "type": "object",
         "properties": {
-          "href": {"type": "string"},
-          "type": {"type": "string"},
-          "rel": {"type": "string"},
-          "anchor": {"type": "string"}
+          "href": {
+            "type": "string",
+            "title": "Link Href"
+          },
+          "type": {
+            "type": "string",
+            "title": "Link type"
+          },
+          "rel": {
+            "type": "string",
+            "title": "Link relation type"
+          },
+          "anchor": {
+            "type": "string",
+            "title": "Link anchor"
+          }
         }
       }
     },
     "properties": {
       "name": "Properties",
-      "$ref": "properties.json"
+      "$ref": "#/definitions/properties"
+    },
+    "actions": {
+      "name": "Actions",
+      "$ref": "#/definitions/actions"
+    }
+  },
+  "definitions": {
+    "properties": {
+      "type": "array",
+      "title": "Thing properties",
+      "options": {
+        "collapsed": true
+      },
+      "items": {
+        "type": "object",
+        "headerTemplate": "{{self.propertyName}}",
+        "required": [
+          "propertyName",
+          "type",
+          "forms"
+        ],
+        "properties": {
+          "propertyName": {
+            "type": "string",
+            "title": "Property name"
+          },
+          "forms": {
+            "type": "array",
+            "format": "table",
+            "items": {
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href",
+                "observable",
+                "readOnly",
+                "writeOnly"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operation supported by the property",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "readproperty",
+                      "writeproperty"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "type": {
+            "title": "Property type",
+            "description": "Type of property",
+            "type": "string",
+            "enum": [
+              "boolean",
+              "integer",
+              "number",
+              "string",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "format": {
+            "type": "string"
+          },
+          "@type": {
+            "type": "array",
+            "title": "Property meta-type",
+            "items": {
+              "type": "string"
+            }
+          },
+          "observable": {
+            "title": "Is property observable?",
+            "type": "boolean",
+            "default": false
+          },
+          "readOnly": {
+            "type": "boolean",
+            "default": true
+          },
+          "writeOnly": {
+            "type": "boolean",
+            "default": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "title": "Thing actions",
+      "options": {
+        "collapsed": true
+      },
+      "items": {
+        "type": "object",
+        "headerTemplate": "{{self.actionName}}",
+        "required": [
+          "actionName",
+          "forms"
+        ],
+        "properties": {
+          "actionName": {
+            "type": "string",
+            "title": "Action name"
+          },
+          "forms": {
+            "type": "array",
+            "format": "table",
+            "items": {
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "default": "invokeaction",
+                  "const": "invokeaction",
+                  "options": {
+                    "hidden": true
+                  }
+                }
+              }
+            }
+          },
+          "input": {
+            "type": "array",
+            "required": [
+              "inputName",
+              "type"
+            ],
+            "items": {
+              "required": ["inputName", "type"],
+              "title": "Inputs",
+              "type": "object",
+              "properties": {
+
+                "inputName": {
+                  "title": "Input name",
+                  "type": "string"
+                },
+                "type": {
+                  "title": "Action type",
+                  "description": "Type of action",
+                  "type": "string",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "string",
+            "enum": [
+              "boolean",
+              "integer",
+              "number",
+              "string",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "safe": {
+            "type": "boolean"
+          },
+          "idempotent": {
+            "type": "boolean"
+          },
+          "@type": {
+            "type": "array",
+            "title": "Action meta types",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "title": "Thing events",
+      "options": {
+        "collapsed": true
+      },
+      "items": {
+        "type": "object",
+        "headerTemplate": "{{self.eventName}}",
+        "required": [
+          "eventName",
+          "type"
+        ],
+        "properties": {
+          "eventName": {
+            "type": "string"
+          },
+          "forms": {
+            "type": "array",
+            "format": "table",
+            "items": {
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operation supported by the event",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "subscribeevent",
+                      "unsubscribeevent"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

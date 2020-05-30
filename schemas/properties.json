@@ -6,12 +6,15 @@
     "properties": {
         "properties": {
             "type": "array",
+            "options": {
+                "collapsed": true
+            },
             "items": {
                 "type": "object",
                 "headerTemplate": "{{self.propertyName}}",
                 "required": ["propertyName", "type", "forms"],
                 "properties": {
-                    "propertyName": { "type": "string" },
+                    "propertyName": { "type": "string", "title": "Property name"},
                     "forms": {
                         "type": "array",
                         "format": "table",

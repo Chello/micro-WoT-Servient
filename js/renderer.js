@@ -2,9 +2,117 @@ const fs = require('fs');
 var term = {};
 
 window.onload = function() {
+    // var initial = {
+    //     "title": "cosaccia",
+    //     "id": "cosaccia",
+    //     "@context": "https://www.w3.org/2019/wot/td/v1",
+    //     "security": "nosec_sc",
+    //     "securityDefinitions": {
+    //         "nosec_sc": {
+    //             "scheme": "nosec"
+    //         }
+    //     },
+    //     "forms": [
+    //         {
+    //             "href": "",
+    //             "contentType": "application/json",
+    //             "op": [
+    //                 "readallproperties",
+    //                 "writeallproperties",
+    //                 "readmultipleproperties",
+    //                 "writemultipleproperties"
+    //             ]
+    //         }
+    //     ],
+    //     "properties": {
+    //         "prop1": {
+    //             "forms": [
+    //                 {
+    //                     "href": "",
+    //                     "contentType": "application/json",
+    //                     "op": [
+    //                         "readproperty",
+    //                         "writeproperty"
+    //                     ]
+    //                 },
+    //                 {
+    //                     "href": "",
+    //                     "contentType": "application/json",
+    //                     "op": [
+    //                         "readproperty",
+    //                         "writeproperty"
+    //                     ]
+    //                 }
+    //             ],
+    //             "type": "boolean",
+    //             "observable": false,
+    //             "readOnly": true,
+    //             "writeOnly": true
+    //         }
+    //     },
+    //     "actions": {
+    //         "act1": {
+    //             "forms": [
+    //                 {
+    //                     "href": "",
+    //                     "contentType": "application/json",
+    //                     "op": "invokeaction",
+    //                     "httptermname": "httptermelem"
+    //                 },
+    //                 {
+    //                     "href": "",
+    //                     "contentType": "application/json",
+    //                     "op": "invokeaction",
+    //                     "wstermelem": "wstermeleeem"
+    //                 }
+    //             ],
+    //             "input": {
+    //                 "act1in1": {
+    //                     "type": "boolean"
+    //                 },
+    //                 "act1in2": {
+    //                     "type": "integer",
+    //                     "minimum": 1,
+    //                     "maximum": 10
+    //                 }
+    //             },
+    //             "output": {
+    //                 "type": "string"
+    //             },
+    //             "safe": true,
+    //             "idempotent": false,
+    //             "@type": [
+    //                 "meta/type1",
+    //                 "meta/type2"
+    //             ],
+    //             "title": "acttitle",
+    //             "description": "actdesc",
+    //             "term1name": "term1elem"
+    //         },
+    //         "act2": {
+    //             "forms": [
+    //                 {
+    //                     "href": "",
+    //                     "contentType": "application/json",
+    //                     "op": "invokeaction"
+    //                 }
+    //             ],
+    //             "input": {
+    //                 "in": {
+    //                     "type": "boolean"
+    //                 }
+    //             },
+    //             "safe": false,
+    //             "idempotent": false
+    //         }
+    //     }
+    // };
+
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
+
+        //startval: initial,
         
         // The schema for the editor
         schema: {
@@ -70,19 +178,61 @@ window.onload = function() {
 };
     
 var composeTD = function() {
-    td = editor.getValue();
+    //clone array
+    //td = editor.getValue().map((x) => x);
+    td = Object.assign({}, editor.getValue());
     //properties arr becomes object of objects
+
+    // if (td["properties"]) {
+    //     td["properties"] = arrToObj(td["properties"], "propertyName");
+    // }
+
     if (td["properties"]) {
-        var arr = td['properties']['properties'];
+        var arr = td['properties'];
+        td['properties'] = {};
         arr.forEach(element => {
             var name = element.propertyName
             td['properties'][name] = element;
         });
     }
-    td['properties']['properties'] = undefined;
+
+    if (td["actions"]) {
+        var arr = td['actions'];
+        td['actions'] = {};
+        arr.forEach(element => {
+            var name = element.actionName
+            td['actions'][name] = element;
+
+            if (td['actions'][name]['input']) {
+                var arr = td['actions'][name]['input'];
+                td['actions'][name]['input'] = {};
+                arr.forEach(element => {
+                    var inputName = element.inputName
+                    td['actions'][name]['input'][inputName] = element;
+        
+                    
+                });
+            }
+        });
+    }
     return td;
 
 }
+
+// var arrToObj = function(arr, nameElement) {
+//     // if (td["properties"]) {
+//     //     var arr = td['properties'];
+//     //     td['properties'] = {};
+//     //     arr.forEach(element => {
+//     //         var name = element.propertyName
+//     //         td['properties'][name] = element;
+//     //     });
+//     // }
+//     var obj = {};
+//     arr.forEach(element => {
+//         var 
+//     })
+// }
 
 
 $('#submit_button').on('click', function() {
@@ -91,6 +241,7 @@ $('#submit_button').on('click', function() {
     console.log(builder.validate() /*? "true": "false"*/)
 
     thing_prop = composeTD();
+    console.log(thing_prop)
     build_prop = builder.getValue();
     // console.log(editor.getValue());
     // console.log(builder.getValue());
