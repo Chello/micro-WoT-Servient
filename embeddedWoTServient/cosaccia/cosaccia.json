@@ -75,6 +75,10 @@
             "output": {
                 "type": "string"
             },
+            "body": {
+                "type": "string",
+                "format": "textarea"
+            },
             "safe": true,
             "idempotent": false,
             "@type": [

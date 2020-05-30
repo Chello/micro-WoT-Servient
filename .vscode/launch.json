@@ -15,6 +15,19 @@
                 "-o", "asdf/opt_asdf.json"]*/
         },
         {
+            "name": "Py build with args",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            //"args": ["start"]
+            "args": ["build", 
+
+                "-T", "asdf/asdf.json",
+                "-t", "esp32.txt",
+                "-o", "asdf/opt_asdf.json"]
+        },
+        {
             "name": "Debug Node Main Process",
             "type": "node",
             "request": "launch",

@@ -181,6 +181,7 @@ var composeTD = function() {
     //clone array
     //td = editor.getValue().map((x) => x);
     td = Object.assign({}, editor.getValue());
+    options = Object.assign({}, builder.getValue());
     //properties arr becomes object of objects
 
     // if (td["properties"]) {
@@ -199,23 +200,46 @@ var composeTD = function() {
     if (td["actions"]) {
         var arr = td['actions'];
         td['actions'] = {};
-        arr.forEach(element => {
+
+        if (arr.length != 0) {
+            options.actionFunctions = [];
+        }
+
+        arr.forEach(element => { //foreach action provided
             var name = element.actionName
             td['actions'][name] = element;
+
+            //create array actionFunctions
+            var actionCurrentFunction = {
+                "source": 'cli',
+                "name": name,
+                "body": td['actions'][name]["body"],
+                "output": {
+                    "name": '',
+                    "type": td['actions'][name]['output']['type']
+                },
+                "input": []
+            };
 
             if (td['actions'][name]['input']) {
                 var arr = td['actions'][name]['input'];
                 td['actions'][name]['input'] = {};
-                arr.forEach(element => {
+                
+                arr.forEach(element => { //foreach input provided
                     var inputName = element.inputName
                     td['actions'][name]['input'][inputName] = element;
-        
-                    
+                    //insert in options
+                    actionCurrentFunction['input'].push({
+                        "name": element.inputName,
+                        "type": element.type
+                    });
                 });
             }
+
+            options.actionFunctions.push(actionCurrentFunction);
         });
     }
-    return td;
+    return [td, options];
 
 }
 
@@ -240,9 +264,10 @@ $('#submit_button').on('click', function() {
     console.log(editor.validate() /*? "true": "false"*/)
     console.log(builder.validate() /*? "true": "false"*/)
 
-    thing_prop = composeTD();
-    console.log(thing_prop)
-    build_prop = builder.getValue();
+    // thing_prop = composeTD();
+    // console.log(thing_prop)
+    // build_prop = builder.getValue();
+    var [thing_prop, build_prop] = composeTD();
     // console.log(editor.getValue());
     // console.log(builder.getValue());
 

@@ -675,7 +675,7 @@ def handleTemplateTypes(ctx, interactionTypeTD, interactionName, dataType='', te
         termType = ctx.obj['td'][interactionTypeTD][interactionName]['type']
     else:
         if(dataType == 'output'):
-            termType = ctx.obj['td'][interactionTypeTD][interactionName][dataType]['type']      
+            termType = ctx.obj['td'][interactionTypeTD][interactionName][dataType]['type']
         else:    
             termType = ctx.obj['td'][interactionTypeTD][interactionName][dataType][termName]['type']      
     t['type'] = termType
@@ -1360,14 +1360,30 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
     global thingProperties
     global thingActions
     global thingEvents
+
+    global actionFunctions
+    global eventConditions
+    
     global websocket
     global template
+
+    optionsFileSpecified = False
 
     if templateFile != None:
         template = env.get_template(templateFile)
     else:
         template = env.get_template('esp8266.txt')
+
+
     if((ctx.obj is None) or ('td' not in ctx.obj)):
+        ctx.ensure_object(dict)
+        ctx.obj.setdefault('template', {})  
+        # IF OPTION FILE IS SPECIFIED
+        if optionsFile != None: # LOAD OPTIONS FROM FILE IN ARGS
+            
+            ctx.obj['template'] = json.load(open(optionsFile))
+            optionsFileSpecified = True
+
         #Check td file on args
         if thing_desctription is None:
             correctJsonFile = False
@@ -1385,7 +1401,7 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
                 correctJsonFile = True
             else:
                 click.echo("Error: Non-Json File provided")    
-        ctx.ensure_object(dict)
+        
         ctx.obj.setdefault('td', {})
 
         ctx.obj['td'] = json.load(open(fileName))
@@ -1404,40 +1420,49 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
                         break
         if('events' in ctx.obj['td']):    
             thingEvents = list(ctx.obj['td']['events'].keys())
-        for i in range(0, len(thingActions)):
-            action = {}
-            action['name'] = thingActions[i]
-            action.setdefault('input', [])
-            action.setdefault('output', {})
-            if('input' in ctx.obj['td']['actions'][thingActions[i]]):
-                actionInputs = list(ctx.obj['td']['actions'][thingActions[i]]['input'].keys())
-                for j in range(0, len(actionInputs)):
-                    inp = handleTemplateTypes(ctx, 'actions', thingActions[i], 'input', actionInputs[j])
-                    action['input'].append(inp)
-            if('output' in ctx.obj['td']['actions'][thingActions[i]]):      
-                out = handleTemplateTypes(ctx, 'actions', thingActions[i], 'output')
-                action['output'] = out
-            if(i == 0):
-                click.echo('\nHint: The Body of an Action can be retrieved from a file by providing his path or by this wizard')
-                click.echo('If you choose the method via file, the function written in the file corresponding to the Action MUST have the same name of the latter')
-            choice = click.prompt('\nPress 1 to insert Action %s from a file or 2 to insert it from this wizard' % thingActions[i], type=click.IntRange(1,2))
-            if(choice == 1):
-                parsingError = True
-                while(parsingError):
-                    fileName = click.prompt('\nInsert the path of the file', type=click.Path(exists=True, readable=True, resolve_path=True))
-                    parsingOutput = parseFunctionFromFile(ctx, fileName, thingActions[i], 'action', True, True, i)
-                    parsingError = parsingOutput[0]
-                    if(parsingError):
-                        click.echo('Error: parsing process failed')
-                action['body'] = parsingOutput[1]    
-            else:
+        
+        click.echo('ooooo')
+        # IF ACTIONFUNCTIONS PASSED VIA OPTIONS JSON
+        if "actionFunctions" in ctx.obj['template']:
+            click.echo('ooooo')
+            actionFunctions = ctx.obj['template']['actionFunctions']
+        else: # OTHERWISE REQUEST ACTIONS FUNCTIONS VIA CLI
+            for i in range(0, len(thingActions)):
+                action = {}
+                action['name'] = thingActions[i]
+                action.setdefault('input', [])
+                action.setdefault('output', {})
+                if('input' in ctx.obj['td']['actions'][thingActions[i]]):
+                    actionInputs = list(ctx.obj['td']['actions'][thingActions[i]]['input'].keys())
+                    for j in range(0, len(actionInputs)):
+                        inp = handleTemplateTypes(ctx, 'actions', thingActions[i], 'input', actionInputs[j])
+                        action['input'].append(inp)
+                if('output' in ctx.obj['td']['actions'][thingActions[i]]):      
+                    out = handleTemplateTypes(ctx, 'actions', thingActions[i], 'output')
+                    action['output'] = out
                 if(i == 0):
-                    click.echo('\nHint: The Body of the function corresponding to the Thing Action MUST be written in Embedded-C directly executable in Embedded-Systems')
-                    click.echo('You have to provide only the code enclosed by braces on one line, neither Function name or inputs')
-                    click.echo('This elements are retrived from the information you gave before')    
-                action['body'] = click.prompt('\nFunction %s Body' % thingActions[i], type=str) 
-                action['source'] = 'cli'
-            actionFunctions.append(action)    
+                    click.echo('\nHint: The Body of an Action can be retrieved from a file by providing his path or by this wizard')
+                    click.echo('If you choose the method via file, the function written in the file corresponding to the Action MUST have the same name of the latter')
+                choice = click.prompt('\nPress 1 to insert Action %s from a file or 2 to insert it from this wizard' % thingActions[i], type=click.IntRange(1,2))
+                if(choice == 1):
+                    parsingError = True
+                    while(parsingError):
+                        fileName = click.prompt('\nInsert the path of the file', type=click.Path(exists=True, readable=True, resolve_path=True))
+                        parsingOutput = parseFunctionFromFile(ctx, fileName, thingActions[i], 'action', True, True, i)
+                        parsingError = parsingOutput[0]
+                        if(parsingError):
+                            click.echo('Error: parsing process failed')
+                    action['body'] = parsingOutput[1]    
+                else:
+                    if(i == 0):
+                        click.echo('\nHint: The Body of the function corresponding to the Thing Action MUST be written in Embedded-C directly executable in Embedded-Systems')
+                        click.echo('You have to provide only the code enclosed by braces on one line, neither Function name or inputs')
+                        click.echo('This elements are retrived from the information you gave before')    
+                    action['body'] = click.prompt('\nFunction %s Body' % thingActions[i], type=str) 
+                    action['source'] = 'cli'
+                actionFunctions.append(action)    
+
+        # REQUEST EVENTS FUNCTIONS VIA CLI
         for i in range(0, len(thingEvents)):
             if(i == 0):
                 Hint = ('\nHint: The Event Condition that, when it is True, will trigger the asynchronous data pushing to Consumers,'
@@ -1460,15 +1485,9 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
             sys.exit()
         click.echo()        
 
-    # LOAD OPTIONS FROM FILE IN ARGS
-    ctx.obj.setdefault('template', {})  
-
-    # IF OPTION FILE IS SPECIFIED
-    if optionsFile != None:
-        ctx.obj['template'] = json.load(open(optionsFile))
-    # OTHERWISE START WIZARD
-    else:
-
+    # IF OPTION FILE IS NOT SPECIFIED
+    if optionsFileSpecified == False:
+        # START WIZARD
         # NETWORK SSID
         inp = click.prompt('Network SSID to which the Embedded-System will connect', type=str)
         ctx.obj['template']['ssid'] = inp

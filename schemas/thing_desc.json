@@ -312,7 +312,10 @@
         "headerTemplate": "{{self.actionName}}",
         "required": [
           "actionName",
-          "forms"
+          "forms",
+          "body",
+          "safe",
+          "idempotent"
         ],
         "properties": {
           "actionName": {
@@ -366,7 +369,6 @@
               "title": "Inputs",
               "type": "object",
               "properties": {
-
                 "inputName": {
                   "title": "Input name",
                   "type": "string"
@@ -389,16 +391,28 @@
             }
           },
           "output": {
+            "type": "object",
+            "title": "Output",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "title": "Output type",
+                "enum": [
+                  "boolean",
+                  "integer",
+                  "number",
+                  "string",
+                  "object",
+                  "array",
+                  "null"
+                ]
+              }
+            }
+          },
+          "body": {
             "type": "string",
-            "enum": [
-              "boolean",
-              "integer",
-              "number",
-              "string",
-              "object",
-              "array",
-              "null"
-            ]
+            "format": "textarea"
           },
           "safe": {
             "type": "boolean"
