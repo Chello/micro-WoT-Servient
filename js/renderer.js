@@ -83,9 +83,13 @@ window.onload = function() {
 var composeTD = function() {
     //clone array
     //td = editor.getValue().map((x) => x);
-    var td = Object.assign({}, editor.getValue());
-    var options = Object.assign({}, builder.getValue());
+    // let td = Object.assign({}, editor.getValue());
+    // let options = Object.assign({}, builder.getValue());
     //properties arr becomes object of objects
+
+    let td = JSON.parse(JSON.stringify(editor.getValue()))
+    let options = JSON.parse(JSON.stringify(builder.getValue()))
+
 
     //check if thing using websocket
     if (td["useWS"]) {
@@ -93,37 +97,38 @@ var composeTD = function() {
     }
 
     if (td["properties"]) {
-        var arr = td['properties'];
+        var propArr = td['properties'];
         td['properties'] = {};
-
-        //check if property using websocket
-        if (td["properties"]["useWS"]) {
-            td["properties"]["forms"][1] = td["properties"]["forms"][0]
-        }
-
-        arr.forEach(element => {
+        
+        propArr.forEach(element => {
             var name = element.propertyName
             td['properties'][name] = element;
+
+            //check if property using websocket
+            if (td["properties"][name]["useWS"]) {
+                td["properties"][name]["forms"][1] = td["properties"][name]["forms"][0]
+            }
         });
     }
 
     //actions arr becomes object of objects
     if (td["actions"]) {
-        var arr = td['actions'];
+        var actionArr = td['actions'];
         td['actions'] = {};
 
         //check if action using websocket
-        if (td["actions"]["useWS"]) {
-            td["actions"]["forms"][1] = td["actions"]["forms"][0]
-        }
-
-        if (arr.length != 0) {
+        
+        if (actionArr.length != 0) {
             options.actionFunctions = [];
         }
-
-        arr.forEach(element => { //foreach action provided
+        
+        actionArr.forEach(element => { //foreach action provided
             var name = element.actionName
             td['actions'][name] = element;
+            
+            if (td["actions"][name]["useWS"]) {
+                td["actions"][name]["forms"][1] = td["actions"][name]["forms"][0]
+            }
 
             //create array actionFunctions
             var actionCurrentFunction = {
@@ -134,18 +139,18 @@ var composeTD = function() {
                 "input": []
             };
             //if output is set
-            if (td['actions'][name]['output']) {
+            if (element['output']) {
                 actionCurrentFunction.output = {
                     "name": '',
                     "type": td['actions'][name]['output']['type']
                 }
             }
             //if inputs are set
-            if (td['actions'][name]['input']) {
-                var arr = td['actions'][name]['input'];
+            if (element['input']) {
+                var inputArr = td['actions'][name]['input'];
                 td['actions'][name]['input'] = {};
                 
-                arr.forEach(element => { //foreach input provided
+                inputArr.forEach(element => { //foreach input provided
                     var inputName = element.inputName
                     td['actions'][name]['input'][inputName] = element;
                     //insert in options
@@ -162,21 +167,21 @@ var composeTD = function() {
     
     //events arr becomes object of objects
     if (td['events']) {
-        var arr = td['events'];
+        var evtArr = td['events'];
         td['events'] = {};
 
-        //check if event using websocket
-        if (td["events"]["useWS"]) {
-            td["events"]["forms"][1] = td["events"]["forms"][0]
-        }
-
-        if (arr.length != 0) {
+        
+        if (evtArr.length != 0) {
             options.eventConditions = [];
         }
-
-        arr.forEach(element => { //foreach event provided
+        
+        evtArr.forEach(element => { //foreach event provided
             var name = element.eventName
             td['events'][name] = element;
+            //check if event using websocket
+            if (td["events"][name]["useWS"]) {
+                td["events"][name]["forms"][1] = td["events"][name]["forms"][0]
+            }
 
             eventCurrentCondition = {
                 "condition": element.condition,

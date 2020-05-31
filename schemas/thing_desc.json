@@ -214,19 +214,14 @@
             "title": "Operations",
             "minItems": 1,
             "maxItems": 1,
-            "options": {
-              "hidden": true
-            },
+
             "items": {
               "title": "Operations",
               "type": "object",
               "required": [
                 "op",
                 "contentType",
-                "href",
-                "observable",
-                "readOnly",
-                "writeOnly"
+                "href"
               ],
               "properties": {
                 "contentType": {
@@ -392,12 +387,12 @@
               "type"
             ],
             "items": {
+              "title": "Input",
+              "type": "object",
               "required": [
                 "inputName",
                 "type"
               ],
-              "title": "Input",
-              "type": "object",
               "properties": {
                 "inputName": {
                   "title": "Input name",
@@ -550,7 +545,7 @@
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
-            "uniqueItems": true,
+            
             "items": {
               "type": "string",
               "title": "Trigger for this event",

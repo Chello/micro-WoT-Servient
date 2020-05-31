@@ -12,7 +12,7 @@ CustomTerminal.prototype.exec = function(command) {
 
     //handle stdout
     this.cmd.stdout.on('data', function(data) {
-        console.log(data.toString())
+        //console.log(data.toString())
         data.toString().split('\n').forEach(element => {
             this.terminal.writeln(element);
         });
@@ -20,7 +20,7 @@ CustomTerminal.prototype.exec = function(command) {
 
     //handle stderr
     this.cmd.stderr.on('data', function(data) {
-        console.log(data.toString())
+        //console.log(data.toString())
         data.toString().split('\n').forEach(element => {
             this.terminal.writeln('\x1B[1;3;31m'+element+'\x1B[0m');
         });
@@ -48,19 +48,3 @@ CustomTerminal.prototype.exec = function(command) {
         this.cmd = undefined;
     });
 }
-
-// CustomTerminal.prototype.exec = function(command) {
-//     this.cmd = cp.execFile(command, function (error, stdout, stderr) {
-//         if (error) {
-//           console.log(error.stack);
-//           console.log('Error code: '+error.code);
-//           console.log('Signal received: '+error.signal);
-//         }
-//         stdout = stdout.split('\n')
-//         stdout.forEach(element => {
-//             this.terminal.writeln(element)
-//         });
-//     }.bind(this));
-
-
-// }
