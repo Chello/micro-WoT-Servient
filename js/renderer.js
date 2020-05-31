@@ -35,7 +35,7 @@ window.onload = function() {
         iconlib: "fontawesome4"
     });
 
-    test = new JSONEditor(document.getElementById('test_holder'),{
+    /*test = new JSONEditor(document.getElementById('test_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
         
@@ -55,7 +55,7 @@ window.onload = function() {
         theme: 'bootstrap4',
         //set icon library
         iconlib: "fontawesome4"
-    });
+    });*/
 
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
@@ -87,10 +87,6 @@ var composeTD = function() {
     options = Object.assign({}, builder.getValue());
     //properties arr becomes object of objects
 
-    // if (td["properties"]) {
-    //     td["properties"] = arrToObj(td["properties"], "propertyName");
-    // }
-
     if (td["properties"]) {
         var arr = td['properties'];
         td['properties'] = {};
@@ -100,6 +96,7 @@ var composeTD = function() {
         });
     }
 
+    //actions arr becomes object of objects
     if (td["actions"]) {
         var arr = td['actions'];
         td['actions'] = {};
@@ -146,25 +143,24 @@ var composeTD = function() {
             options.actionFunctions.push(actionCurrentFunction);
         });
     }
+    
+    //events arr becomes object of objects
+    if (td['events']) {
+        var arr = td['events'];
+        td['events'] = {};
+
+        if (arr.length != 0) {
+            options.eventConditions = [];
+        }
+
+        arr.forEach(element => { //foreach action provided
+            var name = element.actionName
+            td['events'][name] = element;
+        });
+    }
     return [td, options];
 
 }
-
-// var arrToObj = function(arr, nameElement) {
-//     // if (td["properties"]) {
-//     //     var arr = td['properties'];
-//     //     td['properties'] = {};
-//     //     arr.forEach(element => {
-//     //         var name = element.propertyName
-//     //         td['properties'][name] = element;
-//     //     });
-//     // }
-//     var obj = {};
-//     arr.forEach(element => {
-//         var 
-//     })
-// }
-
 
 $('#submit_button').on('click', function() {
 

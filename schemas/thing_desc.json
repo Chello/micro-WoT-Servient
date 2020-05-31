@@ -11,33 +11,6 @@
     "securityDefinitions"
   ],
   "properties": {
-    "lool": {
-      "type": "object",
-      "properties": {
-          "possible_colors": {
-              "type": "array",
-              "items": {
-                  "type": "object",
-                  "properties": {
-                      "text": {
-                          "type": "string"
-                      }
-                  }
-              }
-          },
-          "primary_color": {
-              "type": "string",
-              "watch": {
-                  "colors": "root.lool.possible_colors"
-              },
-              "enumSource": [{
-                  "source": "colors",
-                  "value": "{{item.text}}",
-                  "filter": "filterFun"
-              }]
-          }
-      }
-    },
     "title": {
       "type": "string",
       "title": "Thing title",
@@ -228,7 +201,6 @@
           "safe",
           "idempotent"
         ],
-        
         "properties": {
           "actionName": {
             "type": "string",
@@ -279,7 +251,10 @@
               "type"
             ],
             "items": {
-              "required": ["inputName", "type"],
+              "required": [
+                "inputName",
+                "type"
+              ],
               "title": "Inputs",
               "type": "object",
               "properties": {
@@ -307,7 +282,9 @@
           "output": {
             "type": "object",
             "title": "Output",
-            "required": ["type"],
+            "required": [
+              "type"
+            ],
             "properties": {
               "type": {
                 "type": "string",
@@ -355,7 +332,9 @@
       "name": "events",
       "title": "Thing events",
       "items": {
-        "required":["eventName"],
+        "required": [
+          "eventName"
+        ],
         "type": "object",
         "title": "Thing events",
         "properties": {
@@ -363,17 +342,31 @@
             "type": "string"
           },
           "actionsTriggered": {
+            "type": "array",
+            "title": "Triggers for the event",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "watch": {
+                "asdf": "root.actions"
+              },
+              "enumSource": [
+                {
+                  "source": "asdf",
+                  "value": "{{item.actionName}}"
+                }
+              ]
+            }
+          },
+          "condition": {
             "type": "string"
           },
-          "test": {
-            "type": "string",
-            "watch": {
-              "asdf": "root.actions"
-            },
-            "enumSource": [{
-              "source": "asdf",
-              "value":"{{item.actionName}}"
-              }]
+          "subscription": {
+            "type": "array",
+            "title": "Subscription events",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }
@@ -516,7 +509,6 @@
           "safe",
           "idempotent"
         ],
-        
         "properties": {
           "actionName": {
             "type": "string",
@@ -567,7 +559,10 @@
               "type"
             ],
             "items": {
-              "required": ["inputName", "type"],
+              "required": [
+                "inputName",
+                "type"
+              ],
               "title": "Inputs",
               "type": "object",
               "properties": {
@@ -595,7 +590,9 @@
           "output": {
             "type": "object",
             "title": "Output",
-            "required": ["type"],
+            "required": [
+              "type"
+            ],
             "properties": {
               "type": {
                 "type": "string",
@@ -643,7 +640,9 @@
       "name": "events",
       "title": "Thing events",
       "items": {
-        "required":["eventName"],
+        "required": [
+          "eventName"
+        ],
         "type": "object",
         "title": "Thing events",
         "properties": {
@@ -658,10 +657,12 @@
             "watch": {
               "asdf": "actions"
             },
-            "enumSource": [{
-              "source": "root.actionName",
-              "filter": "filterFun"
-              }]
+            "enumSource": [
+              {
+                "source": "root.actionName",
+                "filter": "filterFun"
+              }
+            ]
           }
         }
       }
