@@ -180,333 +180,6 @@
       }
     },
     "properties": {
-      "name": "Properties",
-      "$ref": "#/definitions/properties"
-    },
-    "actions": {
-      "type": "array",
-      "name": "actions",
-      "id": "actions",
-      "title": "Thing actions",
-      "options": {
-        "collapsed": true
-      },
-      "items": {
-        "type": "object",
-        "headerTemplate": "{{self.actionName}}",
-        "required": [
-          "actionName",
-          "forms",
-          "body",
-          "safe",
-          "idempotent"
-        ],
-        "properties": {
-          "actionName": {
-            "type": "string",
-            "title": "Action name"
-          },
-          "forms": {
-            "type": "array",
-            "format": "table",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "title": "Operations",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "op": {
-                  "default": "invokeaction",
-                  "const": "invokeaction",
-                  "options": {
-                    "hidden": true
-                  }
-                }
-              }
-            }
-          },
-          "input": {
-            "type": "array",
-            "required": [
-              "inputName",
-              "type"
-            ],
-            "items": {
-              "required": [
-                "inputName",
-                "type"
-              ],
-              "title": "Inputs",
-              "type": "object",
-              "properties": {
-                "inputName": {
-                  "title": "Input name",
-                  "type": "string"
-                },
-                "type": {
-                  "title": "Action type",
-                  "description": "Type of action",
-                  "type": "string",
-                  "enum": [
-                    "boolean",
-                    "integer",
-                    "number",
-                    "string",
-                    "object",
-                    "array",
-                    "null"
-                  ]
-                }
-              }
-            }
-          },
-          "output": {
-            "type": "object",
-            "title": "Output",
-            "required": [
-              "type"
-            ],
-            "properties": {
-              "type": {
-                "type": "string",
-                "title": "Output type",
-                "enum": [
-                  "boolean",
-                  "integer",
-                  "number",
-                  "string",
-                  "object",
-                  "array",
-                  "null"
-                ]
-              }
-            }
-          },
-          "body": {
-            "type": "string",
-            "format": "textarea"
-          },
-          "safe": {
-            "type": "boolean"
-          },
-          "idempotent": {
-            "type": "boolean"
-          },
-          "@type": {
-            "type": "array",
-            "title": "Action meta types",
-            "items": {
-              "type": "string"
-            }
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "events": {
-      "type": "array",
-      "name": "events",
-      "title": "Thing events",
-      "items": {
-        "required": [
-          "eventName",
-          "condition",
-          "actionsTriggered",
-          "forms"
-        ],
-        "type": "object",
-        "title": "Thing events",
-        "properties": {
-          "eventName": {
-            "type": "string"
-          },
-          "forms": {
-            "type": "array",
-            "title": "Operations",
-            "format": "table",
-            "minItems": 1,
-            "maxItems": 2,
-            "items": {
-              "title": "",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "op": {
-                  "type": "array",
-                  "format": "categories",
-                  "name": "operations",
-                  "description": "Operation supported by the event",
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "subscribeevent",
-                      "unsubscribeevent"
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "actionsTriggered": {
-            "type": "array",
-            "title": "Triggers for the event",
-            
-            "items": {
-              "type": "string",
-              "watch": {
-                "asdf": "root.actions"
-              },
-              "enumSource": [
-                {
-                  "source": "asdf",
-                  "value": "{{item.actionName}}"
-                }
-              ]
-            }
-          },
-          "condition": {
-            "type": "string"
-          },
-          "subscription": {
-            "type": "array",
-            "title": "Subscription schema",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "required":["subscriptionsName", "type", "value"],
-              "properties": {
-                "subscriptionsName": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "title": "Subscription type",
-                  "enum": [
-                    "boolean",
-                    "integer",
-                    "number",
-                    "string",
-                    "object",
-                    "array",
-                    "null"
-                  ]
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "data": {
-            "type": "array",
-            "title": "Data schema",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "required":["dataName", "type", "value"],
-              "properties": {
-                "dataName": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "title": "Subscription type",
-                  "enum": [
-                    "boolean",
-                    "integer",
-                    "number",
-                    "string",
-                    "object",
-                    "array",
-                    "null"
-                  ]
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "cancellation": {
-            "type": "array",
-            "title": "Cancellations events",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "required":["cancellationsName", "type", "value"],
-              "properties": {
-                "cancellationsName": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string",
-                  "title": "Cancellations type",
-                  "enum": [
-                    "boolean",
-                    "integer",
-                    "number",
-                    "string",
-                    "object",
-                    "array",
-                    "null"
-                  ]
-                },
-                "value": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "properties": {
       "type": "array",
       "title": "Thing properties",
       "options": {
@@ -592,9 +265,6 @@
               "null"
             ]
           },
-          "format": {
-            "type": "string"
-          },
           "@type": {
             "type": "array",
             "title": "Property meta-type",
@@ -608,17 +278,21 @@
             "default": false
           },
           "readOnly": {
+            "title": "Is property read-only?",
             "type": "boolean",
             "default": true
           },
           "writeOnly": {
+            "title": "Is property write-only?",
             "type": "boolean",
             "default": true
           },
           "title": {
+            "title": "Property title",
             "type": "string"
           },
           "description": {
+            "title": "Property description",
             "type": "string"
           }
         }
@@ -687,6 +361,7 @@
           },
           "input": {
             "type": "array",
+            "title": "Inputs",
             "required": [
               "inputName",
               "type"
@@ -696,7 +371,7 @@
                 "inputName",
                 "type"
               ],
-              "title": "Inputs",
+              "title": "Input",
               "type": "object",
               "properties": {
                 "inputName": {
@@ -743,26 +418,33 @@
             }
           },
           "body": {
+            "title": "Action function",
             "type": "string",
-            "format": "textarea"
+            "format": "textarea",
+            "description": "Body of the function for current action"
           },
           "safe": {
+            "title": "Is function safe?",
             "type": "boolean"
           },
           "idempotent": {
+            "title": "Is function idempotent?",
             "type": "boolean"
           },
           "@type": {
             "type": "array",
             "title": "Action meta types",
             "items": {
+              "title":"Specify meta-type",
               "type": "string"
             }
           },
           "title": {
+            "title":"Action title",
             "type": "string"
           },
           "description": {
+            "title": "Action description",
             "type": "string"
           }
         }
@@ -774,28 +456,184 @@
       "title": "Thing events",
       "items": {
         "required": [
-          "eventName"
+          "eventName",
+          "condition",
+          "actionsTriggered",
+          "forms"
         ],
         "type": "object",
         "title": "Thing events",
         "properties": {
           "eventName": {
+            "title": "Event name",
             "type": "string"
+          },
+          "forms": {
+            "type": "array",
+            "title": "Operations",
+            "format": "table",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": {
+              "title": "",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operation supported by the event",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "subscribeevent",
+                      "unsubscribeevent"
+                    ]
+                  }
+                }
+              }
+            }
           },
           "actionsTriggered": {
-            "type": "string"
+            "type": "array",
+            "title": "Triggers for the event",
+            
+            "items": {
+              "type": "string",
+              "title": "Trigger for this event",
+              "description": "Specify which action will be triggered for this event. You can specify more triggers",
+              "watch": {
+                "actionAssoc": "root.actions"
+              },
+              "enumSource": [
+                {
+                  "source": "actionAssoc",
+                  "value": "{{item.actionName}}"
+                }
+              ]
+            }
           },
-          "test": {
+          "condition": {
+            "title": "Condition when event will occur",
             "type": "string",
-            "watch": {
-              "asdf": "actions"
-            },
-            "enumSource": [
-              {
-                "source": "root.actionName",
-                "filter": "filterFun"
+            "description": "Must be a boolean statement. Must NOT contain 'if' or brackets"
+          },
+          "subscription": {
+            "type": "array",
+            "title": "Event subscription schema",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required":["subscriptionName", "type", "value"],
+              "properties": {
+                "subscriptionName": {
+                  "title": "Subscription name",
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Subscription type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "title": "Value for subscription schema",
+                  "type": "string"
+                }
               }
-            ]
+            }
+          },
+          "data": {
+            "type": "array",
+            "title": "Event data schema",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required":["dataName", "type", "value"],
+              "properties": {
+                "dataName": {
+                  "title": "Event data name",
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Event subscription type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "title": "Value for data schema",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "cancellation": {
+            "type": "array",
+            "title": "Event cancellation schema",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required":["cancellationName", "type", "value"],
+              "properties": {
+                "cancellationName": {
+                  "title": "Event cancellation name",
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Event cancellation type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "title": "Value for cancellation schema",
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
