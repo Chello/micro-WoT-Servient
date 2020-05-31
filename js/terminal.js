@@ -4,7 +4,20 @@ var CustomTerminal = function () {
     this.terminal.open(document.getElementById('terminal_holder'));
     this.terminal.write('WoTServient$ ');
 
-
+    //handle stdin
+    this.terminal.onKey( (key, ev) => {
+        this.stdLine += key.key;
+        this.terminal.write(key.key);
+        if (key.key.charCodeAt(0) == 13) {
+            this.stdLine += '\n';
+            this.cmd.stdin.write(this.stdLine);
+            this.stdLine = '';
+        }
+        else if (key.key.charCodeAt(0) == 127) {
+            this.terminal.write("\b \b");
+            this.stdLine = this.stdLine.slice(0, -1);
+        }
+    })
 }
 
 CustomTerminal.prototype.exec = function(command) {
@@ -27,20 +40,7 @@ CustomTerminal.prototype.exec = function(command) {
     }.bind(this));
 
     this.stdLine = '';
-    //handle stdin
-    this.terminal.onKey( (key, ev) => {
-        this.stdLine += key.key;
-        this.terminal.write(key.key);
-        if (key.key.charCodeAt(0) == 13) {
-            this.stdLine += '\n';
-            this.cmd.stdin.write(this.stdLine);
-            this.stdLine = '';
-        }
-        else if (key.key.charCodeAt(0) == 127) {
-            this.terminal.write("\b \b");
-            this.stdLine = this.stdLine.slice(0, -1);
-        }
-    })
+    
     //on exit
     this.cmd.on('exit', (code) => {
         this.terminal.writeln('Child process exited with exit code '+code);
