@@ -333,7 +333,10 @@
       "title": "Thing events",
       "items": {
         "required": [
-          "eventName"
+          "eventName",
+          "condition",
+          "actionsTriggered",
+          "forms"
         ],
         "type": "object",
         "title": "Thing events",
@@ -341,10 +344,57 @@
           "eventName": {
             "type": "string"
           },
+          "forms": {
+            "type": "array",
+            "title": "Operations",
+            "format": "table",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": {
+              "title": "",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operation supported by the event",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "subscribeevent",
+                      "unsubscribeevent"
+                    ]
+                  }
+                }
+              }
+            }
+          },
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
-            "uniqueItems": true,
+            
             "items": {
               "type": "string",
               "watch": {
@@ -364,8 +414,31 @@
           "subscription": {
             "type": "array",
             "title": "Subscription events",
+            "uniqueItems": true,
             "items": {
-              "type": "string"
+              "type": "object",
+              "required":["itemName", "type", "value"],
+              "properties": {
+                "itemName": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Subscription type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
             }
           }
         }

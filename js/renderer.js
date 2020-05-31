@@ -154,8 +154,15 @@ var composeTD = function() {
         }
 
         arr.forEach(element => { //foreach action provided
-            var name = element.actionName
+            var name = element.eventName
             td['events'][name] = element;
+
+            eventCurrentCondition = {
+                "condition": element.condition,
+                "actions": element.actionsTriggered
+            }
+
+            options.eventConditions.push(eventCurrentCondition);
         });
     }
     return [td, options];
@@ -168,9 +175,9 @@ $('#submit_button').on('click', function() {
     console.log(builder.validate() /*? "true": "false"*/)
 
     // thing_prop = composeTD();
-    // console.log(thing_prop)
     // build_prop = builder.getValue();
     var [thing_prop, build_prop] = composeTD();
+    console.log(thing_prop)
     // console.log(editor.getValue());
     // console.log(builder.getValue());
 

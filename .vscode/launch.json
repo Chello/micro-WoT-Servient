@@ -24,8 +24,8 @@
             "args": ["build", 
 
                 "-T", "asdf/asdf.json",
-                "-t", "esp32.txt"//,
-                /*"-o", "asdf/opt_asdf.json"*/]
+                "-t", "esp32.txt",
+                "-o", "asdf/opt_asdf.json"]
         },
         {
             "name": "Debug Node Main Process",

@@ -1463,22 +1463,27 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
                     action['source'] = 'cli'
                 actionFunctions.append(action)    
 
-        # REQUEST EVENTS FUNCTIONS VIA CLI
-        for i in range(0, len(thingEvents)):
-            if(i == 0):
-                Hint = ('\nHint: The Event Condition that, when it is True, will trigger the asynchronous data pushing to Consumers,'
-                    '\ncan include every relational and logic operator like standard conditions in programming languages.'
-                    '\nTo send messages through WebSocket it is necessarly to use sendTXT() method of WebSocketServer library.')
-                click.echo(Hint)
-                click.echo('Example: ''property1_name <= 0''. IF-keyword and round brackets are not necessary')
-            event = {}
-            event['condition'] = click.prompt('\nEvent %s Condition' % thingEvents[i], type=str)
-            an = click.prompt('Number of Actions in which the Event Condition will triggered', type=click.IntRange(1, len(thingActions)))
-            event.setdefault('actions', [])
-            for j in range(1, an+1):
-                inp = click.prompt('Event %s Action %d name' % (thingEvents[i], j), type=click.Choice(thingActions))
-                event['actions'].append(inp)
-            eventConditions.append(event) 
+        # IF EVENTCONDITIONS PASSED VIA OPTIONS JSON
+        if "eventConditions" in ctx.obj['template']:
+            click.echo('oooooaaa')
+            eventConditions = ctx.obj['template']['eventConditions']
+        # OTHERWISE REQUEST EVENTS FUNCTIONS VIA CLI
+        else:
+            for i in range(0, len(thingEvents)):
+                if(i == 0):
+                    Hint = ('\nHint: The Event Condition that, when it is True, will trigger the asynchronous data pushing to Consumers,'
+                        '\ncan include every relational and logic operator like standard conditions in programming languages.'
+                        '\nTo send messages through WebSocket it is necessarly to use sendTXT() method of WebSocketServer library.')
+                    click.echo(Hint)
+                    click.echo('Example: ''property1_name <= 0''. IF-keyword and round brackets are not necessary')
+                event = {}
+                event['condition'] = click.prompt('\nEvent %s Condition' % thingEvents[i], type=str)
+                an = click.prompt('Number of Actions in which the Event Condition will triggered', type=click.IntRange(1, len(thingActions)))
+                event.setdefault('actions', [])
+                for j in range(1, an+1):
+                    inp = click.prompt('Event %s Action %d name' % (thingEvents[i], j), type=click.Choice(thingActions))
+                    event['actions'].append(inp)
+                eventConditions.append(event) 
         try:
             js.validate(ctx.obj['td'], schema)
         except Exception as e:
