@@ -44,6 +44,8 @@ CustomTerminal.prototype.exec = function(command) {
     //on exit
     this.cmd.on('exit', (code) => {
         this.terminal.writeln('Child process exited with exit code '+code);
+        this.cmd.kill();
+        this.cmd = undefined;
     });
 }
 

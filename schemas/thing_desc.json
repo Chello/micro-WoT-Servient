@@ -186,6 +186,10 @@
     "actions": {
       "name": "Actions",
       "$ref": "#/definitions/actions"
+    },
+    "events": {
+      "name": "Events",
+      "$ref": "#/definitions/events"
     }
   },
   "definitions": {
@@ -201,7 +205,10 @@
         "required": [
           "propertyName",
           "type",
-          "forms"
+          "forms",
+          "observable",
+          "readOnly",
+          "writeOnly"
         ],
         "properties": {
           "propertyName": {
@@ -211,6 +218,9 @@
           "forms": {
             "type": "array",
             "format": "table",
+            "title": "Operations",
+            "minItems": 1,
+            "maxItems": 2,
             "items": {
               "title": "Operations",
               "type": "object",
@@ -303,6 +313,7 @@
     },
     "actions": {
       "type": "array",
+      "name": "actions",
       "title": "Thing actions",
       "options": {
         "collapsed": true
@@ -317,6 +328,7 @@
           "safe",
           "idempotent"
         ],
+        
         "properties": {
           "actionName": {
             "type": "string",
@@ -325,6 +337,8 @@
           "forms": {
             "type": "array",
             "format": "table",
+            "minItems": 1,
+            "uniqueItems": true,
             "items": {
               "title": "Operations",
               "type": "object",
@@ -438,6 +452,7 @@
     },
     "events": {
       "type": "array",
+      "name": "events",
       "title": "Thing events",
       "options": {
         "collapsed": true
@@ -446,10 +461,13 @@
         "type": "object",
         "headerTemplate": "{{self.eventName}}",
         "required": [
-          "eventName",
-          "type"
+          "eventName"
         ],
         "properties": {
+          "loool": {
+            "name": "lool",
+            "$ref": "#/definitions/colorTest"
+          },
           "eventName": {
             "type": "string"
           },
@@ -482,7 +500,7 @@
                 "op": {
                   "type": "array",
                   "format": "categories",
-                  "name": "operations",
+                  "name": "eventOperations",
                   "description": "Operation supported by the event",
                   "uniqueItems": true,
                   "minItems": 1,

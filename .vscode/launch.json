@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Python current file",
+            "name": "Py from start",
             "type": "python",
             "request": "launch",
             "program": "${file}",
@@ -24,8 +24,8 @@
             "args": ["build", 
 
                 "-T", "asdf/asdf.json",
-                "-t", "esp32.txt",
-                "-o", "asdf/opt_asdf.json"]
+                "-t", "esp32.txt"//,
+                /*"-o", "asdf/opt_asdf.json"*/]
         },
         {
             "name": "Debug Node Main Process",

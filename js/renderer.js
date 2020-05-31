@@ -131,15 +131,15 @@ window.onload = function() {
         //set icon library
         iconlib: "fontawesome4"
     });
-/*
-    properties = new JSONEditor(document.getElementById('properties_holder'),{
+
+    test = new JSONEditor(document.getElementById('test_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
         
         // The schema for the editor
         schema: {
             type: "object",
-            $ref: "schemas/properties.json",
+            $ref: "schemas/test.json",
             //$ref: "embeddedWoTServient/thing-schema.json"
         },
         //are fields all required? no
@@ -153,7 +153,7 @@ window.onload = function() {
         //set icon library
         iconlib: "fontawesome4"
     });
-*/
+
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -214,13 +214,17 @@ var composeTD = function() {
                 "source": 'cli',
                 "name": name,
                 "body": td['actions'][name]["body"],
-                "output": {
-                    "name": '',
-                    "type": td['actions'][name]['output']['type']
-                },
+                "output": {},
                 "input": []
             };
-
+            //if output is set
+            if (td['actions'][name]['output']) {
+                actionCurrentFunction.output = {
+                    "name": '',
+                    "type": td['actions'][name]['output']['type']
+                }
+            }
+            //if inputs are set
             if (td['actions'][name]['input']) {
                 var arr = td['actions'][name]['input'];
                 td['actions'][name]['input'] = {};

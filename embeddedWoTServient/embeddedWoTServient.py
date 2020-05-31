@@ -1375,9 +1375,10 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
         template = env.get_template('esp8266.txt')
 
 
+    ctx.ensure_object(dict)
+    ctx.obj.setdefault('template', {})  
+
     if((ctx.obj is None) or ('td' not in ctx.obj)):
-        ctx.ensure_object(dict)
-        ctx.obj.setdefault('template', {})  
         # IF OPTION FILE IS SPECIFIED
         if optionsFile != None: # LOAD OPTIONS FROM FILE IN ARGS
             
