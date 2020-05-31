@@ -413,18 +413,78 @@
           },
           "subscription": {
             "type": "array",
-            "title": "Subscription events",
+            "title": "Subscription schema",
             "uniqueItems": true,
             "items": {
               "type": "object",
-              "required":["itemName", "type", "value"],
+              "required":["subscriptionsName", "type", "value"],
               "properties": {
-                "itemName": {
+                "subscriptionsName": {
                   "type": "string"
                 },
                 "type": {
                   "type": "string",
                   "title": "Subscription type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "data": {
+            "type": "array",
+            "title": "Data schema",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required":["dataName", "type", "value"],
+              "properties": {
+                "dataName": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Subscription type",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "cancellation": {
+            "type": "array",
+            "title": "Cancellations events",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "required":["cancellationsName", "type", "value"],
+              "properties": {
+                "cancellationsName": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "Cancellations type",
                   "enum": [
                     "boolean",
                     "integer",

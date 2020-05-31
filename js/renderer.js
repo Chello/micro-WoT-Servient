@@ -153,13 +153,46 @@ var composeTD = function() {
             options.eventConditions = [];
         }
 
-        arr.forEach(element => { //foreach action provided
+        arr.forEach(element => { //foreach event provided
             var name = element.eventName
             td['events'][name] = element;
 
             eventCurrentCondition = {
                 "condition": element.condition,
                 "actions": element.actionsTriggered
+            }
+
+            //if subscription are set
+            if (td['events'][name]['subscription']) {
+                var arrSubscription = td['events'][name]['subscription'];
+                td['events'][name]['subscription'] = {};
+                
+                arrSubscription.forEach(element => { //foreach subscription provided
+                    var subscriptionName = element.subscriptionName
+                    td['events'][name]['subscription'][subscriptionName] = element;
+                });
+            }
+
+            //if data are set
+            if (td['events'][name]['data']) {
+                var arrData = td['events'][name]['data'];
+                td['events'][name]['data'] = {};
+                
+                arrData.forEach(element => { //foreach data provided
+                    var dataName = element.dataName
+                    td['events'][name]['data'][dataName] = element;
+                });
+            }
+
+            //if cancellation are set
+            if (td['events'][name]['cancellation']) {
+                var arrCancellation = td['events'][name]['cancellation'];
+                td['events'][name]['cancellation'] = {};
+                
+                arrCancellation.forEach(element => { //foreach cancellation provided
+                    var cancellationName = element.cancellationName
+                    td['events'][name]['cancellation'][cancellationName] = element;
+                });
             }
 
             options.eventConditions.push(eventCurrentCondition);
