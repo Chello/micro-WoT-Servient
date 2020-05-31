@@ -83,13 +83,24 @@ window.onload = function() {
 var composeTD = function() {
     //clone array
     //td = editor.getValue().map((x) => x);
-    td = Object.assign({}, editor.getValue());
-    options = Object.assign({}, builder.getValue());
+    var td = Object.assign({}, editor.getValue());
+    var options = Object.assign({}, builder.getValue());
     //properties arr becomes object of objects
+
+    //check if thing using websocket
+    if (td["useWS"]) {
+        td["forms"][1] = td["forms"][0]
+    }
 
     if (td["properties"]) {
         var arr = td['properties'];
         td['properties'] = {};
+
+        //check if property using websocket
+        if (td["properties"]["useWS"]) {
+            td["properties"]["forms"][1] = td["properties"]["forms"][0]
+        }
+
         arr.forEach(element => {
             var name = element.propertyName
             td['properties'][name] = element;
@@ -100,6 +111,11 @@ var composeTD = function() {
     if (td["actions"]) {
         var arr = td['actions'];
         td['actions'] = {};
+
+        //check if action using websocket
+        if (td["actions"]["useWS"]) {
+            td["actions"]["forms"][1] = td["actions"]["forms"][0]
+        }
 
         if (arr.length != 0) {
             options.actionFunctions = [];
@@ -148,6 +164,11 @@ var composeTD = function() {
     if (td['events']) {
         var arr = td['events'];
         td['events'] = {};
+
+        //check if event using websocket
+        if (td["events"]["useWS"]) {
+            td["events"]["forms"][1] = td["events"]["forms"][0]
+        }
 
         if (arr.length != 0) {
             options.eventConditions = [];

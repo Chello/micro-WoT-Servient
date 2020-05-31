@@ -8,7 +8,8 @@
     "forms",
     "@context",
     "security",
-    "securityDefinitions"
+    "securityDefinitions",
+    "useWS"
   ],
   "properties": {
     "title": {
@@ -78,7 +79,7 @@
       "title": "Operations",
       "format": "table",
       "minItems": 1,
-      "maxItems": 2,
+      "maxItems": 1,
       "items": {
         "title": "",
         "type": "object",
@@ -121,6 +122,11 @@
           }
         }
       }
+    },
+    "useWS": {
+      "type": "boolean",
+      "title": "Is Thing using WebSocket?",
+      "format": "checkbox"
     },
     "description": {
       "type": "string",
@@ -192,6 +198,7 @@
           "propertyName",
           "type",
           "forms",
+          "useWS",
           "observable",
           "readOnly",
           "writeOnly"
@@ -206,7 +213,10 @@
             "format": "table",
             "title": "Operations",
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 1,
+            "options": {
+              "hidden": true
+            },
             "items": {
               "title": "Operations",
               "type": "object",
@@ -250,6 +260,11 @@
                 }
               }
             }
+          },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is property using WebSocket?",
+            "format": "checkbox"
           },
           "type": {
             "title": "Property type",
@@ -312,6 +327,7 @@
         "required": [
           "actionName",
           "forms",
+          "useWS",
           "body",
           "safe",
           "idempotent"
@@ -325,7 +341,11 @@
             "type": "array",
             "format": "table",
             "minItems": 1,
+            "maxItems": 1,
             "uniqueItems": true,
+            "options": {
+              "hidden": true
+            },
             "items": {
               "title": "Operations",
               "type": "object",
@@ -358,6 +378,11 @@
                 }
               }
             }
+          },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is property using WebSocket?",
+            "format": "checkbox"
           },
           "input": {
             "type": "array",
@@ -459,7 +484,8 @@
           "eventName",
           "condition",
           "actionsTriggered",
-          "forms"
+          "forms",
+          "useWS"
         ],
         "type": "object",
         "title": "Thing events",
@@ -473,14 +499,15 @@
             "title": "Operations",
             "format": "table",
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 1,
             "items": {
               "title": "",
               "type": "object",
               "required": [
                 "op",
                 "contentType",
-                "href"
+                "href",
+                "useWS"
               ],
               "properties": {
                 "contentType": {
@@ -515,14 +542,19 @@
               }
             }
           },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is event using WebSocket?",
+            "format": "checkbox"
+          },
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
-            
+            "uniqueItems": true,
             "items": {
               "type": "string",
               "title": "Trigger for this event",
-              "description": "Specify which action will be triggered for this event. You can specify more triggers",
+              "description": "Specify which action will be triggered for this event. You can specify more triggers but you cannot duplicate them.",
               "watch": {
                 "actionAssoc": "root.actions"
               },
@@ -634,6 +666,21 @@
                 }
               }
             }
+          },
+          "@type": {
+            "type": "array",
+            "title": "Property meta-type",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "title": "Event title",
+            "type": "string"
+          },
+          "description": {
+            "title": "Event description",
+            "type": "string"
           }
         }
       }
