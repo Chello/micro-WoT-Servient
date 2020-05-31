@@ -19,7 +19,8 @@
             },
             "enumSource": [{
                 "source": "colors",
-                "value": "{{item.text}}"
+                "value": "{{item.text}}",
+                "filter": "filterFun"
             }]
         }
     }

@@ -1,7 +1,7 @@
 {
   "title": "Thing",
   "type": "object",
-  "id": "thing",
+  "id": "root",
   "required": [
     "title",
     "id",
@@ -11,6 +11,33 @@
     "securityDefinitions"
   ],
   "properties": {
+    "lool": {
+      "type": "object",
+      "properties": {
+          "possible_colors": {
+              "type": "array",
+              "items": {
+                  "type": "object",
+                  "properties": {
+                      "text": {
+                          "type": "string"
+                      }
+                  }
+              }
+          },
+          "primary_color": {
+              "type": "string",
+              "watch": {
+                  "colors": "root.lool.possible_colors"
+              },
+              "enumSource": [{
+                  "source": "colors",
+                  "value": "{{item.text}}",
+                  "filter": "filterFun"
+              }]
+          }
+      }
+    },
     "title": {
       "type": "string",
       "title": "Thing title",
@@ -184,136 +211,9 @@
       "$ref": "#/definitions/properties"
     },
     "actions": {
-      "name": "Actions",
-      "$ref": "#/definitions/actions"
-    },
-    "events": {
-      "name": "Events",
-      "$ref": "#/definitions/events"
-    }
-  },
-  "definitions": {
-    "properties": {
-      "type": "array",
-      "title": "Thing properties",
-      "options": {
-        "collapsed": true
-      },
-      "items": {
-        "type": "object",
-        "headerTemplate": "{{self.propertyName}}",
-        "required": [
-          "propertyName",
-          "type",
-          "forms",
-          "observable",
-          "readOnly",
-          "writeOnly"
-        ],
-        "properties": {
-          "propertyName": {
-            "type": "string",
-            "title": "Property name"
-          },
-          "forms": {
-            "type": "array",
-            "format": "table",
-            "title": "Operations",
-            "minItems": 1,
-            "maxItems": 2,
-            "items": {
-              "title": "Operations",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href",
-                "observable",
-                "readOnly",
-                "writeOnly"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "op": {
-                  "type": "array",
-                  "format": "categories",
-                  "name": "operations",
-                  "description": "Operation supported by the property",
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "readproperty",
-                      "writeproperty"
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "type": {
-            "title": "Property type",
-            "description": "Type of property",
-            "type": "string",
-            "enum": [
-              "boolean",
-              "integer",
-              "number",
-              "string",
-              "object",
-              "array",
-              "null"
-            ]
-          },
-          "format": {
-            "type": "string"
-          },
-          "@type": {
-            "type": "array",
-            "title": "Property meta-type",
-            "items": {
-              "type": "string"
-            }
-          },
-          "observable": {
-            "title": "Is property observable?",
-            "type": "boolean",
-            "default": false
-          },
-          "readOnly": {
-            "type": "boolean",
-            "default": true
-          },
-          "writeOnly": {
-            "type": "boolean",
-            "default": true
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "actions": {
       "type": "array",
       "name": "actions",
+      "id": "actions",
       "title": "Thing actions",
       "options": {
         "collapsed": true
@@ -454,26 +354,179 @@
       "type": "array",
       "name": "events",
       "title": "Thing events",
+      "items": {
+        "required":["eventName"],
+        "type": "object",
+        "title": "Thing events",
+        "properties": {
+          "eventName": {
+            "type": "string"
+          },
+          "actionsTriggered": {
+            "type": "string"
+          },
+          "test": {
+            "type": "string",
+            "watch": {
+              "asdf": "root.actions"
+            },
+            "enumSource": [{
+              "source": "asdf",
+              "value":"{{item.actionName}}"
+              }]
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "properties": {
+      "type": "array",
+      "title": "Thing properties",
       "options": {
         "collapsed": true
       },
       "items": {
         "type": "object",
-        "headerTemplate": "{{self.eventName}}",
+        "headerTemplate": "{{self.propertyName}}",
         "required": [
-          "eventName"
+          "propertyName",
+          "type",
+          "forms",
+          "observable",
+          "readOnly",
+          "writeOnly"
         ],
         "properties": {
-          "loool": {
-            "name": "lool",
-            "$ref": "#/definitions/colorTest"
-          },
-          "eventName": {
-            "type": "string"
+          "propertyName": {
+            "type": "string",
+            "title": "Property name"
           },
           "forms": {
             "type": "array",
             "format": "table",
+            "title": "Operations",
+            "minItems": 1,
+            "maxItems": 2,
+            "items": {
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href",
+                "observable",
+                "readOnly",
+                "writeOnly"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operation supported by the property",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "readproperty",
+                      "writeproperty"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "type": {
+            "title": "Property type",
+            "description": "Type of property",
+            "type": "string",
+            "enum": [
+              "boolean",
+              "integer",
+              "number",
+              "string",
+              "object",
+              "array",
+              "null"
+            ]
+          },
+          "format": {
+            "type": "string"
+          },
+          "@type": {
+            "type": "array",
+            "title": "Property meta-type",
+            "items": {
+              "type": "string"
+            }
+          },
+          "observable": {
+            "title": "Is property observable?",
+            "type": "boolean",
+            "default": false
+          },
+          "readOnly": {
+            "type": "boolean",
+            "default": true
+          },
+          "writeOnly": {
+            "type": "boolean",
+            "default": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "name": "actions",
+      "id": "actions",
+      "title": "Thing actions",
+      "options": {
+        "collapsed": true
+      },
+      "items": {
+        "type": "object",
+        "headerTemplate": "{{self.actionName}}",
+        "required": [
+          "actionName",
+          "forms",
+          "body",
+          "safe",
+          "idempotent"
+        ],
+        
+        "properties": {
+          "actionName": {
+            "type": "string",
+            "title": "Action name"
+          },
+          "forms": {
+            "type": "array",
+            "format": "table",
+            "minItems": 1,
+            "uniqueItems": true,
             "items": {
               "title": "Operations",
               "type": "object",
@@ -498,22 +551,117 @@
                   }
                 },
                 "op": {
-                  "type": "array",
-                  "format": "categories",
-                  "name": "eventOperations",
-                  "description": "Operation supported by the event",
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "items": {
-                    "type": "string",
-                    "enum": [
-                      "subscribeevent",
-                      "unsubscribeevent"
-                    ]
+                  "default": "invokeaction",
+                  "const": "invokeaction",
+                  "options": {
+                    "hidden": true
                   }
                 }
               }
             }
+          },
+          "input": {
+            "type": "array",
+            "required": [
+              "inputName",
+              "type"
+            ],
+            "items": {
+              "required": ["inputName", "type"],
+              "title": "Inputs",
+              "type": "object",
+              "properties": {
+                "inputName": {
+                  "title": "Input name",
+                  "type": "string"
+                },
+                "type": {
+                  "title": "Action type",
+                  "description": "Type of action",
+                  "type": "string",
+                  "enum": [
+                    "boolean",
+                    "integer",
+                    "number",
+                    "string",
+                    "object",
+                    "array",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "output": {
+            "type": "object",
+            "title": "Output",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "title": "Output type",
+                "enum": [
+                  "boolean",
+                  "integer",
+                  "number",
+                  "string",
+                  "object",
+                  "array",
+                  "null"
+                ]
+              }
+            }
+          },
+          "body": {
+            "type": "string",
+            "format": "textarea"
+          },
+          "safe": {
+            "type": "boolean"
+          },
+          "idempotent": {
+            "type": "boolean"
+          },
+          "@type": {
+            "type": "array",
+            "title": "Action meta types",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "name": "events",
+      "title": "Thing events",
+      "items": {
+        "required":["eventName"],
+        "type": "object",
+        "title": "Thing events",
+        "properties": {
+          "eventName": {
+            "type": "string"
+          },
+          "actionsTriggered": {
+            "type": "string"
+          },
+          "test": {
+            "type": "string",
+            "watch": {
+              "asdf": "actions"
+            },
+            "enumSource": [{
+              "source": "root.actionName",
+              "filter": "filterFun"
+              }]
           }
         }
       }

@@ -2,111 +2,14 @@ const fs = require('fs');
 var term = {};
 
 window.onload = function() {
-    // var initial = {
-    //     "title": "cosaccia",
-    //     "id": "cosaccia",
-    //     "@context": "https://www.w3.org/2019/wot/td/v1",
-    //     "security": "nosec_sc",
-    //     "securityDefinitions": {
-    //         "nosec_sc": {
-    //             "scheme": "nosec"
-    //         }
-    //     },
-    //     "forms": [
-    //         {
-    //             "href": "",
-    //             "contentType": "application/json",
-    //             "op": [
-    //                 "readallproperties",
-    //                 "writeallproperties",
-    //                 "readmultipleproperties",
-    //                 "writemultipleproperties"
-    //             ]
-    //         }
-    //     ],
-    //     "properties": {
-    //         "prop1": {
-    //             "forms": [
-    //                 {
-    //                     "href": "",
-    //                     "contentType": "application/json",
-    //                     "op": [
-    //                         "readproperty",
-    //                         "writeproperty"
-    //                     ]
-    //                 },
-    //                 {
-    //                     "href": "",
-    //                     "contentType": "application/json",
-    //                     "op": [
-    //                         "readproperty",
-    //                         "writeproperty"
-    //                     ]
-    //                 }
-    //             ],
-    //             "type": "boolean",
-    //             "observable": false,
-    //             "readOnly": true,
-    //             "writeOnly": true
-    //         }
-    //     },
-    //     "actions": {
-    //         "act1": {
-    //             "forms": [
-    //                 {
-    //                     "href": "",
-    //                     "contentType": "application/json",
-    //                     "op": "invokeaction",
-    //                     "httptermname": "httptermelem"
-    //                 },
-    //                 {
-    //                     "href": "",
-    //                     "contentType": "application/json",
-    //                     "op": "invokeaction",
-    //                     "wstermelem": "wstermeleeem"
-    //                 }
-    //             ],
-    //             "input": {
-    //                 "act1in1": {
-    //                     "type": "boolean"
-    //                 },
-    //                 "act1in2": {
-    //                     "type": "integer",
-    //                     "minimum": 1,
-    //                     "maximum": 10
-    //                 }
-    //             },
-    //             "output": {
-    //                 "type": "string"
-    //             },
-    //             "safe": true,
-    //             "idempotent": false,
-    //             "@type": [
-    //                 "meta/type1",
-    //                 "meta/type2"
-    //             ],
-    //             "title": "acttitle",
-    //             "description": "actdesc",
-    //             "term1name": "term1elem"
-    //         },
-    //         "act2": {
-    //             "forms": [
-    //                 {
-    //                     "href": "",
-    //                     "contentType": "application/json",
-    //                     "op": "invokeaction"
-    //                 }
-    //             ],
-    //             "input": {
-    //                 "in": {
-    //                     "type": "boolean"
-    //                 }
-    //             },
-    //             "safe": false,
-    //             "idempotent": false
-    //         }
-    //     }
-    // };
+
+    JSONEditor.defaults.callbacks.template = {
+        "filterFun":(jseditor, e) => {
+            console.log(jseditor)
+            console.log(e)
+            return e.item.text
+        },
+    }
 
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
