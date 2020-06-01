@@ -1422,10 +1422,8 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
         if('events' in ctx.obj['td']):    
             thingEvents = list(ctx.obj['td']['events'].keys())
         
-        click.echo('ooooo')
         # IF ACTIONFUNCTIONS PASSED VIA OPTIONS JSON
         if "actionFunctions" in ctx.obj['template']:
-            click.echo('ooooo')
             actionFunctions = ctx.obj['template']['actionFunctions']
         else: # OTHERWISE REQUEST ACTIONS FUNCTIONS VIA CLI
             for i in range(0, len(thingActions)):
@@ -1465,7 +1463,6 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
 
         # IF EVENTCONDITIONS PASSED VIA OPTIONS JSON
         if "eventConditions" in ctx.obj['template']:
-            click.echo('oooooaaa')
             eventConditions = ctx.obj['template']['eventConditions']
         # OTHERWISE REQUEST EVENTS FUNCTIONS VIA CLI
         else:
