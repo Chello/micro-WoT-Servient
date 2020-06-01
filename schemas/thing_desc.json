@@ -215,7 +215,6 @@
             "title": "Operations",
             "minItems": 1,
             "maxItems": 1,
-
             "items": {
               "title": "Operations",
               "type": "object",
@@ -322,8 +321,8 @@
         "headerTemplate": "{{self.actionName}}",
         "title": "Thing action",
         "required": [
-          "actionName",
           "forms",
+          "actionName",
           "useWS",
           "body",
           "safe",
@@ -332,7 +331,7 @@
         "properties": {
           "actionName": {
             "type": "string",
-            "minLenght": 1,
+            "minLength": 1,
             "title": "Action name"
           },
           "forms": {
@@ -461,12 +460,12 @@
             "type": "array",
             "title": "Action meta types",
             "items": {
-              "title":"Specify meta-type",
+              "title": "Specify meta-type",
               "type": "string"
             }
           },
           "title": {
-            "title":"Action title",
+            "title": "Action title",
             "type": "string"
           },
           "description": {
@@ -557,7 +556,6 @@
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
-            
             "items": {
               "type": "string",
               "title": "Trigger for this event",
@@ -575,7 +573,7 @@
           },
           "condition": {
             "type": "string",
-            "minLenght": 1,
+            "minLength": 1,
             "title": "Condition when event will occur",
             "description": "Must be a boolean statement. Must NOT contain 'if' or brackets"
           },
@@ -588,7 +586,12 @@
             },
             "items": {
               "type": "object",
-              "required":["subscriptionName", "type", "value"],
+              "headerTemplate": "{{self.subscriptionName}}",
+              "required": [
+                "subscriptionName",
+                "type",
+                "value"
+              ],
               "properties": {
                 "subscriptionName": {
                   "type": "string",
@@ -597,7 +600,7 @@
                 },
                 "type": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Subscription type",
                   "enum": [
                     "boolean",
@@ -611,7 +614,7 @@
                 },
                 "value": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Value for subscription schema",
                   "description": "It should be a value compatible with the type specified before"
                 }
@@ -627,16 +630,21 @@
             },
             "items": {
               "type": "object",
-              "required":["dataName", "type", "value"],
+              "headerTemplate": "{{self.datatName}}",
+              "required": [
+                "dataName",
+                "type",
+                "value"
+              ],
               "properties": {
                 "dataName": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Event data name"
                 },
                 "type": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Event subscription type",
                   "enum": [
                     "boolean",
@@ -650,7 +658,7 @@
                 },
                 "value": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Value for data schema",
                   "description": "It should be a value compatible with the type specified before"
                 }
@@ -666,16 +674,21 @@
             },
             "items": {
               "type": "object",
-              "required":["cancellationName", "type", "value"],
+              "headerTemplate": "{{self.cancellationName}}",
+              "required": [
+                "cancellationName",
+                "type",
+                "value"
+              ],
               "properties": {
                 "cancellationName": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Event cancellation name"
                 },
                 "type": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Event cancellation type",
                   "enum": [
                     "boolean",
@@ -689,9 +702,9 @@
                 },
                 "value": {
                   "type": "string",
-                  "minLenght": 1,
+                  "minLength": 1,
                   "title": "Value for cancellation schema",
-                  "description":"It should be a value compatible with the type specified before"
+                  "description": "It should be a value compatible with the type specified before"
                 }
               }
             }
@@ -699,6 +712,9 @@
           "@type": {
             "type": "array",
             "title": "Property meta-type",
+            "options": {
+              "collapsed": true 
+            },
             "items": {
               "type": "string"
             }

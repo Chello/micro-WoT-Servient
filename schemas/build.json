@@ -1,57 +1,66 @@
 {
-    "title": "Build",
-    "type": "object",
-    "id": "build",
-    "required": ["ssid", "password", "portserver", "portsocket", "libraries"],
-    "properties": {
-      "ssid": {
-        "type": "string",
-        "description": "Network SSID to which the Embedded-System will connect",
-        "minLength": 4,
-        "default": "asdf"
+  "title": "Build",
+  "type": "object",
+  "id": "build",
+  "required": [
+    "ssid",
+    "password",
+    "portserver",
+    "portsocket",
+    "libraries"
+  ],
+  "properties": {
+    "ssid": {
+      "type": "string",
+      "title": "Network name",
+      "description": "Network SSID to which the Embedded-System will connect",
+      "minLength": 4
+    },
+    "password": {
+      "type": "string",
+      "format": "password",
+      "title": "Network password",
+      "description": "If network has no password, leave the field blank.",
+      "default": ""
+    },
+    "portserver": {
+      "type": "string",
+      "title": "WebServer port",
+      "pattern": "[0-9]",
+      "default": "80"
+    },
+    "portsocket": {
+      "type": "string",
+      "title": "WebSocket port",
+      "pattern": "[0-9]",
+      "default": "80"
+    },
+    "libraries": {
+      "type": "array",
+      "format": "table",
+      "title": "Arduino libraries",
+      "description": "",
+      "uniqueItems": true,
+      "items": {
+        "title": "Libraries",
+        "type": "array"
       },
-      "password": {
-          "type": "string",
-          "description": "Network password",
-          "default": ""
+      "options": {
+        "collapsed": true
+      }
+    },
+    "constants": {
+      "type": "array",
+      "format": "table",
+      "title": "Additional constants",
+      "uniqueItems": true,
+      "items": {
+        "title": "constants",
+        "type": "array"
       },
-      "portserver": {
-          "type": "string",
-          "description": "WebServer port",
-          "pattern": "[0-9]",
-          "default": "80"
-      },
-      "portsocket": {
-          "type": "string",
-          "description": "WebSocket port",
-          "pattern": "[0-9]",
-          "default": "80"
-      },
-      "libraries": {
-        "type": "array",
-        "format": "table",
-        "description": "Additional Arduino libraries",
-        "uniqueItems": true,
-        "items": {
-          "title": "libraries",
-          "type": "array"
-        },
-        "options": {
-          "collapsed": true
-        }
-      },
-      "constants": {
-        "type": "array",
-        "format": "table",
-        "description": "Additional constants",
-        "uniqueItems": true,
-        "items": {
-          "title": "constants",
-          "type": "array"
-        },
-        "options": {
-          "collapsed": true
-        }
+      "options": {
+        "collapsed": true
       }
     }
+  }
 }

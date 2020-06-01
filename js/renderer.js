@@ -74,6 +74,8 @@ var composeTD = function() {
     //check if thing using websocket
     if (td["useWS"]) {
         td["forms"][1] = td["forms"][0]
+        //delete useWS 
+        td["useWS"] = undefined;
     }
 
     if (td["properties"]) {
