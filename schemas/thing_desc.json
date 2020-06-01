@@ -630,7 +630,7 @@
             },
             "items": {
               "type": "object",
-              "headerTemplate": "{{self.datatName}}",
+              "headerTemplate": "{{self.dataName}}",
               "required": [
                 "dataName",
                 "type",
