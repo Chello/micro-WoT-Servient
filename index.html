@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="node_modules/xterm/css/xterm.css" />
     <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="css/style.css">
     
     <title>Embedded WoT Servient</title>
   </head>
@@ -20,7 +21,34 @@
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
   -->
+  
+  <!-- <div id="header">
     
+  </div> -->
+
+  <div id="content">
+    <div id="leftbar">
+      <div id='editor_holder'></div>
+    </div>
+    
+    <div id="rightbar">
+      <div id='build_holder'></div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <label id="target_board">Choose target board:</label>
+    <select name="board" id="board">
+      <option value="esp32.txt">ESP32</option>
+      <option value="esp8266.txt">ESP8266</option>
+    </select>
+    <button id="submit_button">Build, compile and flash</button>
+    <div id='terminal_holder'></div>
+  </div>
+
+
+<!-- 
+  <div class='fixed-top' id="editor">
     Choose target board: 
     <select name="board" id="board">
       <option value="esp32.txt">ESP32</option>
@@ -31,12 +59,12 @@
     <div id='test_holder'></div>
 
     <div id='build_holder'></div>
+  </div>
     
-    
-    <!-- <div class="fixed-bottom"> -->
+    <div class="fixed-bottom">
       <button id="submit_button">Compile and build</button>
       <div id='terminal_holder'></div>
-    <!-- </div> -->
+    </div> -->
 
     <!-- You can also require other files to run in this process -->
     <script>window.$ = window.jQuery = require('jquery');</script>
@@ -48,6 +76,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
     -->
     <script src="node_modules/xterm/lib/xterm.js"></script>
+    <!-- <script src="node_modules/xterm-addon-fit/src/FitAddon.ts"></script> -->
     <script src="./node_modules/@json-editor/json-editor/dist/jsoneditor.js"></script>
     
   </body>

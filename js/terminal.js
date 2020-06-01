@@ -2,6 +2,7 @@ var CustomTerminal = function () {
 
     this.terminal = new Terminal();
     this.terminal.open(document.getElementById('terminal_holder'));
+    this.terminal.setOption('fontSize', 10)
     this.terminal.write('WoTServient$ ');
 
     //handle stdin
