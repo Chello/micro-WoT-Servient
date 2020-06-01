@@ -170,7 +170,9 @@ var composeTD = function() {
             td['events'][name] = element;
             //check if event using websocket
             if (td["events"][name]["useWS"]) {
-                td["events"][name]["forms"][1] = td["events"][name]["forms"][0]
+                td["events"][name]["forms"][1] = td["events"][name]["forms"][0];
+                //delete useWS
+                td["events"][name]["useWS"] = undefined;
             }
 
             eventCurrentCondition = {
@@ -178,7 +180,7 @@ var composeTD = function() {
                 "actions": element.actionsTriggered
             }
 
-            //if subscription are set
+            //if subscription is set
             if (td['events'][name]['subscription']) {
                 var arrSubscription = td['events'][name]['subscription'];
                 td['events'][name]['subscription'] = {};
@@ -186,10 +188,12 @@ var composeTD = function() {
                 arrSubscription.forEach(element => { //foreach subscription provided
                     var subscriptionName = element.subscriptionName
                     td['events'][name]['subscription'][subscriptionName] = element;
+                    //delete subscriptionName
+                    td['events'][name]['subscription'][subscriptionName]['subscriptionName'] = undefined;
                 });
             }
 
-            //if data are set
+            //if data is set
             if (td['events'][name]['data']) {
                 var arrData = td['events'][name]['data'];
                 td['events'][name]['data'] = {};
@@ -197,10 +201,12 @@ var composeTD = function() {
                 arrData.forEach(element => { //foreach data provided
                     var dataName = element.dataName
                     td['events'][name]['data'][dataName] = element;
+                    //delete dataName
+                    td['events'][name]['data'][dataName]['dataName'] = undefined;
                 });
             }
 
-            //if cancellation are set
+            //if cancellation is set
             if (td['events'][name]['cancellation']) {
                 var arrCancellation = td['events'][name]['cancellation'];
                 td['events'][name]['cancellation'] = {};
@@ -208,6 +214,8 @@ var composeTD = function() {
                 arrCancellation.forEach(element => { //foreach cancellation provided
                     var cancellationName = element.cancellationName
                     td['events'][name]['cancellation'][cancellationName] = element;
+                    //delete cancellationName
+                    td['events'][name]['cancellation'][cancellationName]['cancellationName'] = undefined;
                 });
             }
 
