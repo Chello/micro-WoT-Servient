@@ -16,15 +16,13 @@
       "type": "string",
       "title": "Thing title",
       "description": "Title of the Thing",
-      "minLength": 4,
-      "default": "asdf"
+      "minLength": 2
     },
     "id": {
       "type": "string",
       "title": "Thing URI",
       "description": "URI of the Thing",
-      "minLength": 4,
-      "default": "asdf"
+      "minLength": 2
     },
     "@context": {
       "title": "Thing context",
@@ -126,7 +124,8 @@
     "useWS": {
       "type": "boolean",
       "title": "Is Thing using WebSocket?",
-      "format": "checkbox"
+      "format": "checkbox",
+      "default": true
     },
     "description": {
       "type": "string",
@@ -193,6 +192,7 @@
       },
       "items": {
         "type": "object",
+        "title": "Thing property",
         "headerTemplate": "{{self.propertyName}}",
         "required": [
           "propertyName",
@@ -259,7 +259,8 @@
           "useWS": {
             "type": "boolean",
             "title": "Is property using WebSocket?",
-            "format": "checkbox"
+            "format": "checkbox",
+            "default": true
           },
           "type": {
             "title": "Property type",
@@ -319,6 +320,7 @@
       "items": {
         "type": "object",
         "headerTemplate": "{{self.actionName}}",
+        "title": "Thing action",
         "required": [
           "actionName",
           "forms",
@@ -377,7 +379,8 @@
           "useWS": {
             "type": "boolean",
             "title": "Is property using WebSocket?",
-            "format": "checkbox"
+            "format": "checkbox",
+            "default": true
           },
           "input": {
             "type": "array",
@@ -482,8 +485,9 @@
           "forms",
           "useWS"
         ],
+        "headerTemplate": "{{self.eventName}}",
         "type": "object",
-        "title": "Thing events",
+        "title": "Thing event",
         "properties": {
           "eventName": {
             "title": "Event name",
@@ -540,7 +544,8 @@
           "useWS": {
             "type": "boolean",
             "title": "Is event using WebSocket?",
-            "format": "checkbox"
+            "format": "checkbox",
+            "default": true
           },
           "actionsTriggered": {
             "type": "array",
