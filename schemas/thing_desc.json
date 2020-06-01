@@ -105,7 +105,7 @@
             "type": "array",
             "format": "categories",
             "name": "operations",
-            "description": "Operation supported by the Thing",
+            "description": "Operations supported by the Thing. You can choose one or more of them.",
             "uniqueItems": true,
             "minItems": 1,
             "items": {
@@ -156,13 +156,13 @@
       "title": "Thing modification date"
     },
     "links": {
+      "type": "array",
+      "title": "Thing links",
       "options": {
         "collapsed": true
       },
-      "type": "array",
-      "title": "Links",
-      "headerTemplate": "Link {{i}}",
       "items": {
+        "headerTemplate": "Link {{i}}",
         "type": "object",
         "properties": {
           "href": {
@@ -206,6 +206,7 @@
         "properties": {
           "propertyName": {
             "type": "string",
+            "minLength": 1,
             "title": "Property name"
           },
           "forms": {
@@ -242,10 +243,10 @@
                   "type": "array",
                   "format": "categories",
                   "name": "operations",
-                  "description": "Operation supported by the property",
+                  "description": "Operations supported by the property. You can choose one or more of them.",
                   "uniqueItems": true,
-                  "minItems": 1,
                   "items": {
+                    "minItems": 1,
                     "type": "string",
                     "enum": [
                       "readproperty",
@@ -312,7 +313,6 @@
     "actions": {
       "type": "array",
       "name": "actions",
-      "id": "actions",
       "title": "Thing actions",
       "options": {
         "collapsed": true
@@ -332,6 +332,7 @@
         "properties": {
           "actionName": {
             "type": "string",
+            "minLenght": 1,
             "title": "Action name"
           },
           "forms": {
@@ -399,6 +400,7 @@
               "properties": {
                 "inputName": {
                   "title": "Input name",
+                  "minLength": 1,
                   "type": "string"
                 },
                 "type": {
@@ -444,6 +446,7 @@
             "title": "Action function",
             "type": "string",
             "format": "textarea",
+            "minLength": 1,
             "description": "Body of the function for current action"
           },
           "safe": {
@@ -477,7 +480,13 @@
       "type": "array",
       "name": "events",
       "title": "Thing events",
+      "options": {
+        "collapsed": true
+      },
       "items": {
+        "type": "object",
+        "headerTemplate": "{{self.eventName}}",
+        "title": "Thing event",
         "required": [
           "eventName",
           "condition",
@@ -485,13 +494,11 @@
           "forms",
           "useWS"
         ],
-        "headerTemplate": "{{self.eventName}}",
-        "type": "object",
-        "title": "Thing event",
         "properties": {
           "eventName": {
-            "title": "Event name",
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "title": "Event name"
           },
           "forms": {
             "type": "array",
@@ -505,8 +512,7 @@
               "required": [
                 "op",
                 "contentType",
-                "href",
-                "useWS"
+                "href"
               ],
               "properties": {
                 "contentType": {
@@ -527,11 +533,12 @@
                   "type": "array",
                   "format": "categories",
                   "name": "operations",
-                  "description": "Operation supported by the event",
+                  "description": "Operations supported by the event. You can choose one or more of them.",
                   "uniqueItems": true,
                   "minItems": 1,
                   "items": {
                     "type": "string",
+                    "minLength": 1,
                     "enum": [
                       "subscribeevent",
                       "unsubscribeevent"
@@ -567,24 +574,30 @@
             }
           },
           "condition": {
-            "title": "Condition when event will occur",
             "type": "string",
+            "minLenght": 1,
+            "title": "Condition when event will occur",
             "description": "Must be a boolean statement. Must NOT contain 'if' or brackets"
           },
           "subscription": {
             "type": "array",
             "title": "Event subscription schema",
             "uniqueItems": true,
+            "options": {
+              "collapsed": true
+            },
             "items": {
               "type": "object",
               "required":["subscriptionName", "type", "value"],
               "properties": {
                 "subscriptionName": {
-                  "title": "Subscription name",
-                  "type": "string"
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Subscription name"
                 },
                 "type": {
                   "type": "string",
+                  "minLenght": 1,
                   "title": "Subscription type",
                   "enum": [
                     "boolean",
@@ -597,8 +610,10 @@
                   ]
                 },
                 "value": {
+                  "type": "string",
+                  "minLenght": 1,
                   "title": "Value for subscription schema",
-                  "type": "string"
+                  "description": "It should be a value compatible with the type specified before"
                 }
               }
             }
@@ -607,16 +622,21 @@
             "type": "array",
             "title": "Event data schema",
             "uniqueItems": true,
+            "options": {
+              "collapsed": true
+            },
             "items": {
               "type": "object",
               "required":["dataName", "type", "value"],
               "properties": {
                 "dataName": {
-                  "title": "Event data name",
-                  "type": "string"
+                  "type": "string",
+                  "minLenght": 1,
+                  "title": "Event data name"
                 },
                 "type": {
                   "type": "string",
+                  "minLenght": 1,
                   "title": "Event subscription type",
                   "enum": [
                     "boolean",
@@ -629,8 +649,10 @@
                   ]
                 },
                 "value": {
+                  "type": "string",
+                  "minLenght": 1,
                   "title": "Value for data schema",
-                  "type": "string"
+                  "description": "It should be a value compatible with the type specified before"
                 }
               }
             }
@@ -639,16 +661,21 @@
             "type": "array",
             "title": "Event cancellation schema",
             "uniqueItems": true,
+            "options": {
+              "collapsed": true
+            },
             "items": {
               "type": "object",
               "required":["cancellationName", "type", "value"],
               "properties": {
                 "cancellationName": {
-                  "title": "Event cancellation name",
-                  "type": "string"
+                  "type": "string",
+                  "minLenght": 1,
+                  "title": "Event cancellation name"
                 },
                 "type": {
                   "type": "string",
+                  "minLenght": 1,
                   "title": "Event cancellation type",
                   "enum": [
                     "boolean",
@@ -661,8 +688,10 @@
                   ]
                 },
                 "value": {
+                  "type": "string",
+                  "minLenght": 1,
                   "title": "Value for cancellation schema",
-                  "type": "string"
+                  "description":"It should be a value compatible with the type specified before"
                 }
               }
             }

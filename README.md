@@ -1,45 +1,71 @@
-# electron-quick-start
+# WoT-microcontroller-servient-gui
 
-**Clone and run for a quick way to see Electron in action.**
+> WoT-microcontroller-servient is an implementation of W3C Web of Things Servient for embedded systems. This module allows users to: define W3C WoT Thing Descriptions, generate scripting files (sketches) in Embedded-C programming language executable by microcontrollers to expose Things, compile and flash these sketches.
 
-This is a minimal Electron application based on the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start) within the Electron documentation.
+## How does it work?
 
-**Use this app along with the [Electron API Demos](https://electronjs.org/#get-started) app for API code examples to help you get started.**
+This module provides an Electron-made GUI. The GUI uses the [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can insert all the metadata included in W3C WoT Thing Descriptions and store them in a JSON Thing Description file. 
+The project can also build a scripting file including the Thing logic. This scripting file is executed by microcontrollers and it has the .ino extension.
+This project can also compile the built .ino project and upload to the prototipying board, calling the WoTServient CLI and showing it to a built-in terminal.
 
-A basic Electron application needs just these files:
+The **only supported** embedded systems are NodeMCU ESP8266 and ESP32. 
 
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-- `main.js` - Starts the app and creates a browser window to render HTML. This is the app's **main process**.
-- `index.html` - A web page to render. This is the app's **renderer process**.
+## Prerequisites
+This package is only supported by Linux systems.
 
-You can learn more about each of these components within the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start).
+**Linux**
+- Python v3.6.x
+- Nodejs v8.10.0
+- npm (tested with version 3.5.x)
+- pip3 Python package manager
+- A proper C/C++ compiler toolchain, like GCC
 
-## To Use
+## Usage
+### Clone and install
+Clone the repository:
 
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+```shell
+git clone git@github.com:UniBO-PRISMLab/WoT-microcontroller-servient.git
+```
 
-```bash
-# Clone this repository
-git clone https://github.com/electron/electron-quick-start
-# Go into the repository
-cd electron-quick-start
-# Install dependencies
+Go into the repository:
+
+```shell
+cd WoT-microcontroller-servient
+```
+Install the package and all dependencies:
+
+```shell
+pip install .
 npm install
-# Run the app
+```
+
+It is **recomended** to install and use the package inside a virtual environment.
+
+### Start application
+
+The application can be started with the following command:
+
+```shell
 npm start
 ```
 
-Note: If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+### Implemented/supported features
 
-## Resources for Learning Electron
+**Scripting API**
 
-- [electronjs.org/docs](https://electronjs.org/docs) - all of Electron's documentation
-- [electronjs.org/community#boilerplates](https://electronjs.org/community#boilerplates) - sample starter apps created by the community
-- [electron/electron-quick-start](https://github.com/electron/electron-quick-start) - a very basic starter Electron app
-- [electron/simple-samples](https://github.com/electron/simple-samples) - small applications with ideas for taking them further
-- [electron/electron-api-demos](https://github.com/electron/electron-api-demos) - an Electron app that teaches you how to use Electron
-- [hokein/electron-sample-apps](https://github.com/hokein/electron-sample-apps) - small demo apps for the various Electron APIs
+- RESTful API :heavy_check_mark:
+
+**Protocol Support**
+
+- HTTP :heavy_check_mark:
+- WebSocket :heavy_check_mark:
+
+**MediaType Support**
+
+- JSON :heavy_check_mark:
 
 ## License
+WoT-microcontroller-servient-GUI is released under the MIT License.
 
-[CC0 1.0 (Public Domain)](LICENSE.md)
+

@@ -576,7 +576,7 @@ DynamicJsonDocument p_doc(
     {{ capacity['properties'] }});
 {% endif %}
 {% if global['isWS'] %}
-# document to handle Interaction Affordances WebSocket requests
+// document to handle Interaction Affordances WebSocket requests
 DynamicJsonDocument ia_doc(
     {%- do capacity.update({'actions':0}) -%}
     {%- for action in template['actions'] -%}
@@ -585,15 +585,15 @@ DynamicJsonDocument ia_doc(
     {%- endif -%}
     {%- endfor -%}
     {{ capacity['actions'] * 1000 }});
-# document to store the ip addresses of clients connected to WebSocket channel for Interaction Affordances requests   
+// document to store the ip addresses of clients connected to WebSocket channel for Interaction Affordances requests   
 DynamicJsonDocument ipia_doc(2000);
 JsonArray ipia_arr;
 {% endif %}
 {% if template['numevents'] > 0 %}
-# document to handle Events WebSocket requests
+// document to handle Events WebSocket requests
 DynamicJsonDocument e_doc({{ template['numevents'] * 1000 }});
 {% if global['isSubscription'] or global['isData'] or global['isCancellation'] -%}
-# document to handle Events Schemas
+// document to handle Events Schemas
 DynamicJsonDocument es_doc(
     {%- do capacity.update({'events':0}) -%}
     {%- for event in template['events'] -%}
@@ -610,7 +610,7 @@ DynamicJsonDocument es_doc(
 {% else %}
 DynamicJsonDocument es_doc(20);
 {% endif %}
-# document to store the ip addresses of clients connected to WebSocket channel for Events requests   
+// document to store the ip addresses of clients connected to WebSocket channel for Events requests   
 DynamicJsonDocument ipe_doc(2000);
 JsonArray ipe_arr;
 {% endif %}
