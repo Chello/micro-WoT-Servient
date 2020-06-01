@@ -62,14 +62,8 @@ window.onload = function() {
     
 var composeTD = function() {
     //clone array
-    //td = editor.getValue().map((x) => x);
-    // let td = Object.assign({}, editor.getValue());
-    // let options = Object.assign({}, builder.getValue());
-    //properties arr becomes object of objects
-
     let td = JSON.parse(JSON.stringify(editor.getValue()))
     let options = JSON.parse(JSON.stringify(builder.getValue()))
-
 
     //check if thing using websocket
     if (td["useWS"]) {
@@ -82,14 +76,19 @@ var composeTD = function() {
         var propArr = td['properties'];
         td['properties'] = {};
         
-        propArr.forEach(element => {
+        propArr.forEach(element => {//foreach property
             var name = element.propertyName
             td['properties'][name] = element;
 
             //check if property using websocket
             if (td["properties"][name]["useWS"]) {
                 td["properties"][name]["forms"][1] = td["properties"][name]["forms"][0]
+                //delete useWS
+                td["properties"][name]["useWS"] = undefined;
             }
+
+            //delete propertyName 
+            td['properties'][name]['propertyName'] = undefined;
         });
     }
 
