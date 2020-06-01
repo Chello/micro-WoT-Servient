@@ -109,6 +109,8 @@ var composeTD = function() {
             
             if (td["actions"][name]["useWS"]) {
                 td["actions"][name]["forms"][1] = td["actions"][name]["forms"][0]
+                //delete useWS
+                td["actions"][name]["useWS"] = undefined;
             }
 
             //create array actionFunctions
@@ -139,8 +141,15 @@ var composeTD = function() {
                         "name": element.inputName,
                         "type": element.type
                     });
+
+                    //delete inputName element
+                    td['actions'][name]['input'][inputName]['inputName'] = undefined;
                 });
             }
+            //delete actionName field
+            td['actions'][name]['actionName'] = undefined;
+            //delete body field
+            td['actions'][name]['body'] = undefined;
 
             options.actionFunctions.push(actionCurrentFunction);
         });
