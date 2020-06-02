@@ -2,15 +2,6 @@ const fs = require('fs');
 var term = {};
 
 window.onload = function() {
-
-    JSONEditor.defaults.callbacks.template = {
-        "filterFun":(jseditor, e) => {
-            console.log(jseditor)
-            console.log(e)
-            return e.item.text
-        },
-    }
-
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -59,7 +50,11 @@ window.onload = function() {
 
     term = new CustomTerminal();
 };
-    
+
+/**
+ * This function composes the json variables for both thing description and thing options.
+ * This object must be saved and passed to embeddedWoTServient python script for building the .ino code
+ */
 var composeTD = function() {
     //clone array
     let td = JSON.parse(JSON.stringify(editor.getValue()))
@@ -226,8 +221,10 @@ var composeTD = function() {
 
 }
 
+/**
+ * Action triggered when submit-button is clicked
+ */
 $('#submit_button').on('click', function() {
-
     console.log(editor.validate() /*? "true": "false"*/)
     console.log(builder.validate() /*? "true": "false"*/)
 
@@ -238,21 +235,52 @@ $('#submit_button').on('click', function() {
 
     // thing_prop = composeTD();
     // build_prop = builder.getValue();
-    var [thing_prop, build_prop] = composeTD();
-    console.log(thing_prop)
+    // var [thing_prop, build_prop] = composeTD();
+    // console.log(thing_prop)
     // console.log(editor.getValue());
     // console.log(builder.getValue());
 
-    var thingName = thing_prop['title'].toLowerCase();
+    var thingName = editor.getValue()['title'];
     console.log(thingName)
 
-    //create dir
-    fs.mkdir(path.join(__dirname, thingName), (err) => { 
-        if (err) { 
+    //generate directory path name
+    var dirPath = path.join(__dirname, thingName);
+    //if does not exist directory
+    if (!fs.existsSync(dirPath)) {
+        //create it
+        createThingFiles(dirPath, thingName);
+    } else {
+        //else ask if wanted to overwrite   
+        if (confirm("Thing "+dirPath+" already exists! Do you want to overwrite it?")) {
+            createThingFiles(dirPath, thingName);
+        }
+    }
+    
+});
+
+/**
+ * Creates thing directory. 
+ * If creation success, then creates files
+ * @param {String} dirPath the path that will contain files
+ * @param {String} thingName the thing title
+ */
+var createThingFiles = function(dirPath, thingName) {
+    fs.mkdir(dirPath, (err) => { 
+        if (err && err.code != "EEXIST") { 
             return console.error(err); 
         } 
         console.log('Directory created successfully!'); 
+        createTDFiles(thingName);
     }); 
+}
+
+/**
+ * Creates thing files and then launches py builder
+ * @param {String} thingName the name of the thing
+ */
+var createTDFiles = function(thingName) {
+    //generate
+    var [thing_prop, build_prop] = composeTD();
     //generate file names
     var tdFile = path.join(__dirname, thingName + '/' + thingName + '.json');
     var optFile = path.join(__dirname, thingName + '/opt_' + thingName + '.json');
@@ -281,4 +309,4 @@ $('#submit_button').on('click', function() {
                     ' -o ' + optFile +
                     ' -t ' + tmplFile;
     term.exec(exec_str)
-});
+}
