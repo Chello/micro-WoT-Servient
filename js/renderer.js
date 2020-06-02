@@ -225,11 +225,21 @@ var composeTD = function() {
  * Action triggered when submit-button is clicked
  */
 $('#submit_button').on('click', function() {
-    console.log(editor.validate() /*? "true": "false"*/)
-    console.log(builder.validate() /*? "true": "false"*/)
+    var editorErrors = editor.validate();
+    var builderErrors = builder.validate();
 
-    if (editor.validate().length != 0) {
-        alert("Some errors found in form. Please check")
+    if (editorErrors.length || builderErrors.length) {
+        alert("Some errors found in forms. Please check");
+        if (editorErrors.length) {
+            term.write(
+                "\n\nErrors found in Thing description:\n" + JSON.stringify(editorErrors, 
+                ["path","message"], ' '));
+        }
+        if (builderErrors.length) {
+            term.write(
+                "\n\nErrors found in builder description:\n" + JSON.stringify(builderErrors, 
+                ["path","message"], ' '));
+        }
         return;
     }
 

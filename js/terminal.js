@@ -1,6 +1,8 @@
 var CustomTerminal = function () { 
 
-    this.terminal = new Terminal();
+    this.terminal = new Terminal(options = {
+        cols: 150
+    });
     this.terminal.open(document.getElementById('terminal_holder'));
     this.terminal.setOption('fontSize', 10)
     this.terminal.write('WoTServient$ ');
@@ -19,6 +21,13 @@ var CustomTerminal = function () {
             this.stdLine = this.stdLine.slice(0, -1);
         }
     })
+}
+
+CustomTerminal.prototype.write = function(message) {
+    message.toString().split('\n').forEach(element => {
+        this.terminal.writeln(element);
+    });
+    //this.terminal.writeln(message);
 }
 
 CustomTerminal.prototype.exec = function(command) {
