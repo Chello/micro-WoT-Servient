@@ -44,6 +44,8 @@ window.onload = function() {
         show_opt_in: true,
         //set theme
         theme: 'bootstrap4',
+        //show errors in editor
+        show_errors: "always",
         //set icon library
         iconlib: "fontawesome4"
     });
