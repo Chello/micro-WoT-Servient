@@ -230,6 +230,8 @@ var composeTD = function() {
  * Action triggered when submit-button is clicked
  */
 $('#submit_button').on('click', function() {
+    hide_show_terminal(true);
+    
     var editorErrors = editor.validate();
     var builderErrors = builder.validate();
 
@@ -248,13 +250,6 @@ $('#submit_button').on('click', function() {
         return;
     }
 
-    // thing_prop = composeTD();
-    // build_prop = builder.getValue();
-    // var [thing_prop, build_prop] = composeTD();
-    // console.log(thing_prop)
-    // console.log(editor.getValue());
-    // console.log(builder.getValue());
-
     var thingName = editor.getValue()['title'];
     console.log(thingName)
 
@@ -270,8 +265,17 @@ $('#submit_button').on('click', function() {
             createThingFiles(dirPath, thingName);
         }
     }
-    
 });
+
+$("#hide_show").on('click', function() {
+    hide_show_terminal();
+})
+
+var hide_show_terminal = function(force) {
+    if ($('#terminal_holder').is(":hidden") || force)
+        $('#terminal_holder').show();
+    else $('#terminal_holder').hide();
+}
 
 /**
  * Creates thing directory. 

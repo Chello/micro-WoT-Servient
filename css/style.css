@@ -1,5 +1,6 @@
 body{
     padding: 0;
+    overflow-y: hidden;
 }
 
 #target_board {
@@ -10,7 +11,7 @@ body{
     position: absolute;
     width: 100%;
     top: 0px;
-    bottom: 300px;
+    /* bottom: 30vh; */
 }
 
 #leftbar{
@@ -31,8 +32,17 @@ body{
 #footer{
     background-color:#777;
     position: absolute;
-    resize: both;
-    height: 300px;
+    /* height: 30vh; */
     width: 100%;
     bottom:0;
+}
+
+#terminal_holder {
+    height: 30vh;
+}
+
+#hide_show {
+    position: absolute;
+    right: 10px;
+    top: 5px;
 }
