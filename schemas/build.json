@@ -42,8 +42,9 @@
       "description": "",
       "uniqueItems": true,
       "items": {
-        "title": "Libraries",
-        "type": "array"
+        "title": "Arduino libraries",
+        "description": "Libraries in format 'library_name'.h",
+        "type": "string"
       },
       "options": {
         "collapsed": true
@@ -55,12 +56,50 @@
       "title": "Additional constants",
       "uniqueItems": true,
       "items": {
-        "title": "constants",
-        "type": "array"
+        "title": "Constants",
+        "type": "string"
       },
       "options": {
         "collapsed": true
       }
+    },
+    "globals": {
+      "type": "array",
+      "format": "table",
+      "title":"Additional global variables",
+      "items": {
+        "type": "object",
+        "title": "Global variable",
+        "properties": {
+          "name": {
+            "title": "Variable name",
+            "type": "string"
+          },
+          "type": {
+            "title": "Variable type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Variable value",
+            "type": "string"
+          }
+        }
+      },
+      "options": {
+        "collapsed": true
+      }
+    },
+    "setup": {
+      "type": "string",
+      "format": "textarea",
+      "title": "Setup code",
+      "description": "Code will be added to setup() function"
+    },
+    "loop": {
+      "type": "string",
+      "format": "textarea",
+      "title": "Loop code",
+      "description": "Code will be added to loop() function"
     }
   }
 }
