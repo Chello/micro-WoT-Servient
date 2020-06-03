@@ -15,7 +15,7 @@ This package is only supported by Linux systems.
 
 **Linux**
 - Python v3.6.x
-- Nodejs v8.10.0
+- Node v8.10.0 (tested and working also with 9.11.2 and 10.21.0)
 - npm (tested with version 3.5.x)
 - pip3 Python package manager
 - A proper C/C++ compiler toolchain, like GCC

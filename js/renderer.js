@@ -1,7 +1,10 @@
 const fs = require('fs');
 var term = {};
 
-window.onload = function() {
+$(document).ready(function() {
+
+    $('#footer').resizable();
+
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -51,7 +54,7 @@ window.onload = function() {
     });
 
     term = new CustomTerminal();
-};
+});
 
 /**
  * This function composes the json variables for both thing description and thing options.
