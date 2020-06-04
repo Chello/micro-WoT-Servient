@@ -25,13 +25,13 @@ This package is only supported by Linux systems.
 Clone the repository:
 
 ```shell
-git clone git@github.com:UniBO-PRISMLab/WoT-microcontroller-servient.git
+git clone https://github.com/Chello/WoT-microcontroller-servient-GUI.git
 ```
 
 Go into the repository:
 
 ```shell
-cd WoT-microcontroller-servient
+cd WoT-microcontroller-servient-GUI
 ```
 Install the package and all dependencies:
 
