@@ -4,7 +4,7 @@
 
 ## How does it work?
 
-This module provides an Electron-made GUI. The GUI uses the [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can insert all the metadata included in W3C WoT Thing Descriptions and store them in a JSON Thing Description file. 
+This module provides an Electron-made GUI. The GUI uses the [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can provide all the metadata included in W3C WoT Thing Descriptions via forms on GUI and store them in a JSON Thing Description file. 
 The project can also build a scripting file including the Thing logic. This scripting file is executed by microcontrollers and it has the .ino extension.
 This project can also compile the built .ino project and upload to the prototipying board, calling the WoTServient CLI and showing it to a built-in terminal.
 
@@ -15,7 +15,7 @@ This package is only supported by Linux systems.
 
 **Linux**
 - Python v3.6.x
-- Node v8.10.0 (tested and working also with 9.11.2 and 10.21.0)
+- Nodejs v8.10.0 (tested also with v9.11.2 and v10.21.0)
 - npm (tested with version 3.5.x)
 - pip3 Python package manager
 - A proper C/C++ compiler toolchain, like GCC
@@ -39,6 +39,8 @@ Install the package and all dependencies:
 pip install .
 npm install
 ```
+
+Depending of what you need, you have also to provide Arduino libraries (should be installed in default library directory, typically ```~/Arduino/libraries```)
 
 It is **recomended** to install and use the package inside a virtual environment.
 
