@@ -11,20 +11,20 @@ body{
     position: absolute;
     width: 100%;
     top: 0px;
-    /* bottom: 30vh; */
+    bottom: 300px;
 }
 
 #leftbar{
     background-color:#eee;
     position: absolute;
-    width: 620px;
+    width: 65vw;
     height: 100%;
     overflow:auto;
 }
 
 #rightbar{
     background-color:#eee;
-    padding-left: 620px;
+    padding-left: 65vw;
     height: 100%;
     overflow: auto;
 }
@@ -32,13 +32,13 @@ body{
 #footer{
     background-color:#777;
     position: absolute;
-    /* height: 30vh; */
+    height: 300px;
     width: 100%;
     bottom:0;
 }
 
 #terminal_holder {
-    height: 30vh;
+    height: 300px;
 }
 
 #hide_show {

@@ -272,9 +272,17 @@ $("#hide_show").on('click', function() {
 })
 
 var hide_show_terminal = function(force) {
-    if ($('#terminal_holder').is(":hidden") || force)
+    if ($('#terminal_holder').is(":hidden") || force) {
+        //show terminal
         $('#terminal_holder').show();
-    else $('#terminal_holder').hide();
+        $('#content').css("bottom", "300px");
+        $('#footer').css("height", "300px");
+    }
+    else {
+        $('#terminal_holder').hide();
+        $('#content').css("bottom", "30px");
+        $('#footer').css("height", "30px");
+    }
 }
 
 /**
