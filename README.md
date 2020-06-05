@@ -4,7 +4,7 @@
 
 ## How does it work?
 
-This module provides an Electron-made GUI. The GUI uses the [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can provide all the metadata included in W3C WoT Thing Descriptions via forms on GUI and store them in a JSON Thing Description file. 
+This module provides an Electron-made GUI for [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can provide all the metadata included in W3C WoT Thing Descriptions via forms on GUI and store them in a JSON Thing Description file. 
 The project can also build a scripting file including the Thing logic. This scripting file is executed by microcontrollers and it has the .ino extension.
 This project can also compile the built .ino project and upload to the prototipying board, calling the WoTServient CLI and showing it to a built-in terminal.
 

@@ -28,5 +28,5 @@ RUN npm install \
 
 # EXPOSE 8080
 
-ENTRYPOINT [ "/bin/sh" ]
-#CMD [ "npm", "start" ]
+#ENTRYPOINT [ "/bin/sh" ]
+CMD [ "npm", "start" ]
