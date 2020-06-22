@@ -33,7 +33,7 @@
       "type": "string",
       "title": "WebSocket port",
       "pattern": "[0-9]",
-      "default": "80"
+      "default": "81"
     },
     "libraries": {
       "type": "array",
