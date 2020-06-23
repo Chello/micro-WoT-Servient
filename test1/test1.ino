@@ -22,7 +22,7 @@ char longPollIP[16][16];
 int longPollRequestsNum = 0;
 
 void longPollHandler(AsyncWebServerRequest *req) {
-    Serial.printf("Entered in the longpoll handler\n");
+    // Serial.printf("Entered in the longpoll handler\n");
     int i = 0;
 
     // for (; i < 16; i++) {
@@ -31,20 +31,26 @@ void longPollHandler(AsyncWebServerRequest *req) {
     // Serial.println();
     // i = 0;
 
+    // int headers = req->headers();
+    // for(i=0;i<headers;i++){
+    //     AsyncWebHeader* h = req->getHeader(i);
+    //     Serial.printf("HEADER[%s]: %s\n", h->name().c_str(), h->value().c_str());
+    // }
+
     bool found = false;
     for(; i < longPollRequestsNum; i++){
         Serial.printf("\tHost #%d ", i );
-        Serial.printf("current host IP is %s, ", req->header("Host").c_str());
+        Serial.printf("current host IP is %s, ", req->client()->remoteIP().toString().c_str());
         Serial.printf("analyzing IP %s \n", longPollIP[i]);
-        if (req->host().equals(longPollIP[i])) {
+        if (req->client()->remoteIP().toString().equals(longPollIP[i])) {
             found = true;
-            Serial.printf("Longpoll host %s has returned\n", req->host().c_str());
+            Serial.printf("Longpoll host %s has returned\n", req->client()->remoteIP().toString().c_str());
             break;
         }
     }
     if (!found) {
         longPollRequestsNum++;
-        strcpy(longPollIP[i], req->host().c_str());
+        strcpy(longPollIP[i], req->client()->remoteIP().toString().c_str());
         Serial.printf("Connected longpoll host: %s\nNow there are %d hosts connected via longpoll\n", 
                         longPollIP[i], 
                         longPollRequestsNum);
@@ -61,6 +67,8 @@ void sendLongPollTXT(String txt) {
         Serial.printf("Handling request #%d\n", i);
         longPollRequests[i]->send(200, "application/ld+json", txt);
         longPollRequests[i] = NULL;
+        // longPollIP[i] = NULL;
+        strcpy(longPollIP[i], "");
     }
     longPollRequestsNum = 0;
 }
