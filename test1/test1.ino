@@ -1,4 +1,5 @@
 //#include <ESP32WebServer.h>
+
 #include <WebSocketsServer.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
@@ -14,6 +15,56 @@ String urlSocket = "";
 
 String thingName = "test1";
 String td = "";
+
+//START LONGPOLL DEFINITIONS
+AsyncWebServerRequest *longPollRequests[16];
+char longPollIP[16][16];
+int longPollRequestsNum = 0;
+
+void longPollHandler(AsyncWebServerRequest *req) {
+    Serial.printf("Entered in the longpoll handler\n");
+    int i = 0;
+
+    // for (; i < 16; i++) {
+    //     Serial.printf("%p ", longPollRequests[i]);
+    // }
+    // Serial.println();
+    // i = 0;
+
+    bool found = false;
+    for(; i < longPollRequestsNum; i++){
+        Serial.printf("\tHost #%d ", i );
+        Serial.printf("current host IP is %s, ", req->header("Host").c_str());
+        Serial.printf("analyzing IP %s \n", longPollIP[i]);
+        if (req->host().equals(longPollIP[i])) {
+            found = true;
+            Serial.printf("Longpoll host %s has returned\n", req->host().c_str());
+            break;
+        }
+    }
+    if (!found) {
+        longPollRequestsNum++;
+        strcpy(longPollIP[i], req->host().c_str());
+        Serial.printf("Connected longpoll host: %s\nNow there are %d hosts connected via longpoll\n", 
+                        longPollIP[i], 
+                        longPollRequestsNum);
+    }
+    Serial.printf("Adding new host at position #%d\n", i);
+    longPollRequests[i] = req;
+
+}
+
+void sendLongPollTXT(String txt) {
+    int i;
+    Serial.printf("There are %d longpoll pending hosts\n", longPollRequestsNum);
+    for(i = 0; i < longPollRequestsNum; i++) {
+        Serial.printf("Handling request #%d\n", i);
+        longPollRequests[i]->send(200, "application/ld+json", txt);
+        longPollRequests[i] = NULL;
+    }
+    longPollRequestsNum = 0;
+}
+//END LONGPOLL DEFINITIONS
 
 // document to handle Interaction Affordances WebSocket requests
 DynamicJsonDocument ia_doc(1000);
@@ -147,7 +198,7 @@ void requestHandler(AsyncWebServerRequest *req) {
     }
     if (req->url().equals(req5)) {
         Serial.println("Handeled request 5");
-        handleReq5(req);
+        handleReq6(req);
     }
     //if (req->url().equals(req6)) handleReq6(req);
 }
@@ -231,8 +282,7 @@ void handleReq5(AsyncWebServerRequest * req) {
 }
 
 void handleReq6(AsyncWebServerRequest * req) {
-    char* resp = "Method Not Allowed";
-    req->send(405, "text/plain", resp);
+    longPollHandler(req);
 }
 
 String request3() {
@@ -332,6 +382,7 @@ String request5(String body) {
                             if(!ae[j][event1_name].isNull() && ae[j][event1_name]) {
                                 Serial.printf("ws_msg ok to send %s\n", ws_msg);
                                 webSocket.sendTXT(ws_num, ws_msg);
+                                sendLongPollTXT(ws_msg);
                             }
                         }
                     }
