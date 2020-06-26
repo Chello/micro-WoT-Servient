@@ -18,11 +18,12 @@ String td = "";
 
 //START LONGPOLL DEFINITIONS
 AsyncWebServerRequest *longPollRequests[16];
+AsyncResponseStream *longPollResponse[16];
 char longPollIP[16][16];
 int longPollRequestsNum = 0;
 
 void longPollHandler(AsyncWebServerRequest *req) {
-    // Serial.printf("Entered in the longpoll handler\n");
+        // Serial.printf("Entered in the longpoll handler\n");
     int i = 0;
 
     // for (; i < 16; i++) {
@@ -37,6 +38,7 @@ void longPollHandler(AsyncWebServerRequest *req) {
     //     Serial.printf("HEADER[%s]: %s\n", h->name().c_str(), h->value().c_str());
     // }
 
+
     bool found = false;
     for(; i < longPollRequestsNum; i++){
         Serial.printf("\tHost #%d ", i );
@@ -44,7 +46,7 @@ void longPollHandler(AsyncWebServerRequest *req) {
         Serial.printf("analyzing IP %s \n", longPollIP[i]);
         if (req->client()->remoteIP().toString().equals(longPollIP[i])) {
             found = true;
-            Serial.printf("Longpoll host %s has returned\n", req->client()->remoteIP().toString().c_str());
+            Serial.printf("Longpoll host %s has came back!\n", req->client()->remoteIP().toString().c_str());
             break;
         }
     }
@@ -57,6 +59,8 @@ void longPollHandler(AsyncWebServerRequest *req) {
     }
     Serial.printf("Adding new host at position #%d\n", i);
     longPollRequests[i] = req;
+    //MGMT responses
+    longPollResponse[i] = req->beginResponseStream("application/ld+json");
 
 }
 
@@ -64,13 +68,40 @@ void sendLongPollTXT(String txt) {
     int i;
     Serial.printf("There are %d longpoll pending hosts\n", longPollRequestsNum);
     for(i = 0; i < longPollRequestsNum; i++) {
-        Serial.printf("Handling request #%d\n", i);
-        longPollRequests[i]->send(200, "application/ld+json", txt);
+        Serial.printf("Handling request #%d, ", i);
+        
+        //if (longPollRequests[i]->version() == 1 || longPollRequests[i]->version() == 0) {
+        if (isValidRequest(i)) {
+            longPollResponse[i]->print(txt);
+            longPollRequests[i]->send(longPollResponse[i]);
+            Serial.printf("request satisfied.\n");
+        } else {
+            Serial.printf("request expired, not sent.\n");
+        }
+        
         longPollRequests[i] = NULL;
         // longPollIP[i] = NULL;
         strcpy(longPollIP[i], "");
     }
     longPollRequestsNum = 0;
+}
+
+/**
+ * This function checks if the IP of the specified request index is a valid IP address.
+ * If not, means that the connection is dropped. 
+ * @param i the index of the request
+ * @return true if connection is valid, false otherwise
+ */
+bool isValidRequest(int i) {
+    // try {
+        Serial.printf("Checking if %s == %s ", 
+                        longPollRequests[i]->client()->remoteIP().toString().c_str(), 
+                        longPollIP[i]);//,
+                        // strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]));
+        return strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false;
+    // } catch (Exception ex) {
+    //     return false;
+    // }
 }
 //END LONGPOLL DEFINITIONS
 
@@ -118,6 +149,7 @@ String req2 = "/" + thingName;
 String req3 = "/" + thingName + "/all/properties";
 String req4 = "/" + thingName + "/properties/" + property1_name;
 String req5 = "/" + thingName + "/actions/" + action1_name;
+String req6 = "/" + thingName + "/events/" + event1_name;
 
 int ws_requestsNumber = 3;
 int ws_actionsNumber = 1;
@@ -170,13 +202,14 @@ void setup() {
     td = "{\"title\":\"test1\",\"id\":\"test1\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]}],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"integer\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento\":{\"eventName\":\"evento\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\",\"data\":{\"datas\":{\"type\":\"boolean\",\"value\":\"true\"},\"datassi\":{\"type\":\"string\",\"value\":\"pippo\"}}}}}";
 
     // Server requests
-    server.on("/", HTTP_GET, handleReq1);
-    // server.on(req1.c_str(),HTTP_GET,handleReq1);
-    server.on("/test1", HTTP_GET, requestHandler);
-    // server.on(req3.c_str(),HTTP_GET,handleReq3);
-    // server.on(req4.c_str(),HTTP_GET,handleReq4);
+    server.on(req6.c_str(),HTTP_GET,handleReq7);
+    server.on(req5.c_str(),HTTP_GET,handleReq6);
     server.on(req5.c_str(),HTTP_POST,handleReq5);
-    // server.on(req5.c_str(),HTTP_GET,handleReq6);
+    server.on(req4.c_str(),HTTP_GET,handleReq4);
+    server.on(req3.c_str(),HTTP_GET,handleReq3);
+    server.on(req2.c_str(), HTTP_GET, handleReq2);//req2
+    server.on(req1.c_str(), HTTP_GET, handleReq1);
+    // server.on(req1.c_str(),HTTP_GET,handleReq1);
 
     server.begin();
     webSocket.begin();
@@ -186,30 +219,30 @@ void setup() {
     Serial.println(urlServer);
 }
 
-void requestHandler(AsyncWebServerRequest *req) {
-    Serial.println("Opened requestHandler");
-    if (req->url().equals(req1)) {
-        Serial.println("Handeled request 1");
-        handleReq1(req);
-    }
-    if (req->url().equals(req2)) {
-        Serial.println("Handeled request 2");
-        handleReq2(req);
-    }
-    if (req->url().equals(req3)) {
-        Serial.println("Handeled request 3");
-        handleReq3(req);
-    }
-    if (req->url().equals(req4)) {
-        Serial.println("Handeled request 4");
-        handleReq4(req);
-    }
-    if (req->url().equals(req5)) {
-        Serial.println("Handeled request 5");
-        handleReq6(req);
-    }
-    //if (req->url().equals(req6)) handleReq6(req);
-}
+// void requestHandler(AsyncWebServerRequest *req) {
+//     Serial.println("Opened requestHandler");
+//     if (req->url().equals(req1)) {
+//         Serial.println("Handeled request 1");
+//         handleReq1(req);
+//     }
+//     if (req->url().equals(req2)) {
+//         Serial.println("Handeled request 2");
+//         handleReq2(req);
+//     }
+//     if (req->url().equals(req3)) {
+//         Serial.println("Handeled request 3");
+//         handleReq3(req);
+//     }
+//     if (req->url().equals(req4)) {
+//         Serial.println("Handeled request 4");
+//         handleReq4(req);
+//     }
+//     if (req->url().equals(req5)) {
+//         Serial.println("Handeled request 5");
+//         handleReq6(req);
+//     }
+//     //if (req->url().equals(req6)) handleReq6(req);
+// }
 
 
 void loop() {
@@ -289,7 +322,12 @@ void handleReq5(AsyncWebServerRequest * req) {
     req->send(200, "application/ld+json", resp);
 }
 
-void handleReq6(AsyncWebServerRequest * req) {
+void handleReq6(AsyncWebServerRequest * req){
+    char* resp = "Method Not Allowed";
+    req->send(405, "text/plain", resp);
+}
+
+void handleReq7(AsyncWebServerRequest * req) {
     longPollHandler(req);
 }
 
@@ -360,7 +398,7 @@ String request5(String body) {
                 resp = (String) output;
 
                 // evento condition
-                String ws_msg = "pluto";
+                String ws_msg = "{\"output\" : \"pluto\"}";
                 String t_name = "";
                 DynamicJsonDocument tmp_doc(150);
                 JsonObject tmp_obj = tmp_doc.createNestedObject();
@@ -375,6 +413,8 @@ String request5(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
+                    sendLongPollTXT(ws_msg);
+
                     Serial.printf("ipe_arr.size() (clients connected on ws) = %d", ipe_arr.size());//num ipaddress 
                     for(i=0; i<ipe_arr.size(); i++) {
                         String ws_ip = ipe_arr[i]["ip"];
@@ -390,7 +430,6 @@ String request5(String body) {
                             if(!ae[j][event1_name].isNull() && ae[j][event1_name]) {
                                 Serial.printf("ws_msg ok to send %s\n", ws_msg);
                                 webSocket.sendTXT(ws_num, ws_msg);
-                                sendLongPollTXT(ws_msg);
                             }
                         }
                     }
@@ -427,7 +466,7 @@ bool handleInputType(String value, String schema) {
 
 // Action functions
 String azione(String in) {
-	return "pippo";
+	return "{'input':'" + in + "'}";
 	
 }
 
