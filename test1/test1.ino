@@ -58,6 +58,24 @@ void longPollHandler(AsyncWebServerRequest *req) {
                         longPollRequestsNum);
     }
     Serial.printf("Adding new host at position #%d\n", i);
+    req->onDisconnect([req](){
+        int i = 0;
+        // Serial.printf("Client disconnected, %p\n", req);
+        for(; i < longPollRequestsNum; i++) {
+            Serial.printf("Comparing %p with %p\n", req, longPollRequests[i]);
+        }
+
+    });
+
+    // req->client()->onDisconnect([](void *r, AsyncClient* c) { 
+    //     AsyncWebServerRequest *requ = (AsyncWebServerRequest*)r; 
+    //     int i = 0;
+    //     for(; i < longPollRequestsNum; i++) {
+    //      //   Serial.printf("Comparing %p with %p\n", requ, longPollRequests[i]);
+    //     }
+    //     delete c; 
+    // });
+
     longPollRequests[i] = req;
     //MGMT responses
     longPollResponse[i] = req->beginResponseStream("application/ld+json");
@@ -86,6 +104,12 @@ void sendLongPollTXT(String txt) {
     longPollRequestsNum = 0;
 }
 
+// ArDisconnectHandler disconnectClient() {
+//     Serial.println("Client disconnected!");
+//     // return NULL;
+//     return disconnectClient;
+// }
+
 /**
  * This function checks if the IP of the specified request index is a valid IP address.
  * If not, means that the connection is dropped. 
@@ -94,12 +118,19 @@ void sendLongPollTXT(String txt) {
  */
 bool isValidRequest(int i) {
     // try {
+        Serial.printf("%p\n", longPollRequests[i]);
+        Serial.printf("%p\n", longPollRequests[i]->client());
+        Serial.printf("%p\n", longPollRequests[i]->client()->remoteIP());
         Serial.printf("Checking if %s == %s ", 
                         longPollRequests[i]->client()->remoteIP().toString().c_str(), 
-                        longPollIP[i]);//,
-                        // strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]));
-        return strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false;
-    // } catch (Exception ex) {
+                        longPollIP[i]);
+
+        //check if object is coherent
+        return (longPollRequests[i] != NULL &&
+                longPollRequests[i]->client() != NULL &&
+                longPollRequests[i]->client()->remoteIP() != NULL &&
+                strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false);
+    // } catch (esp_err_t ex) {
     //     return false;
     // }
 }
