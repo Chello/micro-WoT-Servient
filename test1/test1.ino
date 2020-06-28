@@ -4,6 +4,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 
+const int MAX_LONGPOLL_HOSTS = 16;
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
 String protocolServer = "http";
@@ -17,67 +18,36 @@ String thingName = "test1";
 String td = "";
 
 //START LONGPOLL DEFINITIONS
-AsyncWebServerRequest *longPollRequests[16];
-AsyncResponseStream *longPollResponse[16];
-char longPollIP[16][16];
+AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
+AsyncResponseStream *longPollResponse[MAX_LONGPOLL_HOSTS];
+char longPollIP[16][MAX_LONGPOLL_HOSTS];
 int longPollRequestsNum = 0;
 
 void longPollHandler(AsyncWebServerRequest *req) {
-        // Serial.printf("Entered in the longpoll handler\n");
     int i = 0;
-
-    // for (; i < 16; i++) {
-    //     Serial.printf("%p ", longPollRequests[i]);
-    // }
-    // Serial.println();
-    // i = 0;
-
-    // int headers = req->headers();
-    // for(i=0;i<headers;i++){
-    //     AsyncWebHeader* h = req->getHeader(i);
-    //     Serial.printf("HEADER[%s]: %s\n", h->name().c_str(), h->value().c_str());
-    // }
-
-
     bool found = false;
-    for(; i < longPollRequestsNum; i++){
-        Serial.printf("\tHost #%d ", i );
-        Serial.printf("current host IP is %s, ", req->client()->remoteIP().toString().c_str());
-        Serial.printf("analyzing IP %s \n", longPollIP[i]);
-        if (req->client()->remoteIP().toString().equals(longPollIP[i])) {
-            found = true;
-            Serial.printf("Longpoll host %s has came back!\n", req->client()->remoteIP().toString().c_str());
+    for(; i < MAX_LONGPOLL_HOSTS; i++){
+        if (longPollRequests[i] == NULL) {
+            longPollRequests[i] = req;
+            longPollRequestsNum++;
             break;
         }
     }
-    if (!found) {
-        longPollRequestsNum++;
-        strcpy(longPollIP[i], req->client()->remoteIP().toString().c_str());
-        Serial.printf("Connected longpoll host: %s\nNow there are %d hosts connected via longpoll\n", 
-                        longPollIP[i], 
-                        longPollRequestsNum);
-    }
+    
     Serial.printf("Adding new host at position #%d\n", i);
+
     req->onDisconnect([req](){
         int i = 0;
         // Serial.printf("Client disconnected, %p\n", req);
         for(; i < longPollRequestsNum; i++) {
-            Serial.printf("Comparing %p with %p\n", req, longPollRequests[i]);
+            Serial.printf("Longpoll Host disconnected. Comparing %p with %p\n", req, longPollRequests[i]);
+            if (req == longPollRequests[i]) {
+                longPollRequests[i] = NULL;
+                break;
+            }
         }
-
     });
 
-    // req->client()->onDisconnect([](void *r, AsyncClient* c) { 
-    //     AsyncWebServerRequest *requ = (AsyncWebServerRequest*)r; 
-    //     int i = 0;
-    //     for(; i < longPollRequestsNum; i++) {
-    //      //   Serial.printf("Comparing %p with %p\n", requ, longPollRequests[i]);
-    //     }
-    //     delete c; 
-    // });
-
-    longPollRequests[i] = req;
-    //MGMT responses
     longPollResponse[i] = req->beginResponseStream("application/ld+json");
 
 }
@@ -85,11 +55,11 @@ void longPollHandler(AsyncWebServerRequest *req) {
 void sendLongPollTXT(String txt) {
     int i;
     Serial.printf("There are %d longpoll pending hosts\n", longPollRequestsNum);
-    for(i = 0; i < longPollRequestsNum; i++) {
+    for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
         Serial.printf("Handling request #%d, ", i);
         
         //if (longPollRequests[i]->version() == 1 || longPollRequests[i]->version() == 0) {
-        if (isValidRequest(i)) {
+        if (longPollRequests[i] != NULL) {
             longPollResponse[i]->print(txt);
             longPollRequests[i]->send(longPollResponse[i]);
             Serial.printf("request satisfied.\n");
@@ -248,6 +218,11 @@ void setup() {
 
     Serial.println("Server started");
     Serial.println(urlServer);
+
+    //Setup Longpoll hosts list
+    for (int i = 0; i < MAX_LONGPOLL_HOSTS; i++){
+        longPollRequests[i] = NULL;
+    }
 }
 
 // void requestHandler(AsyncWebServerRequest *req) {
