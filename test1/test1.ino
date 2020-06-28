@@ -19,9 +19,7 @@ String td = "";
 
 //START LONGPOLL DEFINITIONS
 AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
-AsyncResponseStream *longPollResponse[MAX_LONGPOLL_HOSTS];
-char longPollIP[16][MAX_LONGPOLL_HOSTS];
-int longPollRequestsNum = 0;
+// AsyncResponseStream *longPollResponse[MAX_LONGPOLL_HOSTS];
 
 void longPollHandler(AsyncWebServerRequest *req) {
     int i = 0;
@@ -29,7 +27,6 @@ void longPollHandler(AsyncWebServerRequest *req) {
     for(; i < MAX_LONGPOLL_HOSTS; i++){
         if (longPollRequests[i] == NULL) {
             longPollRequests[i] = req;
-            longPollRequestsNum++;
             break;
         }
     }
@@ -39,8 +36,8 @@ void longPollHandler(AsyncWebServerRequest *req) {
     req->onDisconnect([req](){
         int i = 0;
         // Serial.printf("Client disconnected, %p\n", req);
-        for(; i < longPollRequestsNum; i++) {
-            Serial.printf("Longpoll Host disconnected. Comparing %p with %p\n", req, longPollRequests[i]);
+        Serial.printf("Longpoll Host disconnected\n");
+        for(; i < MAX_LONGPOLL_HOSTS; i++) {
             if (req == longPollRequests[i]) {
                 longPollRequests[i] = NULL;
                 break;
@@ -48,30 +45,23 @@ void longPollHandler(AsyncWebServerRequest *req) {
         }
     });
 
-    longPollResponse[i] = req->beginResponseStream("application/ld+json");
+    // longPollResponse[i] = req->beginResponseStream("application/ld+json");
 
 }
 
 void sendLongPollTXT(String txt) {
     int i;
-    Serial.printf("There are %d longpoll pending hosts\n", longPollRequestsNum);
     for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
-        Serial.printf("Handling request #%d, ", i);
         
         //if (longPollRequests[i]->version() == 1 || longPollRequests[i]->version() == 0) {
         if (longPollRequests[i] != NULL) {
-            longPollResponse[i]->print(txt);
-            longPollRequests[i]->send(longPollResponse[i]);
+            Serial.printf("Handling request from IP %d\n, ", longPollRequests[i]->client()->remoteIP().toString().c_str());
+            // longPollResponse[i]->print(txt);
+            longPollRequests[i]->send(200, "application/ld+json", txt/*longPollResponse[i]*/);
             Serial.printf("request satisfied.\n");
-        } else {
-            Serial.printf("request expired, not sent.\n");
         }
-        
         longPollRequests[i] = NULL;
-        // longPollIP[i] = NULL;
-        strcpy(longPollIP[i], "");
     }
-    longPollRequestsNum = 0;
 }
 
 // ArDisconnectHandler disconnectClient() {
@@ -80,30 +70,30 @@ void sendLongPollTXT(String txt) {
 //     return disconnectClient;
 // }
 
-/**
- * This function checks if the IP of the specified request index is a valid IP address.
- * If not, means that the connection is dropped. 
- * @param i the index of the request
- * @return true if connection is valid, false otherwise
- */
-bool isValidRequest(int i) {
-    // try {
-        Serial.printf("%p\n", longPollRequests[i]);
-        Serial.printf("%p\n", longPollRequests[i]->client());
-        Serial.printf("%p\n", longPollRequests[i]->client()->remoteIP());
-        Serial.printf("Checking if %s == %s ", 
-                        longPollRequests[i]->client()->remoteIP().toString().c_str(), 
-                        longPollIP[i]);
+// /**
+//  * This function checks if the IP of the specified request index is a valid IP address.
+//  * If not, means that the connection is dropped. 
+//  * @param i the index of the request
+//  * @return true if connection is valid, false otherwise
+//  */
+// bool isValidRequest(int i) {
+//     // try {
+//         Serial.printf("%p\n", longPollRequests[i]);
+//         Serial.printf("%p\n", longPollRequests[i]->client());
+//         Serial.printf("%p\n", longPollRequests[i]->client()->remoteIP());
+//         Serial.printf("Checking if %s == %s ", 
+//                         longPollRequests[i]->client()->remoteIP().toString().c_str(), 
+//                         longPollIP[i]);
 
-        //check if object is coherent
-        return (longPollRequests[i] != NULL &&
-                longPollRequests[i]->client() != NULL &&
-                longPollRequests[i]->client()->remoteIP() != NULL &&
-                strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false);
-    // } catch (esp_err_t ex) {
-    //     return false;
-    // }
-}
+//         //check if object is coherent
+//         return (longPollRequests[i] != NULL &&
+//                 longPollRequests[i]->client() != NULL &&
+//                 longPollRequests[i]->client()->remoteIP() != NULL &&
+//                 strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false);
+//     // } catch (esp_err_t ex) {
+//     //     return false;
+//     // }
+// }
 //END LONGPOLL DEFINITIONS
 
 // document to handle Interaction Affordances WebSocket requests
