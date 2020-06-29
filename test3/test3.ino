@@ -1,5 +1,3 @@
-//#include <ESP32WebServer.h>
-
 #include <WebSocketsServer.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
@@ -14,7 +12,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "test1";
+String thingName = "test3";
 String td = "";
 
 // document to handle Interaction Affordances WebSocket requests
@@ -23,9 +21,8 @@ DynamicJsonDocument ia_doc(1000);
 DynamicJsonDocument ipia_doc(2000);
 JsonArray ipia_arr;
 // document to handle Events WebSocket requests
-DynamicJsonDocument e_doc(1000);
-// document to handle Events Schemas
-DynamicJsonDocument es_doc(150);
+DynamicJsonDocument e_doc(2000);
+DynamicJsonDocument es_doc(20);
 // document to store the ip addresses of clients connected to WebSocket channel for Events requests   
 DynamicJsonDocument ipe_doc(2000);
 JsonArray ipe_arr;
@@ -34,11 +31,11 @@ DeserializationError err;
 int properties_number = 1;
 int objectProperties_number = 0;
 int actions_number = 1;
-int events_number = 1;
+int events_number = 2;
 
 // Properties
 const char* property1_name = "proprieta";
-int property1_value = 0;
+bool property1_value = false;
 
 
 // Actions
@@ -47,13 +44,13 @@ int action1_inputsNumber = 1;
 String action1_schema[1] = {"{\"name\":\"in\",\"type\":\"string\"}"};
 
 // Events
-const char* event1_name = "evento";
-String event1_dataSchema[2] = {"{\"name\":\"datas\",\"value\":\"true\"}","{\"name\":\"datassi\",\"value\":\"pippo\"}"};
-bool events_subscriptionSchema[1] = {false};
-bool events_dataSchema[1] = {true};
-bool events_cancellationSchema[1] = {false};
-String events_list[1] = {event1_name};
-String events_endpoint[1] = {"/" + thingName + "/events/" + event1_name};
+const char* event1_name = "evento1";
+const char* event2_name = "evento2";
+bool events_subscriptionSchema[2] = {false,false};
+bool events_dataSchema[2] = {false,false};
+bool events_cancellationSchema[2] = {false,false};
+String events_list[2] = {event1_name,event2_name,};
+String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name,};
 
 // Requests
 String req1 = "/";
@@ -78,44 +75,22 @@ AsyncLongPoll *alp;
 
 int i, j, k, n;
 
-const int ledPin = 13;
-const int pubPin = 14;
-
 void setup() {
-
-    pinMode(ledPin, OUTPUT);
-    pinMode(pubPin, INPUT);
-
     Serial.begin(115200);
     Serial.println();
 
     // events data
-    int schema_size = 0;
-    JsonArray arr;
-    JsonObject obj;
-
-    schema_size = sizeof(event1_dataSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("data");
-    else
-        arr = es_doc[event1_name].createNestedArray("data");
-    for(i=0; i<schema_size; i++) {
-        DynamicJsonDocument tmp_doc(150);
-        deserializeJson(tmp_doc, event1_dataSchema[i]);
-        JsonObject obj = arr.createNestedObject();
-        obj["name"] = tmp_doc["name"];
-        obj["value"] = tmp_doc["value"];
-    }
 
     ipe_arr = ipe_doc.createNestedArray("clients_list");
     ipia_arr = ipia_doc.createNestedArray("clients_list");
   
     connection(ssid, password);
     
-    td = "{\"title\":\"test1\",\"id\":\"test1\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]}],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"integer\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento\":{\"eventName\":\"evento\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\",\"data\":{\"datas\":{\"type\":\"boolean\",\"value\":\"true\"},\"datassi\":{\"type\":\"string\",\"value\":\"pippo\"}}}}}";
+    td = "{\"title\":\"test3\",\"id\":\"test1\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento1\":{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},\"evento2\":{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}}}";
 
     // Server requests
-    server.on(req6.c_str(),HTTP_GET,handleReq7);
+    server.on(events_endpoint[1].c_str(),HTTP_GET,handleReq8);
+    server.on(events_endpoint[0].c_str(),HTTP_GET,handleReq7);
     server.on(req5.c_str(),HTTP_GET,handleReq6);
     server.on(req5.c_str(),HTTP_POST,handleReq5);
     server.on(req4.c_str(),HTTP_GET,handleReq4);
@@ -131,19 +106,12 @@ void setup() {
 
     Serial.println("Server started");
     Serial.println(urlServer);
-}
+}    
 
 void loop() {
-    //Serial.println(xPortGetCoreID());
-    int pubState = digitalRead(pubPin);
-    if ( pubState == HIGH ) { 
-        digitalWrite(ledPin, HIGH); 
-    } else {
-        digitalWrite(ledPin, LOW); 
-    }
+
     // handle Requests
     webSocket.loop();
-    //server.handleClient();
 }
 
 void connection(const char* ssid, const char* password) {
@@ -191,13 +159,6 @@ void handleReq4(AsyncWebServerRequest *req) {
     String resp = "";
     
     resp = request4();
-    Serial.println("req4 called");
-
-    int pubState;
-    while ((pubState = digitalRead(pubPin)) == LOW) {
-        delay(90);
-    } 
-
     req->send(200, "application/ld+json", resp);
 }
 
@@ -216,6 +177,10 @@ void handleReq6(AsyncWebServerRequest *req) {
 
 void handleReq7(AsyncWebServerRequest *req) {
     alp->longPollHandler(req, event1_name);
+}
+
+void handleReq8(AsyncWebServerRequest *req) {
+    alp->longPollHandler(req, event2_name);
 }
 
 String request3() {
@@ -284,38 +249,31 @@ String request5(String body) {
                 String output = azione(action1_input1_value);    
                 resp = (String) output;
 
-                // evento condition
-                String ws_msg = "{\"output\" : \"pluto\"}";
-                String t_name = "";
-                DynamicJsonDocument tmp_doc(150);
-                JsonObject tmp_obj = tmp_doc.createNestedObject();
-
-                if(events_dataSchema[1]) {
-                    for(i=0; i<es_doc[event1_name]["data"].size(); i++) {
-                        t_name = "";
-                        serializeJson(es_doc[event1_name]["data"][i]["name"], t_name);
-                        t_name.replace("\"", "");
-                        tmp_obj[t_name] = es_doc[event1_name]["data"][i]["value"];
-                    }
-                    serializeJson(tmp_obj, ws_msg);
-                }
+                // evento1 condition
+                String ws_msg = "{\"output\" : \"pippo\", "+ resp +"}";
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event1_name);
-
-                    Serial.printf("ipe_arr.size() (clients connected on ws) = %d", ipe_arr.size());//num ipaddress 
                     for(i=0; i<ipe_arr.size(); i++) {
                         String ws_ip = ipe_arr[i]["ip"];
-                        Serial.println("\t" + ws_ip);
                         JsonArray ae = e_doc[ws_ip];
-                        Serial.printf("Dimenzione: %d\n", ae.size());
                         for(j=0; j<ae.size(); j++) {
-                            Serial.printf("Dentro al for per la %d volta\n", i);
-                            unsigned char ws_num = ipe_doc[ws_ip];
-                            String namemm = ae[j][event1_name];
-                            Serial.println(ws_num);
-                            Serial.println(namemm);
                             if(!ae[j][event1_name].isNull() && ae[j][event1_name]) {
-                                Serial.printf("ws_msg ok to send %s\n", ws_msg);
+                                unsigned char ws_num = ipe_doc[ws_ip];
+                                webSocket.sendTXT(ws_num, ws_msg);
+                            }
+                        }
+                    }
+                }
+                ws_msg = "{\"output\" : \"pluto\", "+ resp +"}";
+                // evento2 condition
+                if(true) {
+                    alp->sendLongPollTXT(ws_msg, event2_name);
+                    for(i=0; i<ipe_arr.size(); i++) {
+                        String ws_ip = ipe_arr[i]["ip"];
+                        JsonArray ae = e_doc[ws_ip];
+                        for(j=0; j<ae.size(); j++) {
+                            if(!ae[j][event2_name].isNull() && ae[j][event2_name]) {
+                                unsigned char ws_num = ipe_doc[ws_ip];
                                 webSocket.sendTXT(ws_num, ws_msg);
                             }
                         }
@@ -354,7 +312,6 @@ bool handleInputType(String value, String schema) {
 // Action functions
 String azione(String in) {
 	return "{'input':'" + in + "'}";
-	
 }
 
 
@@ -553,7 +510,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* pl, size_t length) {
 
         case WStype_TEXT:
         { 
-            DynamicJsonDocument resp_doc(150);
+            DynamicJsonDocument resp_doc(40);
             bool parsingDone = false;
             int validInput = 0;
             String t_name = "";
@@ -581,7 +538,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* pl, size_t length) {
                     while(!parsingDone && j<events_number) {
                         if(!e_doc[ip_s][i][events_list[j]].isNull()) {
                             if(!e_doc[ip_s][i][events_list[j]] && events_subscriptionSchema[j]) {
-                                DynamicJsonDocument tmp_doc(150);
+                                DynamicJsonDocument tmp_doc(40);
                                 JsonObject tmp = tmp_doc.createNestedObject();
                                 validInput = 0;
                                 k = 0;
@@ -610,7 +567,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t* pl, size_t length) {
                                 }
                             }
                             else if(e_doc[ip_s][i][events_list[j]] && events_cancellationSchema[j]) {
-                                DynamicJsonDocument tmp_doc(150);
+                                DynamicJsonDocument tmp_doc(40);
                                 JsonObject tmp = tmp_doc.createNestedObject();
                                 validInput = 0;
                                 k = 0;
