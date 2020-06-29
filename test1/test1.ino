@@ -82,7 +82,7 @@ const int pubPin = 14;
 
 //START LONGPOLL DEFINITIONS
 AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
-char** longPollBoundEvents[MAX_LONGPOLL_HOSTS];
+const char* longPollBoundEvents[MAX_LONGPOLL_HOSTS];
 
 void longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
     int i = 0;
@@ -90,10 +90,11 @@ void longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
     for(; i < MAX_LONGPOLL_HOSTS; i++){
         if (longPollRequests[i] == NULL) {
             longPollRequests[i] = req;
-            //longPollBoundEvents[i] = &eventName;
+            longPollBoundEvents[i] = eventName;
             break;
         }
     }
+    //Serial.printf("Differenza tra puntatore %p e stringa %s.", &eventName, eventName);
     Serial.printf("Adding new host at position #%d\n", i);
 
     req->onDisconnect([req](){
@@ -103,7 +104,7 @@ void longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
         for(; i < MAX_LONGPOLL_HOSTS; i++) {
             if (req == longPollRequests[i]) {
                 longPollRequests[i] = NULL;
-                //longPollBoundEvents[i] = NULL;
+                longPollBoundEvents[i] = NULL;
                 break;
             }
         }
@@ -113,8 +114,10 @@ void longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
 void sendLongPollTXT(String txt, const char* eventName) {
     int i;
     for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
-        if (longPollRequests[i] != NULL /*&& longPollBoundEvents[i] == eventName*/) {
-            Serial.printf("Handling request from IP %d\n, ", longPollRequests[i]->client()->remoteIP().toString().c_str());
+        if (longPollRequests[i] != NULL && longPollBoundEvents[i] == eventName) {
+            Serial.printf("Handling request from IP %s for event %s\n, ", 
+                            longPollRequests[i]->client()->remoteIP().toString().c_str(),
+                            eventName);
             longPollRequests[i]->send(200, "application/ld+json", txt/*longPollResponse[i]*/);
             Serial.printf("request satisfied.\n");
         }
