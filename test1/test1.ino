@@ -17,85 +17,6 @@ String urlSocket = "";
 String thingName = "test1";
 String td = "";
 
-//START LONGPOLL DEFINITIONS
-AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
-// AsyncResponseStream *longPollResponse[MAX_LONGPOLL_HOSTS];
-
-void longPollHandler(AsyncWebServerRequest *req) {
-    int i = 0;
-    bool found = false;
-    for(; i < MAX_LONGPOLL_HOSTS; i++){
-        if (longPollRequests[i] == NULL) {
-            longPollRequests[i] = req;
-            break;
-        }
-    }
-    
-    Serial.printf("Adding new host at position #%d\n", i);
-
-    req->onDisconnect([req](){
-        int i = 0;
-        // Serial.printf("Client disconnected, %p\n", req);
-        Serial.printf("Longpoll Host disconnected\n");
-        for(; i < MAX_LONGPOLL_HOSTS; i++) {
-            if (req == longPollRequests[i]) {
-                longPollRequests[i] = NULL;
-                break;
-            }
-        }
-    });
-
-    // longPollResponse[i] = req->beginResponseStream("application/ld+json");
-
-}
-
-void sendLongPollTXT(String txt) {
-    int i;
-    for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
-        
-        //if (longPollRequests[i]->version() == 1 || longPollRequests[i]->version() == 0) {
-        if (longPollRequests[i] != NULL) {
-            Serial.printf("Handling request from IP %d\n, ", longPollRequests[i]->client()->remoteIP().toString().c_str());
-            // longPollResponse[i]->print(txt);
-            longPollRequests[i]->send(200, "application/ld+json", txt/*longPollResponse[i]*/);
-            Serial.printf("request satisfied.\n");
-        }
-        longPollRequests[i] = NULL;
-    }
-}
-
-// ArDisconnectHandler disconnectClient() {
-//     Serial.println("Client disconnected!");
-//     // return NULL;
-//     return disconnectClient;
-// }
-
-// /**
-//  * This function checks if the IP of the specified request index is a valid IP address.
-//  * If not, means that the connection is dropped. 
-//  * @param i the index of the request
-//  * @return true if connection is valid, false otherwise
-//  */
-// bool isValidRequest(int i) {
-//     // try {
-//         Serial.printf("%p\n", longPollRequests[i]);
-//         Serial.printf("%p\n", longPollRequests[i]->client());
-//         Serial.printf("%p\n", longPollRequests[i]->client()->remoteIP());
-//         Serial.printf("Checking if %s == %s ", 
-//                         longPollRequests[i]->client()->remoteIP().toString().c_str(), 
-//                         longPollIP[i]);
-
-//         //check if object is coherent
-//         return (longPollRequests[i] != NULL &&
-//                 longPollRequests[i]->client() != NULL &&
-//                 longPollRequests[i]->client()->remoteIP() != NULL &&
-//                 strcmp(longPollRequests[i]->client()->remoteIP().toString().c_str(), longPollIP[i]) == 0 ? true : false);
-//     // } catch (esp_err_t ex) {
-//     //     return false;
-//     // }
-// }
-//END LONGPOLL DEFINITIONS
-
 // document to handle Interaction Affordances WebSocket requests
 DynamicJsonDocument ia_doc(1000);
 // document to store the ip addresses of clients connected to WebSocket channel for Interaction Affordances requests   
@@ -159,6 +80,48 @@ int i, j, k, n;
 const int ledPin = 13;
 const int pubPin = 14;
 
+//START LONGPOLL DEFINITIONS
+AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
+char** longPollBoundEvents[MAX_LONGPOLL_HOSTS];
+
+void longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
+    int i = 0;
+    bool found = false;
+    for(; i < MAX_LONGPOLL_HOSTS; i++){
+        if (longPollRequests[i] == NULL) {
+            longPollRequests[i] = req;
+            //longPollBoundEvents[i] = &eventName;
+            break;
+        }
+    }
+    Serial.printf("Adding new host at position #%d\n", i);
+
+    req->onDisconnect([req](){
+        int i = 0;
+        // Serial.printf("Client disconnected, %p\n", req);
+        Serial.printf("Longpoll Host disconnected\n");
+        for(; i < MAX_LONGPOLL_HOSTS; i++) {
+            if (req == longPollRequests[i]) {
+                longPollRequests[i] = NULL;
+                //longPollBoundEvents[i] = NULL;
+                break;
+            }
+        }
+    });
+}
+
+void sendLongPollTXT(String txt, const char* eventName) {
+    int i;
+    for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
+        if (longPollRequests[i] != NULL /*&& longPollBoundEvents[i] == eventName*/) {
+            Serial.printf("Handling request from IP %d\n, ", longPollRequests[i]->client()->remoteIP().toString().c_str());
+            longPollRequests[i]->send(200, "application/ld+json", txt/*longPollResponse[i]*/);
+            Serial.printf("request satisfied.\n");
+        }
+    }
+}
+//END LONGPOLL DEFINITIONS
+
 void setup() {
 
     pinMode(ledPin, OUTPUT);
@@ -198,9 +161,8 @@ void setup() {
     server.on(req5.c_str(),HTTP_POST,handleReq5);
     server.on(req4.c_str(),HTTP_GET,handleReq4);
     server.on(req3.c_str(),HTTP_GET,handleReq3);
-    server.on(req2.c_str(), HTTP_GET, handleReq2);//req2
+    server.on(req2.c_str(), HTTP_GET, handleReq2);
     server.on(req1.c_str(), HTTP_GET, handleReq1);
-    // server.on(req1.c_str(),HTTP_GET,handleReq1);
 
     server.begin();
     webSocket.begin();
@@ -215,32 +177,6 @@ void setup() {
     }
 }
 
-// void requestHandler(AsyncWebServerRequest *req) {
-//     Serial.println("Opened requestHandler");
-//     if (req->url().equals(req1)) {
-//         Serial.println("Handeled request 1");
-//         handleReq1(req);
-//     }
-//     if (req->url().equals(req2)) {
-//         Serial.println("Handeled request 2");
-//         handleReq2(req);
-//     }
-//     if (req->url().equals(req3)) {
-//         Serial.println("Handeled request 3");
-//         handleReq3(req);
-//     }
-//     if (req->url().equals(req4)) {
-//         Serial.println("Handeled request 4");
-//         handleReq4(req);
-//     }
-//     if (req->url().equals(req5)) {
-//         Serial.println("Handeled request 5");
-//         handleReq6(req);
-//     }
-//     //if (req->url().equals(req6)) handleReq6(req);
-// }
-
-
 void loop() {
     //Serial.println(xPortGetCoreID());
     int pubState = digitalRead(pubPin);
@@ -249,7 +185,6 @@ void loop() {
     } else {
         digitalWrite(ledPin, LOW); 
     }
-
     // handle Requests
     webSocket.loop();
     //server.handleClient();
@@ -324,7 +259,7 @@ void handleReq6(AsyncWebServerRequest * req){
 }
 
 void handleReq7(AsyncWebServerRequest * req) {
-    longPollHandler(req);
+    longPollHandler(req, event1_name);
 }
 
 String request3() {
@@ -409,7 +344,7 @@ String request5(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    sendLongPollTXT(ws_msg);
+                    sendLongPollTXT(ws_msg, event1_name);
 
                     Serial.printf("ipe_arr.size() (clients connected on ws) = %d", ipe_arr.size());//num ipaddress 
                     for(i=0; i<ipe_arr.size(); i++) {
