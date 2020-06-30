@@ -5,6 +5,8 @@ $(document).ready(function() {
 
     $('#footer').resizable();
 
+    var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
+
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
@@ -170,9 +172,19 @@ var composeTD = function() {
             td['events'][name] = element;
             //check if event using websocket
             if (td["events"][name]["useWS"]) {
-                td["events"][name]["forms"][1] = td["events"][name]["forms"][0];
+                //td["events"][name]["forms"][1] = td["events"][name]["forms"][0];
+                td["events"][name]["forms"].push(td["events"][name]["forms"][0]);
                 //delete useWS
                 td["events"][name]["useWS"] = undefined;
+            }
+            //check if event using longpoll http
+            if (td["events"][name]["useLP"]) {
+                //td["events"][name]["forms"][2] = td["events"][name]["forms"][0];
+                var longPollForm = JSON.parse(JSON.stringify(td["events"][name]["forms"][0]));
+                longPollForm["subprotocol"] = "longpoll";
+                td["events"][name]["forms"].push(longPollForm);
+                //delete useLP
+                td["events"][name]["useLP"] = undefined;
             }
 
             eventCurrentCondition = {

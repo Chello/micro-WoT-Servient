@@ -1,5 +1,5 @@
-#include <WebSocketsServer.h>
 #include <ESPAsyncWebServer.h>
+#include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include "AsyncLongPoll/AsyncLongPoll.h"
 
@@ -12,7 +12,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "test3";
+String thingName = "test4";
 String td = "";
 
 // document to handle Interaction Affordances WebSocket requests
@@ -44,7 +44,7 @@ int action1_inputsNumber = 1;
 String action1_schema[1] = {"{\"name\":\"in\",\"type\":\"string\"}"};
 
 // Events
-const char* event1_name = "evento1";
+const char* event1_name = "evento";
 const char* event2_name = "evento2";
 bool events_subscriptionSchema[2] = {false,false};
 bool events_dataSchema[2] = {false,false};
@@ -53,11 +53,17 @@ String events_list[2] = {event1_name,event2_name,};
 String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name,};
 
 // Requests
-String req1 = "/";
-String req2 = "/" + thingName;
+
+
+    String req5 = "/" + thingName + "/actions/" + action1_name;
+
+    String req4 = "/" + thingName + "/properties/" + property1_name;
+
 String req3 = "/" + thingName + "/all/properties";
-String req4 = "/" + thingName + "/properties/" + property1_name;
-String req5 = "/" + thingName + "/actions/" + action1_name;
+
+String req2 = "/" + thingName;
+
+String req1 = "/";
 
 int ws_requestsNumber = 3;
 int ws_actionsNumber = 1;
@@ -69,6 +75,7 @@ AsyncWebServer server(portServer);
 WebSocketsServer webSocket = WebSocketsServer(portSocket);
 
 IPAddress ipS;
+//Longpoll object handler
 AsyncLongPoll *alp;
 
 
@@ -85,7 +92,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"test3\",\"id\":\"test1\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento1\":{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},\"evento2\":{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento\":{\"eventName\":\"evento\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},\"evento2\":{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}}}";
 
     // Server requests
     server.on(events_endpoint[1].c_str(),HTTP_GET,handleReq8);
@@ -100,9 +107,7 @@ void setup() {
     server.begin();
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
-
     alp = new AsyncLongPoll();
-
     Serial.println("Server started");
     Serial.println(urlServer);
 }    
@@ -182,6 +187,7 @@ void handleReq8(AsyncWebServerRequest *req) {
     alp->longPollHandler(req, event2_name);
 }
 
+
 String request3() {
     DynamicJsonDocument tmp(220);
     String resp = "";
@@ -247,9 +253,9 @@ String request5(String body) {
 
                 String output = azione(action1_input1_value);    
                 resp = (String) output;
-
-                // evento1 condition
                 String ws_msg = "{\"output\" : \"pippo\", "+ resp +"}";
+
+                // evento condition
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event1_name);
                     for(i=0; i<ipe_arr.size(); i++) {
@@ -263,7 +269,7 @@ String request5(String body) {
                         }
                     }
                 }
-                ws_msg = "{\"output\" : \"pluto\", "+ resp +"}";
+
                 // evento2 condition
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event2_name);

@@ -32,7 +32,11 @@
 {%- for event in template['events'] %}
     {%- set i = loop.index -%}
     {%- for item in td['events'][event['name']]['forms'] if 'href' in item -%}
+        {% if loop.index == 3 %}
+        {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
+        {% else %}
         {%- do item.update(href='" + urlSocket + "/events/" + event' + i | string + '_name + "' ) -%}
+        {% endif %}
     {%- endfor -%}
 {%- endfor %}   
 {%- endmacro %}
@@ -65,6 +69,7 @@
 {%- do global.update({'isData':False}) -%}
 {%- do global.update({'isCancellation':False}) -%}
 {%- do global.update({'isWS':False}) -%}
+{%- do global.update({'isLP':False}) -%}
 {%- for property in template['properties'] -%}
 {%- if property['type'] == 'object' -%}
 {%- if 'properties' in property -%}
@@ -310,9 +315,16 @@
 {%- endif -%}
 {%- endfor -%}
 {%- endfor -%}
+
 {%- if td['forms'] | length == 2 -%}
 {%- do global.update({'isWS':True}) -%}
 {%- endif -%}
+{# Now adding longpoll check #}
+
+{%- if td['events'] | length == 3 -%}
+{%- do global.update({'isLP':True}) -%}
+{%- endif -%}
+
 {%- for property in template['properties'] -%}
 {%- if td['properties'][property['name']]['forms'] | length == 2 -%}
 {%- if not(global['isWS']) -%}
@@ -324,6 +336,18 @@
 {%- if td['actions'][action['name']]['forms'] | length == 2 -%}
 {%- if not(global['isWS']) -%}
 {%- do global.update({'isWS':True}) -%}
+{%- endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- for event in template['events'] -%}
+{%- if td['events'][event['name']]['forms'] | length == 2 -%}
+{%- if not(global['isWS']) -%}
+{%- do global.update({'isWS':True}) -%}
+{%- endif -%}
+{%- endif -%}
+{%- if td['events'][event['name']]['forms'] | length == 3 -%}
+{%- if not(global['isLP']) -%}
+{%- do global.update({'isLP':True}) -%}
 {%- endif -%}
 {%- endif -%}
 {%- endfor -%}
@@ -529,9 +553,10 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- set capacity = {} -%}
 {%- do capacity.update({'maxSchema':20}) -%}
 {%- do capacity.update({'maxInputSchema':0}) -%}
-#include <ESP32WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
+#include "AsyncLongPoll/AsyncLongPoll.h"
 {% if template['libraries'] | length > 0 %}
 {% for lib in template['libraries'] %}
 #include <{{ lib }}>
@@ -738,49 +763,58 @@ String events_endpoint[{{ template['numevents'] }}] = {
     {%- else -%}
     {{ '"/" + thingName + "/events/" + event' + i | string + '_name' }},
     {%- endif -%}
+    {% if global['isLP'] %}
+    {% do req.append(('events_endpoint[' + ((template['numevents'] - i) | string) + ']', 'HTTP_GET')) %}
+    {% endif %}
     {%- endfor -%}
 };
 {% endif %}
 
 // Requests
-{{ defineVariable('String', 'req1', '/') }}
-{% do req.append(('req1', 'HTTP_GET')) %}
-{{ defineVariable('String', 'req2', ['"/"', '+', 'thingName']) }}
-{% do req.append(('req2', 'HTTP_GET')) %}
-{{ defineVariable('String', 'req3', ['"/"', '+', 'thingName', '+', '"/all/properties"' ]) }}
-{% do req.append(('req3', 'HTTP_GET')) %}
-{% for i in range(1, template['numproperties']+1) %}
-{% set request = 'req' + (i + 3) | string %}
-{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
-{% do req.append((request, 'HTTP_GET')) %}
-{% endfor %}
-{% for i in range(1, template['numactions']+1) %}
-{% set request = 'req' + (i + 3 + template['numproperties']) | string %}
-{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
-{% do req.append((request, 'HTTP_POST')) %}
-{% endfor %}
-{% for i in range(1, template['numactions']+1) %}
-{% set request = 'req' + (i + 3 + template['numproperties']) | string %}
-{% do req.append((request, 'HTTP_GET')) %}
-{% endfor %}
 {% if global['isWS'] %}
-{% set reqWS = [] %}
-{% set reqPropertyWS = [] %}
-{% if td['forms'] | length == 2 %}
-{% do reqWS.append(('thingName', 3)) %}
-{% do reqPropertyWS.append(('thingName', 3)) %}
+    {% set reqWS = [] %}
+    {% set reqPropertyWS = [] %}
+    {% if td['forms'] | length == 2 %}
+    {% do reqWS.append(('thingName', 3)) %}
+    {% do reqPropertyWS.append(('thingName', 3)) %}
 {% endif %}
 {% for property in template['properties'] %}
-{% if td['properties'][property['name']]['forms'] | length == 2 %}
-{% do reqWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
-{% do reqPropertyWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
-{% endif %}
+    {% if td['properties'][property['name']]['forms'] | length == 2 %}
+        {% do reqWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
+        {% do reqPropertyWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
+    {% endif %}
 {% endfor %}
 {% for action in template['actions'] %}
-{% if td['actions'][action['name']]['forms'] | length == 2 %}
-{% do reqWS.append(('action' + loop.index | string + '_name', loop.index+3+template['numproperties'])) %}
-{% endif %}
+    {% if td['actions'][action['name']]['forms'] | length == 2 %}
+        {% do reqWS.append(('action' + loop.index | string + '_name', loop.index+3+template['numproperties'])) %}
+    {% endif %}
 {% endfor %}
+
+{% for i in range(1, template['numactions']+1) %}
+    {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
+    {% do req.append((request, 'HTTP_GET')) %}
+{% endfor %}
+
+{% for i in range(1, template['numactions']+1) %}
+    {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
+    {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
+    {% do req.append((request, 'HTTP_POST')) %}
+{% endfor %}
+
+{% for i in range(1, template['numproperties']+1) %}
+    {% set request = 'req' + (i + 3) | string %}
+    {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
+    {% do req.append((request, 'HTTP_GET')) %}
+{% endfor %}
+
+{{ defineVariable('String', 'req3', ['"/"', '+', 'thingName', '+', '"/all/properties"' ]) }}
+{% do req.append(('req3', 'HTTP_GET')) %}
+
+{{ defineVariable('String', 'req2', ['"/"', '+', 'thingName']) }}
+{% do req.append(('req2', 'HTTP_GET')) %}
+
+{{ defineVariable('String', 'req1', '/') }}
+{% do req.append(('req1', 'HTTP_GET')) %}
 
 {{ defineVariable('int', 'ws_requestsNumber', reqWS | length) }}
 {{ defineVariable('int', 'ws_actionsNumber', capacity['actions']) }}
@@ -817,12 +851,14 @@ String ws_actions[{{ capacity['actions'] }}] = {
 {% endif %}
 {% endif %}
 
-ESP32WebServer server(portServer);
+AsyncWebServer server(portServer);
 {% if template['numevents'] != 0 or global['isWS'] %}
 WebSocketsServer webSocket = WebSocketsServer(portSocket);
 {% endif %}
 
 IPAddress ipS;
+//Longpoll object handler
+AsyncLongPoll *alp;
 
 {% for var in template['globals'] %}
 {% set i = loop.index %}
@@ -954,7 +990,7 @@ void setup() {
 
     // Server requests
     {% for r in req %}
-    server.on({{ r[0] }},{{ r[1] }},{{ 'handleReq' + loop.index | string }});
+    server.on({{ r[0] + '.c_str()' | string }},{{ r[1] }},{{ 'handleReq' + (req | length - (loop.index-1)) | string }});
     {% endfor %}
 
     server.begin();
@@ -962,7 +998,9 @@ void setup() {
     webSocket.begin();
     webSocket.onEvent(webSocketEvent);
     {% endif %}
-
+    {% if global['isLP'] %}
+    alp = new AsyncLongPoll();
+    {% endif %}
     Serial.println("Server started");
     Serial.println(urlServer);
     {% if 'setup' in template %}
@@ -980,7 +1018,7 @@ void loop() {
     {% if template['numevents'] != 0 or global['isWS'] %}
     webSocket.loop();
     {% endif %}
-    server.handleClient();
+    {# server.handleClient(); #}
 }
 
 void connection(const char* ssid, const char* password) {
@@ -1006,35 +1044,35 @@ void connection(const char* ssid, const char* password) {
 }
 
 // Request functions
-void handleReq1() {
+void handleReq1(AsyncWebServerRequest *req) {
     {{ defineVariable('String', 'resp', 'iv') }}
 
     Serial.println("\nGET Thing URL");
     {{ setVariable(True, 'resp', '[\\"" + urlServer + "\\"]') }}
-    server.send(200, "application/ld+json", resp);
+    req->send(200, "application/ld+json", resp);
 }
 
-void handleReq2() {
+void handleReq2(AsyncWebServerRequest *req) {
     Serial.println("\nGET Thing Description"); 
-    server.send(200, "application/ld+json", td);
+    req->send(200, "application/ld+json", td);
 }
 
-void handleReq3() {
+void handleReq3(AsyncWebServerRequest *req) {
     {{ defineVariable('String', 'resp', 'iv') }}
 
     {{ setVariable(False, 'resp', 'request3()') }}
-    server.send(200, "application/ld+json", resp);
+    req->send(200, "application/ld+json", resp);
 }
 
 {# HandleReq for Properties #}
 {% for property in template['properties'] %}
 {% set i = loop.index %}
 {% set n = i+3 %}
-void handleReq{{ n }}() {
+void handleReq{{ n }}(AsyncWebServerRequest *req) {
     {{ defineVariable('String', 'resp', '') }}
     
     {{ setVariable(False, 'resp', 'request' + n | string + '()') }}
-    server.send(200, "application/ld+json", resp);
+    req->send(200, "application/ld+json", resp);
 }
 
 {% endfor -%}
@@ -1043,22 +1081,33 @@ void handleReq{{ n }}() {
 {% for action in template['actions'] %}
 {%- set a = loop.index -%}
 {% set n = a+3+template['numproperties'] %}
-void handleReq{{ n }}() {
+void handleReq{{ n }}(AsyncWebServerRequest *req) {
     {{ defineVariable('String', 'resp', '') }}
-    String body = server.arg("plain");
+    String body = req->arg("plain");
     
     {{ setVariable(False, 'resp', 'request' + n | string + '(body)') }}
-    server.send(200, "application/ld+json", resp);
+    req->send(200, "application/ld+json", resp);
 }
 {% endfor %}
 
+{# HandleReq for Events in LongPoll #}
 {% for action in template['actions'] %}
 {%- set a = loop.index -%}
-void handleReq{{ a+3+template['numproperties']+template['numactions'] }}() {
+void handleReq{{ a+3+template['numproperties']+template['numactions'] }}(AsyncWebServerRequest *req) {
     {{ defineVariable('char*', 'resp', 'Method Not Allowed') }}
-    server.send(405, "text/plain", resp);
+    req->send(405, "text/plain", resp);
 }
 {% endfor %}
+
+{% if global['isLP'] %}
+{% for action in template['events'] %}
+{%- set a = loop.index -%}
+void handleReq{{ a+3+template['numproperties']+template['numactions']*2 }}(AsyncWebServerRequest *req) {
+    alp->longPollHandler(req, {{'event' + a | string + '_name'}});
+}
+
+{% endfor %}
+{% endif %}
 
 {# functions for property and actions used for HTTP Requests and WebSocket #}
 String request3() {
@@ -1236,13 +1285,13 @@ String request{{ a+3+template['numproperties'] }}(String body) {
                 {{ setVariable(True, 'resp', '') }}
                 {% endif %}
                 {% if template['numevents'] > 0 %}
+                {{ defineVariable('String', 'ws_msg', 'iv') }}
                 {% for event in template['events'] %}
                 {% set enum = loop.index %}
                 {% for ae in event['actions'] %}
                 {% if ae == action['name'] %}
 
                 // {{ event['name'] }} condition
-                {{ defineVariable('String', 'ws_msg', 'iv') }}
                 {% if global['isData'] %}
                 {{ defineVariable('String', 't_name', 'iv') }}
                 DynamicJsonDocument tmp_doc(
@@ -1264,6 +1313,9 @@ String request{{ a+3+template['numproperties'] }}(String body) {
                 }
                 {% endif %}
                 if({{ event['condition'] }}) {
+                    {% if global['isLP'] %}
+                    alp->sendLongPollTXT(ws_msg, {{'event' + enum | string + '_name'}});
+                    {% endif %}
                     for(i=0; i<ipe_arr.size(); i++) {
                         {{ defineVariable('string_nq', 'ws_ip', 'ipe_arr[i]["ip"]') }}
                         {{ defineVariable('JsonArray', 'ae', 'e_doc[ws_ip]') }}

@@ -23,4 +23,5 @@ class AsyncLongPoll {
         const char* longPollBoundEvents[MAX_LONGPOLL_HOSTS];
 };
 
+#include "AsyncLongPoll.cpp"
 #endif

@@ -2,10 +2,6 @@
 #include <ESPAsyncWebServer.h>
 #include "AsyncLongPoll.h"
 
-//START LONGPOLL DEFINITIONS
-// AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
-// const char* longPollBoundEvents[MAX_LONGPOLL_HOSTS];
-
 AsyncLongPoll::AsyncLongPoll() {
     //Setup Longpoll hosts list
     for (int i = 0; i < MAX_LONGPOLL_HOSTS; i++){
@@ -52,4 +48,3 @@ void AsyncLongPoll::sendLongPollTXT(String txt, const char* eventName) {
         }
     }
 }
-//END LONGPOLL DEFINITIONS

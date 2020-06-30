@@ -491,7 +491,8 @@
           "condition",
           "actionsTriggered",
           "forms",
-          "useWS"
+          "useWS",
+          "useLP"
         ],
         "properties": {
           "eventName": {
@@ -550,6 +551,12 @@
           "useWS": {
             "type": "boolean",
             "title": "Is event using WebSocket?",
+            "format": "checkbox",
+            "default": true
+          },
+          "useLP": {
+            "type": "boolean",
+            "title": "Is event using HTTP LongPolling?",
             "format": "checkbox",
             "default": true
           },
