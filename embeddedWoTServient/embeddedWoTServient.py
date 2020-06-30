@@ -922,105 +922,6 @@ def writeFile(filePath, fileContent):
     of.write(fileContent)
     of.close()
 
-
-def prepareArduinoEnvironment(ctx):
-    global template
-    click.echo('Hint: Before compiling or flashing, be sure that the board which the Embedded-C File will be compiled on is connected to the Serial Port')
-    click.echo('The compile and flash operations are made up with arduino-cli software')
-    home = os.path.expanduser('~')
-    cwd = os.getcwd()
-    # verify that arduino-cli is installed
-    commandFound = False
-    for path in os.environ["PATH"].split(os.pathsep):
-        exe_file = os.path.join(path, 'arduino-cli')
-        if os.path.isfile(exe_file) and os.access(exe_file, os.X_OK):
-            commandFound = True
-            break
-    # install arduino-cli    
-    if(not(commandFound)):
-        os.chdir(home) 
-        c = 'curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh'
-        click.echo()
-        pr1 = sp.Popen(shlex.split(c), universal_newlines=True, check=True, stdout=sp.PIPE)
-        pr2 = sp.Popen(['sh'], universal_newlines=True,  check=True, stdin=pr1.stdout)
-        pr2.wait()
-    # verify that the arduino-cli configuration file is created
-    configFile = home + '/.arduino15/arduino-cli.yaml'
-    if(not(os.path.exists(configFile))):  
-        c = 'arduino-cli config init'
-        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-        click.echo(pr.communicate()[0])
-    # verify that the esp core is installed in arduino-cli    
-    coreUrl = ''
-    if template.name == "esp32.txt":
-        coreUrl = 'https://raw.githubusercontent.com/espressif/arduino-esp32/master/package/package_esp32_index.template.json'
-    elif template.name == "esp8266.txt":
-        coreUrl = 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'
-    yamlDict = yaml.load(open(configFile, 'r'), Loader=yaml.FullLoader)   
-    coreFound = False
-    for item in yamlDict['board_manager']['additional_urls']:
-        if(item == coreUrl):
-            coreFound = True
-            break
-    if(not(coreFound)):
-        yamlDict['board_manager']['additional_urls'].append(coreUrl)
-        with open(configFile, 'w') as yamlFile:
-            yaml.dump(yamlDict, yamlFile)     
-    # update core index        
-    c = 'arduino-cli core update-index'
-    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    while True:
-        output = pr.stdout.readline()
-        if output == '' and pr.poll() is not None:
-            break
-        if output:
-            click.echo(output.strip())
-    # install esp8266 core
-    c = ''
-    if template.name == "esp32.txt":
-        c = 'arduino-cli core install esp32:esp32'    
-    elif template.name == "esp8266.txt":
-        c = 'arduino-cli core install esp8266:esp8266'    
-    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    while True:
-        output = pr.stdout.readline()
-        if output == '' and pr.poll() is not None:
-            break
-        if output:
-            click.echo(output.strip())
-    # install mandatory libraries
-    c = 'arduino-cli lib install "WebSockets"'
-    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    pr.wait()
-    c = 'arduino-cli lib install "ArduinoJson"'
-    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    pr.wait()
-    click.echo('\nHint: Each libraries used in the Embedded-C File MUST be installed')
-    click.echo('It is necessary to provide the exact name of the library to install')
-    click.echo('The path of arduino-cli libraries is %s/Arduino/libraries/' % home)
-    if((ctx.obj is not None) and (len(ctx.obj['template']['libraries']) > 0)):
-        for lib in ctx.obj['template']['libraries']:
-            click.echo('\n%s' % lib.upper())
-            libName = lib.split('.')[0]
-            c = 'arduino-cli lib search %s' % libName
-            pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-            output = pr.communicate()[0]
-            inp = ''
-            if('No libraries matching your search' in output):
-                click.echo('The Library Name used in the skecth is different from the Library Binary Name')
-                inp = click.prompt('Exact Library Name', type=str)
-            else:
-                click.echo(output)    
-                inp = click.prompt('Choose Libray Name from the list ', type=str, default=lib, show_default=True)
-            c = 'arduino-cli lib install "%s"' % inp
-            pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-            click.echo(pr.communicate()[0])
-            input("Press Enter to continue...")    
-    os.chdir(cwd)    
-    global environmentPrepared
-    environmentPrepared = True
-
-
 # CUSTOM TYPES
 SWN_STRING = StartWithoutNumberStringParamType()
 OBJ_STRING = ObjectStringParamType()
@@ -1742,6 +1643,113 @@ def compile(ctx):
     if(click.confirm('Flash the Embedded-C File?', default=True)):
         click.echo()
         ctx.invoke(flash)
+
+@cli.command()
+@click.pass_context
+def prepareArduinoEnvironment(ctx, **kwargs):
+    '''Prepares the environment for execting the program'''
+    global template
+    click.echo('Hint: Before compiling or flashing, be sure that the board which the Embedded-C File will be compiled on is connected to the Serial Port')
+    click.echo('The compile and flash operations are made up with arduino-cli software')
+    home = os.path.expanduser('~')
+    library_path = home + '/Arduino/libraries/'
+    cwd = os.getcwd()
+    # verify that arduino-cli is installed
+    commandFound = False
+    for path in os.environ["PATH"].split(os.pathsep):
+        exe_file = os.path.join(path, 'arduino-cli')
+        if os.path.isfile(exe_file) and os.access(exe_file, os.X_OK):
+            commandFound = True
+            break
+    # install arduino-cli    
+    if(not(commandFound)):
+        os.chdir(home) 
+        c = 'curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh'
+        click.echo()
+        pr1 = sp.Popen(shlex.split(c), universal_newlines=True, check=True, stdout=sp.PIPE)
+        pr2 = sp.Popen(['sh'], universal_newlines=True,  check=True, stdin=pr1.stdout)
+        pr2.wait()
+    # verify that the arduino-cli configuration file is created
+    configFile = home + '/.arduino15/arduino-cli.yaml'
+    if(not(os.path.exists(configFile))):  
+        c = 'arduino-cli config init'
+        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+        click.echo(pr.communicate()[0])
+    # verify that the esp core is installed in arduino-cli    
+    coreUrl = ''
+    if template.name == "esp32.txt":
+        coreUrl = 'https://raw.githubusercontent.com/espressif/arduino-esp32/master/package/package_esp32_index.template.json'
+    elif template.name == "esp8266.txt":
+        coreUrl = 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'
+    yamlDict = yaml.load(open(configFile, 'r'), Loader=yaml.FullLoader)   
+    coreFound = False
+    for item in yamlDict['board_manager']['additional_urls']:
+        if(item == coreUrl):
+            coreFound = True
+            break
+    if(not(coreFound)):
+        yamlDict['board_manager']['additional_urls'].append(coreUrl)
+        with open(configFile, 'w') as yamlFile:
+            yaml.dump(yamlDict, yamlFile)     
+    # update core index        
+    c = 'arduino-cli core update-index'
+    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+    while True:
+        output = pr.stdout.readline()
+        if output == '' and pr.poll() is not None:
+            break
+        if output:
+            click.echo(output.strip())
+    # install esp8266 core
+    c = ''
+    if template.name == "esp32.txt":
+        c = 'arduino-cli core install esp32:esp32'    
+    elif template.name == "esp8266.txt":
+        c = 'arduino-cli core install esp8266:esp8266'    
+    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+    while True:
+        output = pr.stdout.readline()
+        if output == '' and pr.poll() is not None:
+            break
+        if output:
+            click.echo(output.strip())
+    # install mandatory libraries
+    c = 'arduino-cli lib install "WebSockets"'
+    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+    pr.wait()
+    c = 'arduino-cli lib install "ArduinoJson"'
+    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+    pr.wait()
+    click.echo('\nHint: Each libraries used in the Embedded-C File MUST be installed')
+    click.echo('It is necessary to provide the exact name of the library to install')
+    click.echo('The path of arduino-cli libraries is %s' % library_path)
+    if((ctx.obj is not None) and (len(ctx.obj['template']['libraries']) > 0)):
+        for lib in ctx.obj['template']['libraries']:
+            click.echo('\n%s' % lib.upper())
+            libName = lib.split('.')[0]
+            c = 'arduino-cli lib search %s' % libName
+            pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+            output = pr.communicate()[0]
+            inp = ''
+            if('No libraries matching your search' in output):
+                click.echo('The Library Name used in the skecth is different from the Library Binary Name')
+                inp = click.prompt('Exact Library Name', type=str)
+            else:
+                click.echo(output)    
+                inp = click.prompt('Choose Libray Name from the list ', type=str, default=lib, show_default=True)
+            c = 'arduino-cli lib install "%s"' % inp
+            pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+            click.echo(pr.communicate()[0])
+            input("Press Enter to continue...")
+    os.chdir(library_path)
+    if not os.path.isdir(library_path + 'ESPAsyncWebServer'):
+        click.echo('Installing ESPAsyncWebServer from GitHub')
+        c = 'git clone https://github.com/me-no-dev/ESPAsyncWebServer.git'
+        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+        pr.wait()
+    os.chdir(cwd)    
+    global environmentPrepared
+    environmentPrepared = True
 
 
 @cli.command()

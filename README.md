@@ -19,6 +19,7 @@ This package is only supported by Linux systems.
 - npm (tested with version 3.5.x)
 - pip3 Python package manager
 - A proper C/C++ compiler toolchain, like GCC
+- git
 
 ## Usage
 ### Clone and install
