@@ -1,3 +1,5 @@
+const {Terminal} = require(path.resolve('node_modules/xterm/lib/xterm.js'));
+
 var CustomTerminal = function () { 
 
     this.terminal = new Terminal(options = {

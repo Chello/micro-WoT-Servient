@@ -2,6 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const {JSONEditor} = require(path.resolve('node_modules/@json-editor/json-editor/dist/jsoneditor'));
 const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
+window.$ = window.jQuery = require('jquery');
+require('jquery-ui-dist/jquery-ui');
+const cp = require("child_process");
+
 var term = {};
 
 $(document).ready(function() {
