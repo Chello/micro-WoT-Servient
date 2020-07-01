@@ -444,7 +444,15 @@
           "body": {
             "title": "Action function",
             "type": "string",
-            "format": "textarea",
+            "format": "c++",
+            "options": {
+              "ace": {
+                "theme": "ace/theme/vibrant_ink",
+                "tabSize": 2,
+                "useSoftTabs": true,
+                "wrap": true
+              }
+            },
             "minLength": 1,
             "description": "Body of the function for current action"
           },

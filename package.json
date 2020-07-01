@@ -1,20 +1,19 @@
 {
-  "name": "electron-quick-start",
+  "name": "Embedded WoT Servient",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Build a WoT Servient for embedded devices",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/Chello/WoT-microcontroller-servient-GUI",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Embedded",
+    "WoT",
+    "Servient",
+    "GUI"
   ],
-  "author": "GitHub",
+  "author": "Federico Rachelli",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^8.3.0"
@@ -22,6 +21,7 @@
   "dependencies": {
     "@angular/cli": "^9.1.6",
     "@json-editor/json-editor": "^2.2.1",
+    "ace-code-editor": "1.2.3",
     "jquery": "^3.5.1",
     "xterm": "^4.6.0",
     "bootstrap": "4.5.0",
