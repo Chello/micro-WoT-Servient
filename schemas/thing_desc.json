@@ -447,7 +447,7 @@
             "format": "c++",
             "options": {
               "ace": {
-                "theme": "ace/theme/vibrant_ink",
+                "theme": "ace/theme/twilight",
                 "tabSize": 2,
                 "useSoftTabs": true,
                 "wrap": true

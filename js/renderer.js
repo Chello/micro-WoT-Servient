@@ -11,6 +11,7 @@ var term = {};
 $(document).ready(function() {
 
     $('#footer').resizable();
+    window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
     var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
 
