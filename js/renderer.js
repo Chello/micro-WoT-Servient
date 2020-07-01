@@ -1,4 +1,7 @@
 const fs = require('fs');
+const path = require('path');
+const {JSONEditor} = require(path.resolve('node_modules/@json-editor/json-editor/dist/jsoneditor'));
+const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
 var term = {};
 
 $(document).ready(function() {

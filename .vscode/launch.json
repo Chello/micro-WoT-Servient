@@ -8,11 +8,6 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["start"]
-            /*"args": ["build", 
-
-                "-T", "asdf/asdf.json",
-                "-t", "esp32.txt",
-                "-o", "asdf/opt_asdf.json"]*/
         },
         {
             "name": "Py build with args",
@@ -20,12 +15,10 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            //"args": ["start"]
             "args": ["build", 
-
-                "-T", "asdf/asdf.json",
+                "-T", "test5/test5.json",
                 "-t", "esp32.txt",
-                "-o", "asdf/opt_asdf.json"]
+                "-o", "test5/opt_test5.json"]
         },
         {
             "name": "Debug Node Main Process",

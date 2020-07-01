@@ -1600,7 +1600,7 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
     writeFile(filePath, output)
     click.echo('\n\nCOMPILING')
     if(optionsFile != None or click.confirm('Compile the Embedded-C File?', default=True)):
-        prepareArduinoEnvironment(ctx)
+        ctx.invoke(prepareArduinoEnvironment)
         click.echo()
         ctx.invoke(compile)
     else:
@@ -1616,7 +1616,8 @@ def compile(ctx):
     global boardFQBN
 
     if(not(environmentPrepared)):
-        prepareArduinoEnvironment(ctx)
+        #prepareArduinoEnvironment(ctx)
+        ctx.invoke(prepareArduinoEnvironment)
     # SET FQBN STRING FOR COMPILING AND FLASHING
 
     if template.name == "esp32.txt":
@@ -1646,7 +1647,7 @@ def compile(ctx):
 
 @cli.command()
 @click.pass_context
-def prepareArduinoEnvironment(ctx, **kwargs):
+def prepareArduinoEnvironment(ctx):
     '''Prepares the environment for execting the program'''
     global template
     click.echo('Hint: Before compiling or flashing, be sure that the board which the Embedded-C File will be compiled on is connected to the Serial Port')
@@ -1760,7 +1761,8 @@ def flash(ctx):
     global boardFQBN
 
     if(not(environmentPrepared)):
-        prepareArduinoEnvironment(ctx)
+        #prepareArduinoEnvironment(ctx)
+        ctx.invoke(prepareArduinoEnvironment)
     click.echo('\nStart flashing...\n') 
     sketchDir = ''
     if(ctx.obj is None):
