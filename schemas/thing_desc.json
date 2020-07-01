@@ -457,11 +457,13 @@
             "description": "Body of the function for current action"
           },
           "safe": {
-            "title": "Is function safe?",
+            "title": "Function is safe",
+            "format": "checkbox",
             "type": "boolean"
           },
           "idempotent": {
-            "title": "Is function idempotent?",
+            "title": "Function is idempotent?",
+            "format": "checkbox",
             "type": "boolean"
           },
           "@type": {

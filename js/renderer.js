@@ -206,7 +206,7 @@ var composeTD = function() {
                 td['events'][name]['subscription'] = {};
                 
                 arrSubscription.forEach(element => { //foreach subscription provided
-                    var subscriptionName = element.subscriptionName
+                    var subscriptionName = element['subscriptionName']
                     td['events'][name]['subscription'][subscriptionName] = element;
                     //delete subscriptionName
                     td['events'][name]['subscription'][subscriptionName]['subscriptionName'] = undefined;
@@ -219,7 +219,7 @@ var composeTD = function() {
                 td['events'][name]['data'] = {};
                 
                 arrData.forEach(element => { //foreach data provided
-                    var dataName = element.dataName
+                    var dataName = element['dataName']
                     td['events'][name]['data'][dataName] = element;
                     //delete dataName
                     td['events'][name]['data'][dataName]['dataName'] = undefined;
@@ -232,7 +232,7 @@ var composeTD = function() {
                 td['events'][name]['cancellation'] = {};
                 
                 arrCancellation.forEach(element => { //foreach cancellation provided
-                    var cancellationName = element.cancellationName
+                    var cancellationName = element['cancellationName']
                     td['events'][name]['cancellation'][cancellationName] = element;
                     //delete cancellationName
                     td['events'][name]['cancellation'][cancellationName]['cancellationName'] = undefined;
