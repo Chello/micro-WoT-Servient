@@ -292,10 +292,15 @@ var createTDFiles = function(thingName) {
                     console.log('File ${thingName}.json created successfully!'); 
                 })
     //generate exec string
+    console.log($("#serial_port").val());
+    //create serial port
+    var serial_port = ($('#flash').is(":checked")) ? ' -p ' + $("#serial_port").val() : "";
     var exec_str =  'embeddedWoTServient/embeddedWoTServient.py build' +
                     ' -T ' + tdFile + 
                     ' -o ' + optFile +
-                    ' -t ' + tmplFile;
+                    ' -t ' + tmplFile +
+                    serial_port;
+    console.log(exec_str)
     term.exec(exec_str)
 }
 

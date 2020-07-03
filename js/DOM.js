@@ -9,9 +9,7 @@ $(document).ready(function() {
     result = cp.exec(command, []);
     //manage ports obtained
     result.stdout.on('data', function(data) {
-        //console.log(data.toString())
         data.toString().split('\n').forEach(element => {
-            console.log(element);
             if (element.includes("/dev/")) {
                 var port = element.split(' ')[0];
                 $("#serial_port").append(new Option(port, port));
@@ -26,13 +24,6 @@ $(document).ready(function() {
  */
 $('#build_compile_button').on('click', function() {
     build_compile_flash();
-});
-
-/**
- * Action triggered when flash button is pressed
- */
-$('#flash_button').on('click', function() {
-    alert("soccmel")
 });
 
 /**

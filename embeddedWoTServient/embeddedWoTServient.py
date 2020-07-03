@@ -1254,8 +1254,9 @@ def start(ctx, **kwargs):
 @click.option('-t', '--template', 'templateFile', help='Specify compiling template.')
 @click.option('-o', '--options', 'optionsFile', help='Specify options via JSON file. If provided, will next compile and flash code.')
 @click.option('-T', '--thingdesc', 'thing_desctription', help='Specify thing description')
+@click.option('-p', '--port', 'serial_port', help='Specify flashing port. If not specified will be requested.')
 @click.pass_context
-def build(ctx, templateFile, optionsFile, thing_desctription):
+def build(ctx, templateFile, optionsFile, thing_desctription, serial_port):
     '''Build executable Embedded-C File'''
     click.echo('Start building...\n')
     global thingProperties
@@ -1274,10 +1275,12 @@ def build(ctx, templateFile, optionsFile, thing_desctription):
         template = env.get_template(templateFile)
     else:
         template = env.get_template('esp8266.txt')
-
-
+    
     ctx.ensure_object(dict)
     ctx.obj.setdefault('template', {})  
+
+    if serial_port is not None:
+        ctx.obj.setdefault('serial_port', serial_port)
 
     if((ctx.obj is None) or ('td' not in ctx.obj)):
         # IF OPTION FILE IS SPECIFIED
@@ -1641,7 +1644,7 @@ def compile(ctx):
     if('error' in output):
         sys.exit()
     click.echo('\nSTART FLASHING')        
-    if(click.confirm('Flash the Embedded-C File?', default=True)):
+    if('serial_port' in ctx.obj or click.confirm('Flash the Embedded-C File?', default=True)):
         click.echo()
         ctx.invoke(flash)
 
@@ -1765,6 +1768,8 @@ def flash(ctx):
         ctx.invoke(prepareArduinoEnvironment)
     click.echo('\nStart flashing...\n') 
     sketchDir = ''
+    serialPort = ''
+
     if(ctx.obj is None):
         sketchDir = click.prompt('Insert the path of the directory where the Embedded-C File to flash is located', type=click.Path(exists=True, readable=True, resolve_path=True))
         ctx.ensure_object(dict)
@@ -1773,12 +1778,17 @@ def flash(ctx):
             sketchDir = ctx.obj['sketchdir']
         elif('td' in ctx.obj):    
             sketchDir = ctx.obj['td']['title'].lower()
-    click.echo('\nList of serial ports connected to boards:')
-    c = 'arduino-cli board list'      
-    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-    click.echo(pr.communicate()[0])
-    serialPort = click.prompt('Serial Port to flash', type=str)
-    click.echo()
+
+    # IF SERIAL PORT IS SPECIFIED
+    if 'serial_port' in ctx.obj:
+        serialPort = ctx.obj['serial_port']
+    else:
+        click.echo('\nList of serial ports connected to boards:')
+        c = 'arduino-cli board list'      
+        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+        click.echo(pr.communicate()[0])
+        serialPort = click.prompt('Serial Port to flash', type=str)
+        click.echo()
 
     c = 'arduino-cli compile %s %s' % (boardFQBN, sketchDir)
 
