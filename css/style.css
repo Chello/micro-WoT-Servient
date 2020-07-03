@@ -3,7 +3,7 @@ body{
     overflow-y: hidden;
 }
 
-#target_board {
+.labels {
     color: white;
 }
 

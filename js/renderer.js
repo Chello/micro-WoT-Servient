@@ -247,65 +247,6 @@ var composeTD = function() {
 }
 
 /**
- * Action triggered when submit-button is clicked
- */
-$('#submit_button').on('click', function() {
-    hide_show_terminal(true);
-    
-    var editorErrors = editor.validate();
-    var builderErrors = builder.validate();
-
-    if (editorErrors.length || builderErrors.length) {
-        alert("Some errors found in forms. Please check");
-        if (editorErrors.length) {
-            term.write(
-                "\n\nErrors found in Thing description:\n" + JSON.stringify(editorErrors, 
-                ["path","message"], ' '));
-        }
-        if (builderErrors.length) {
-            term.write(
-                "\n\nErrors found in builder description:\n" + JSON.stringify(builderErrors, 
-                ["path","message"], ' '));
-        }
-        return;
-    }
-
-    var thingName = editor.getValue()['title'];
-    console.log(thingName)
-
-    //generate directory path name
-    var dirPath = path.join(__dirname, thingName);
-    //if does not exist directory
-    if (!fs.existsSync(dirPath)) {
-        //create it
-        createThingFiles(dirPath, thingName);
-    } else {
-        //else ask if wanted to overwrite   
-        if (confirm("Thing "+dirPath+" already exists! Do you want to overwrite it?")) {
-            createThingFiles(dirPath, thingName);
-        }
-    }
-});
-
-$("#hide_show").on('click', function() {
-    hide_show_terminal();
-})
-
-var hide_show_terminal = function(force) {
-    if ($('#terminal_holder').is(":hidden") || force) {
-        //show terminal
-        $('#terminal_holder').show();
-        $('#content').css("bottom", "300px");
-        $('#footer').css("height", "300px");
-    }
-    else {
-        $('#terminal_holder').hide();
-        $('#content').css("bottom", "30px");
-        $('#footer').css("height", "30px");
-    }
-}
-
-/**
  * Creates thing directory. 
  * If creation success, then creates files
  * @param {String} dirPath the path that will contain files
@@ -356,4 +297,42 @@ var createTDFiles = function(thingName) {
                     ' -o ' + optFile +
                     ' -t ' + tmplFile;
     term.exec(exec_str)
+}
+
+var build_compile_flash = function() {
+    hide_show_terminal(true);
+    
+    var editorErrors = editor.validate();
+    var builderErrors = builder.validate();
+
+    if (editorErrors.length || builderErrors.length) {
+        alert("Some errors found in forms. Please check");
+        if (editorErrors.length) {
+            term.write(
+                "\n\nErrors found in Thing description:\n" + JSON.stringify(editorErrors, 
+                ["path","message"], ' '));
+        }
+        if (builderErrors.length) {
+            term.write(
+                "\n\nErrors found in builder description:\n" + JSON.stringify(builderErrors, 
+                ["path","message"], ' '));
+        }
+        return;
+    }
+
+    var thingName = editor.getValue()['title'];
+    console.log(thingName)
+
+    //generate directory path name
+    var dirPath = path.join(__dirname, thingName);
+    //if does not exist directory
+    if (!fs.existsSync(dirPath)) {
+        //create it
+        createThingFiles(dirPath, thingName);
+    } else {
+        //else ask if wanted to overwrite   
+        if (confirm("Thing "+dirPath+" already exists! Do you want to overwrite it?")) {
+            createThingFiles(dirPath, thingName);
+        }
+    }
 }

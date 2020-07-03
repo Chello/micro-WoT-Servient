@@ -462,7 +462,7 @@
             "type": "boolean"
           },
           "idempotent": {
-            "title": "Function is idempotent?",
+            "title": "Function is idempotent",
             "format": "checkbox",
             "type": "boolean"
           },
