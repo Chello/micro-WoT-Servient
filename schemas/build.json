@@ -100,8 +100,8 @@
           "wrap": true
         }
       },
-      "title": "Setup code",
-      "description": "Code will be added to setup() function"
+      "title": "Additional setup() code",
+      "description": "Code will be added to void setup() function"
     },
     "loop": {
       "type": "string",
@@ -114,8 +114,8 @@
           "wrap": true
         }
       },
-      "title": "Loop code",
-      "description": "Code will be added to loop() function"
+      "title": "Additional loop() code",
+      "description": "Code will be added to void loop() function"
     }
   }
 }
