@@ -91,13 +91,29 @@
     },
     "setup": {
       "type": "string",
-      "format": "textarea",
+      "format": "c++",
+      "options": {
+        "ace": {
+          "theme": "ace/theme/twilight",
+          "tabSize": 2,
+          "useSoftTabs": true,
+          "wrap": true
+        }
+      },
       "title": "Setup code",
       "description": "Code will be added to setup() function"
     },
     "loop": {
       "type": "string",
-      "format": "textarea",
+      "format": "c++",
+      "options": {
+        "ace": {
+          "theme": "ace/theme/twilight",
+          "tabSize": 2,
+          "useSoftTabs": true,
+          "wrap": true
+        }
+      },
       "title": "Loop code",
       "description": "Code will be added to loop() function"
     }

@@ -13,13 +13,14 @@ $(document).ready(function() {
     $('#footer').resizable();
     window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
-    var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
+    var initial = JSON.parse("{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\"]}],\"useWS\":true,\"links\":[],\"properties\":[]}")
+    //var initial = "";
 
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
 
-        //startval: initial,
+        startval: initial,
         
         // The schema for the editor
         schema: {
@@ -30,7 +31,7 @@ $(document).ready(function() {
         //are fields all required? no
         required_by_default: false,
 
-        object_layout: "table",
+        object_layout: "normal",
         //show checkbox for non-required opt
         show_opt_in: true,
         //show errors in editor
@@ -41,10 +42,13 @@ $(document).ready(function() {
         iconlib: "fontawesome4"
     });
 
+    var initbuild = JSON.parse("{\"ssid\":\"asdffg\",\"password\":\"\",\"portserver\":\"80\",\"portsocket\":\"81\",\"libraries\":[]}")
+
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
         
+        //startval: initbuild,
         // The schema for the editor
         schema: {
             type: "object",

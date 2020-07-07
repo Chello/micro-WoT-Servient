@@ -9,7 +9,9 @@
     "@context",
     "security",
     "securityDefinitions",
-    "useWS"
+    "useWS",
+    "properties",
+    "links"
   ],
   "properties": {
     "title": {
@@ -31,6 +33,7 @@
       "description": "JSON schema(s) for Thing",
       "items": {
         "type": "string",
+        "title": "Context URI",
         "properties": {
           "name": "thing_schema"
         }
@@ -130,30 +133,36 @@
     "description": {
       "type": "string",
       "title": "Description",
-      "description": "Thing description"
+      "description": "Thing description",
+      "default": ""
     },
     "version": {
       "type": "string",
       "title": "Version",
-      "description": "Thing version"
+      "description": "Thing version",
+      "default": ""
     },
     "support": {
       "type": "string",
-      "title": "Thing support URI"
+      "title": "Thing support URI",
+      "default": ""
     },
     "base": {
       "type": "string",
-      "title": "Thing base URI"
+      "title": "Thing base URI",
+      "default": ""
     },
     "created": {
       "type": "string",
       "format": "date",
-      "title": "Thing creation date"
+      "title": "Thing creation date",
+      "default": ""
     },
     "modified": {
       "type": "string",
       "format": "date",
-      "title": "Thing modification date"
+      "title": "Thing modification date",
+      "default": ""
     },
     "links": {
       "type": "array",
@@ -161,6 +170,7 @@
       "options": {
         "collapsed": true
       },
+      "default": [],
       "items": {
         "headerTemplate": "Link {{i}}",
         "type": "object",
@@ -190,6 +200,7 @@
       "options": {
         "collapsed": true
       },
+      "default": [],
       "items": {
         "type": "object",
         "title": "Thing property",
