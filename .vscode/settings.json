@@ -3,5 +3,12 @@
         "titleBar.activeBackground" : "#f2c216",
         "titleBar.inactiveBackground": "#ac8b12",
         "titleBar.activeForeground":"#000",
+    },
+    "files.associations": {
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "string": "cpp"
     }
 }
