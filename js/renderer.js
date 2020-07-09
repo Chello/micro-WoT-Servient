@@ -20,7 +20,7 @@ $(document).ready(function() {
         // Enable fetching schemas via ajax
         ajax: true,
 
-        startval: initial,
+        //startval: initial,
         
         // The schema for the editor
         schema: {

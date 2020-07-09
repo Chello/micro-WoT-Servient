@@ -1,4 +1,4 @@
 node_modules
-asd*
+# asd*
 tmp
-test*
+# test*

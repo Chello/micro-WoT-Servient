@@ -22,6 +22,7 @@ class WebSocketBinding {
         DynamicJsonDocument ipia_doc;
         // document to handle Events WebSocket requests
         DynamicJsonDocument e_doc;
+        // document to handle Events Schemas
         DynamicJsonDocument es_doc;
         // document to store the ip addresses of clients connected to WebSocket channel for Events requests   
         DynamicJsonDocument ipe_doc;
@@ -45,7 +46,7 @@ class WebSocketBinding {
         const bool events_cancellationSchema[2] = {false,false};
 
         String events_list[2];
-        
+
         DeserializationError err;
         // Properties
         const char* property1_name = "proprieta";
@@ -54,7 +55,6 @@ class WebSocketBinding {
         // Actions
         const char* action1_name = "azione";
         const int action1_inputsNumber = 1;
-        const String action1_schema[1] = {"{\"name\":\"in\",\"type\":\"string\"}"};
 
         // Events
         const char* event1_name = "evento";
@@ -64,13 +64,14 @@ class WebSocketBinding {
         const String ws_endpoint[3] = {req3,req4,req5}; 
         const String ws_actions[1] = {action1_name};
 
-        const int ws_requestsNumber = 3;
-        const int ws_actionsNumber = 1;
-
         const int properties_number = 1;
-        const int objectProperties_number = 0;
         const int actions_number = 1;
         const int events_number = 2;
+
+        const int objectProperties_number = 0;
+        const int ws_actionsNumber = 1;
+
+        const int ws_requestsNumber = 3;
 
         String events_endpoint[2];
 

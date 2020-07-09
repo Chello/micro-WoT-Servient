@@ -1,0 +1,1 @@
+{"ssid":"asddffgg","password":"","portserver":"80","portsocket":"81","libraries":[],"actionFunctions":[{"source":"cli","name":"az","body":"return \"plutonzo\"","output":{"name":"","type":"string"},"input":[{"name":"in","type":"string"}]}],"eventConditions":[{"condition":"true","actions":[]}]}

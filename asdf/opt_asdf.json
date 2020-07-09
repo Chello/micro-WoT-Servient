@@ -1,0 +1,1 @@
+{"ssid":"pippol","password":"","portserver":"80","portsocket":"81","libraries":[],"actionFunctions":[{"source":"cli","name":"azione","body":"delay(90);","output":{"name":"","type":"integer"},"input":[{"name":"in1","type":"boolean"},{"name":"in2","type":"string"}]}],"eventConditions":[{"condition":"true","actions":["azione"]},{"condition":"true","actions":["azione"]}]}

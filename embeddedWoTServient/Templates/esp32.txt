@@ -637,6 +637,7 @@ DynamicJsonDocument es_doc(20);
 {% endif %}
 // document to store the ip addresses of clients connected to WebSocket channel for Events requests   
 DynamicJsonDocument ipe_doc(2000);
+// Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 {% endif %}
 DeserializationError err;
