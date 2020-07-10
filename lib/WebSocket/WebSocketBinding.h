@@ -3,6 +3,9 @@
 #include "Arduino.h"
 #include <WebSocketsServer.h>
 
+typedef String (*properties_handler)();
+typedef String (*actions_handler)(String);
+
 class WebSocketBinding {
     public:
         WebSocketBinding(int portSocket);//: ia_doc(1000), ipia_doc(2000), e_doc(1000), es_doc(20), ipe_doc(2000);
@@ -10,7 +13,11 @@ class WebSocketBinding {
         void sendWebSocketTXT(String txt, const char* event_name);
         void webSocketLoop();
 
-        void bindEvents(String ws_endpoints[]);
+        void bindEvents(String ws_endpoints[]);//may be useless
+
+        void bindEventSchema(DynamicJsonDocument doc);
+
+        void exposeProperties(String *properties_endpoint, properties_handler callbacks[]);
 
     private:
         void _clientDisconnect(uint8_t num, uint8_t* pl);
@@ -42,10 +49,8 @@ class WebSocketBinding {
         const String req1 = "/";
 
         const bool events_subscriptionSchema[2] = {false,false};
-        const bool events_dataSchema[2] = {false,false};
+        //const bool events_dataSchema[2] = {false,false};
         const bool events_cancellationSchema[2] = {false,false};
-
-        String events_list[2];
 
         DeserializationError err;
         // Properties
@@ -60,9 +65,22 @@ class WebSocketBinding {
         const char* event1_name = "evento";
         const char* event2_name = "evento2";
 
+        String events_list[2] = {event1_name,event2_name};
+        String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
+
+        //mine
+        String actions_endpoint[1] = {req5};
+        String *properties_endpoint;//[/*2*/];// = {req3, req4};
+
+        actions_handler *actions_cb;
+        properties_handler *properties_cb;
+
+        //endmine
+
         const String ws_requests[3] = {thingName,property1_name,action1_name};
         const String ws_endpoint[3] = {req3,req4,req5}; 
         const String ws_actions[1] = {action1_name};
+        const String ws_properties[2] = {thingName, property1_name};
 
         const int properties_number = 1;
         const int actions_number = 1;
@@ -73,7 +91,6 @@ class WebSocketBinding {
 
         const int ws_requestsNumber = 3;
 
-        String events_endpoint[2];
 
         int i, j, k, n;
 
