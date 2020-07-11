@@ -32,7 +32,8 @@ void WebSocketBinding::webSocketLoop() {
                 break;
             }
             case WStype_CONNECTED: {
-                //this->_clientConnect(num, pl, length);
+                this->_clientConnect(num, pl, length);
+                /*
                 IPAddress ip;
                 String ip_s = "";
                 const char* payload = (char *) pl;
@@ -114,7 +115,7 @@ void WebSocketBinding::webSocketLoop() {
                         resp = properties_cb[i]();
                         webSocket.sendTXT(num, resp);
                     }
-                }
+                }*/
                 break;
             }
             case WStype_TEXT:
@@ -132,7 +133,6 @@ void WebSocketBinding::test() {
     Serial.printf("Nel test %s\n", actions_endpoint[0].c_str());
 }
 
-/*
 void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
     IPAddress ip;
     String ip_s = "";
@@ -183,7 +183,7 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
             }
             else {
                 done = true;
-                webSocket.sendTXT(num, "Connection confirmed");
+                webSocket.sendTXT(num, "Connection confirmed - event accomplished");
                 if(events_subscriptionSchema[i]) 
                     obj_e[events_list[i]] = false;
                 else {
@@ -225,25 +225,24 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
 
 
     //mine
-    //
-    //properties_cb[0]();
-    /*
+    Serial.printf("Nella callback %s\n", this->properties_endpoint[0].c_str());
     for(i = 0; !done && i < actions_number; i++) {
-        Serial.printf("qua dice %d %d %s\n", actions_number, i, this->actions_endpoint[i]);
+        Serial.printf("Siamo nelle actions, %d %d %s\n", actions_number, i, this->actions_endpoint[i].c_str());
         if (actions_endpoint[i].equals(payload)) {
             done = true;
             obj_ia[actions_endpoint[i]] = true;
-            webSocket.sendTXT(num, "Connection confirmed");
+            webSocket.sendTXT(num, "Connection confirmed - action accomplished");
             resp = actions_cb[i]("{}");
             webSocket.sendTXT(num, resp);
         }
     }
 
     for(i = 0; !done && i < properties_number; i++) {
+        Serial.printf("Siamo nelle properties, %d %d %s\n", properties_number, i, this->properties_endpoint[i].c_str());
         if (properties_endpoint[i].equals(payload)) {
             done = true;
             obj_ia[properties_endpoint[i]] = true;
-            webSocket.sendTXT(num, "Connection confirmed");
+            webSocket.sendTXT(num, "Connection confirmed - property accomplished");
             resp = properties_cb[i]();
             webSocket.sendTXT(num, resp);
         }
@@ -291,7 +290,7 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
             ;
 
         webSocket.sendTXT(num, resp);  
-    }
+    }*/
     
 
     Serial.printf("actions_number=%d, properties_number=%d\n", actions_number, properties_number);
@@ -306,7 +305,7 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
     Serial.println();
     serializeJsonPretty(ipia_doc, Serial);
     Serial.println();
-}*/
+}
 
 /*
 void WebSocketBinding::bindEvents(String ws_endpoints[]) {
