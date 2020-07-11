@@ -91,6 +91,17 @@ AsyncLongPoll *alp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
+String ae[2] = {req5, req6};
+String pe[2] = {req3, req4};
+
+String request3();
+String request4();
+
+String request5(String body);
+String request6(String body);
+
+properties_handler ph[2] = {request3, request4};
+actions_handler ah[2] = {request5, request6};
 
 int i, j, k, n;
 
@@ -190,12 +201,14 @@ void setup() {
     
     alp = new AsyncLongPoll();
     wsb = new WebSocketBinding(portSocket);
-    wsb->bindEventSchema(es_doc);
 
-    String pe[1] = {req4};
-    properties_handler ph[1] = {request4};
+    wsb->exposeProperties(pe, ph, 2);
+    
+    wsb->exposeActions(ae, ah, 2);
+    wsb->test();
 
-    wsb->exposeProperties(pe, ph);
+    //wsb->bindEventSchema(es_doc);
+
 
     Serial.println("Server started");
     Serial.println(urlServer);
@@ -205,6 +218,9 @@ void loop() {
 
     // handle Requests
     wsb->webSocketLoop();
+    // delay(1000);
+    // wsb->test();
+    // Serial.printf("Nel loop, %p %s", ae[0], ae[0].c_str());
 }
 
 void connection(const char* ssid, const char* password) {
@@ -518,7 +534,6 @@ String azione2(int intero,bool booleano) {
 	return "pippofranco";
 	
 }
-
 
 // handle Events
 /*
