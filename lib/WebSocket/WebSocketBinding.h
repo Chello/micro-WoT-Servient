@@ -21,11 +21,14 @@ class WebSocketBinding {
 
         void exposeProperties(const String *endpoints, properties_handler callbacks[], int prop_num);
         void exposeActions(const String *endpoints, actions_handler callbacks[], int act_num);
+        void exposeEvents(const String *endpoints, int evt_num);
 
     private:
         void _clientDisconnect(uint8_t num, uint8_t* pl);
         void _clientConnect(uint8_t num, uint8_t* pl, size_t length);
         void _clientText(uint8_t num, uint8_t* pl, size_t length);
+        bool _setEventHandled(String ip_s, int num);
+        bool _setIAHandled(String ip_s, int num, String endpoint);
         // document to handle Interaction Affordances WebSocket requests
         DynamicJsonDocument ia_doc;
         // document to store the ip addresses of clients connected to WebSocket channel for Interaction Affordances requests   
@@ -44,7 +47,7 @@ class WebSocketBinding {
 
         WebSocketsServer webSocket;
 
-        const String thingName = "test4";
+        // const String thingName = "test0";
 
         /*
         // Requests
@@ -59,7 +62,7 @@ class WebSocketBinding {
         //const bool events_dataSchema[2] = {false,false};
         const bool events_cancellationSchema[2] = {false,false};
 
-        DeserializationError err;
+        // DeserializationError err;
         /*
         // Properties
         const char* property1_name = "proprieta";
@@ -73,19 +76,23 @@ class WebSocketBinding {
         */
 
         // Events
-        const char* event1_name = "evento";
-        const char* event2_name = "evento2";
+        // const char* event1_name = "evento";
+        // const char* event2_name = "evento2";
 
-        String events_list[2] = {event1_name,event2_name};
-        String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
+        //String events_list[2] = {event1_name,event2_name};
+        //String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
         //mine
+        const String* events_endpoint;
         const String* actions_endpoint;
         const String* properties_endpoint;//[/*2*/];// = {req3, req4};
 
         actions_handler *actions_cb;
         properties_handler *properties_cb;
 
+        int properties_number;
+        int actions_number;
+        int events_number;
         //endmine
 
         //const String ws_requests[3] = {thingName,property1_name,action1_name};
@@ -93,14 +100,12 @@ class WebSocketBinding {
         //const String ws_actions[1] = {action1_name};
         //const String ws_properties[2] = {thingName, property1_name};
 
-        int properties_number;
-        int actions_number;
-        const int events_number = 2;
+        //const int events_number = 2;
 
-        const int objectProperties_number = 0;
-        const int ws_actionsNumber = 1;
+        // const int objectProperties_number = 0;
+        // const int ws_actionsNumber = 1;
 
-        const int ws_requestsNumber = 3;
+        // const int ws_requestsNumber = 3;
 
 
         int i, j, k, n;

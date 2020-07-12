@@ -205,6 +205,8 @@ void setup() {
     wsb->exposeProperties(pe, ph, 2);
     
     wsb->exposeActions(ae, ah, 2);
+
+    wsb->exposeEvents(events_endpoint, 2);
     wsb->test();
 
     //wsb->bindEventSchema(es_doc);
@@ -387,7 +389,7 @@ String request5(String body) {
                 }
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event1_name);
-                    wsb->sendWebSocketTXT(ws_msg, "evento1");
+                    wsb->sendWebSocketTXT(ws_msg, events_endpoint[0].c_str());
                 }
             }
             else
@@ -473,7 +475,7 @@ String request6(String body) {
                 }
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event2_name);
-                    wsb->sendWebSocketTXT(ws_msg, "evento2");
+                    wsb->sendWebSocketTXT(output, events_endpoint[1].c_str());
                 }
             }
             else
