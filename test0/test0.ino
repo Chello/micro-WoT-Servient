@@ -115,10 +115,10 @@ void setup() {
     JsonObject obj;
 
     schema_size = sizeof(event1_subscriptionSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("subscription");
+    if(es_doc[events_endpoint[0]].isNull())
+        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("subscription");
     else
-        arr = es_doc[event1_name].createNestedArray("subscription");
+        arr = es_doc[events_endpoint[0]].createNestedArray("subscription");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_subscriptionSchema[i]);
@@ -128,10 +128,10 @@ void setup() {
     }
 
     schema_size = sizeof(event1_dataSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("data");
+    if(es_doc[events_endpoint[0]].isNull())
+        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("data");
     else
-        arr = es_doc[event1_name].createNestedArray("data");
+        arr = es_doc[events_endpoint[0]].createNestedArray("data");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_dataSchema[i]);
@@ -141,10 +141,10 @@ void setup() {
     }
 
     schema_size = sizeof(event1_cancellationSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("cancellation");
+    if(es_doc[events_endpoint[0]].isNull())
+        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("cancellation");
     else
-        arr = es_doc[event1_name].createNestedArray("cancellation");
+        arr = es_doc[events_endpoint[0]].createNestedArray("cancellation");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_cancellationSchema[i]);
@@ -153,10 +153,10 @@ void setup() {
         obj["value"] = tmp_doc["value"];
     }
 
-    if(es_doc[event2_name].isNull())
-        arr = es_doc.createNestedObject(event2_name).createNestedArray("subscription");
+    if(es_doc[events_endpoint[1]].isNull())
+        arr = es_doc.createNestedObject(events_endpoint[1]).createNestedArray("subscription");
     else
-        arr = es_doc[event2_name].createNestedArray("subscription");
+        arr = es_doc[events_endpoint[1]].createNestedArray("subscription");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event2_subscriptionSchema[i]);
@@ -165,10 +165,10 @@ void setup() {
         obj["value"] = tmp_doc["value"];
     }
 
-    if(es_doc[event2_name].isNull())
-        arr = es_doc.createNestedObject(event2_name).createNestedArray("cancellation");
+    if(es_doc[events_endpoint[1]].isNull())
+        arr = es_doc.createNestedObject(events_endpoint[1]).createNestedArray("cancellation");
     else
-        arr = es_doc[event2_name].createNestedArray("cancellation");
+        arr = es_doc[events_endpoint[1]].createNestedArray("cancellation");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event2_cancellationSchema[i]);

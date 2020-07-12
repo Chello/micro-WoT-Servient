@@ -458,12 +458,13 @@ void WebSocketBinding::_clientDisconnect(uint8_t num, uint8_t* pl) {
 }
 
 void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
-    /*
+    
     IPAddress ip;
     String ip_s = "";
     const char* payload = (char *) pl;
     String resp = "";
     DynamicJsonDocument resp_doc(40);
+    DeserializationError err;
     bool parsingDone = false;
     int validInput = 0;
     String t_name = "";
@@ -485,51 +486,47 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
     else {
         String message = "";
         serializeJson(resp_doc, message);
-        i = 0;
-        while(!parsingDone && i<e_doc[ip_s].size()) {
-            j = 0;
-            while(!parsingDone && j<events_number) {
-                if(!e_doc[ip_s][i][events_list[j]].isNull()) {
-                    if(!e_doc[ip_s][i][events_list[j]] && events_subscriptionSchema[j]) {
+        for(i = 0; !parsingDone && i<e_doc[ip_s].size(); i++) {
+            for(j = 0; !parsingDone && j<events_number; j++) {
+                if(!e_doc[ip_s][i][events_endpoint[j]].isNull()) {
+                    if(!e_doc[ip_s][i][events_endpoint[j]] && events_subscriptionSchema[j]) {
                         DynamicJsonDocument tmp_doc(40);
                         JsonObject tmp = tmp_doc.createNestedObject();
                         validInput = 0;
-                        k = 0;
-                        while(!parsingDone && k<es_doc[events_list[j]]["subscription"].size()) {
+                        for(k = 0; !parsingDone && k<es_doc[events_endpoint[j]]["subscription"].size(); k++) {
                             t_name = "";
-                            serializeJson(es_doc[events_list[j]]["subscription"][k]["name"], t_name);
+                            serializeJson(es_doc[events_endpoint[j]]["subscription"][k]["name"], t_name);
                             t_name.replace("\"", "");
                             if(!resp_doc[t_name].isNull()) {
-                                tmp[t_name] = es_doc[events_list[j]]["subscription"][k]["value"];
+                                tmp[t_name] = es_doc[events_endpoint[j]]["subscription"][k]["value"];
                                 validInput++;
                             }
                             else  
                                 parsingDone = false;
-                            k++;
                         }
                         if(validInput == k) {
                             parsingDone = true;
                             validate = "";
                             serializeJson(tmp, validate);
                             if(validate.equals(message)) {
-                                e_doc[ip_s][i][events_list[j]] = true;
+                                e_doc[ip_s][i][events_endpoint[j]] = true;
                                 webSocket.sendTXT(num, "Subscription confirmed");
                             }
                             else 
                                 webSocket.sendTXT(num, "Subscription refused");
                         }
                     }
-                    else if(e_doc[ip_s][i][events_list[j]] && events_cancellationSchema[j]) {
+                    else if(e_doc[ip_s][i][events_endpoint[j]] && events_cancellationSchema[j]) {
                         DynamicJsonDocument tmp_doc(40);
                         JsonObject tmp = tmp_doc.createNestedObject();
                         validInput = 0;
                         k = 0;
-                        while(!parsingDone && k<es_doc[events_list[j]]["cancellation"].size()) {
+                        while(!parsingDone && k<es_doc[events_endpoint[j]]["cancellation"].size()) {
                             t_name = "";
-                            serializeJson(es_doc[events_list[j]]["cancellation"][k]["name"], t_name);
+                            serializeJson(es_doc[events_endpoint[j]]["cancellation"][k]["name"], t_name);
                             t_name.replace("\"", "");
                             if(!resp_doc[t_name].isNull()) {                                   
-                                tmp[t_name] = es_doc[events_list[j]]["cancellation"][k]["value"];
+                                tmp[t_name] = es_doc[events_endpoint[j]]["cancellation"][k]["value"];
                                 validInput++;
                             }
                             else
@@ -541,7 +538,7 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
                             validate = "";
                             serializeJson(tmp, validate);
                             if(validate.equals(message)) {
-                                e_doc[ip_s][i][events_list[j]] = false;
+                                e_doc[ip_s][i][events_endpoint[j]] = false;
                                 webSocket.sendTXT(num, "Cancellation confirmed");
                             }
                             else
@@ -549,24 +546,22 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
                         }
                     }  
                 }
-                j++;
             }
-            i++;
         }
         if(!parsingDone) {
             i = 0;
             while(!parsingDone && i<ia_doc[ip_s].size()) {
                 j = 0;
-                while(!parsingDone && j<ws_actionsNumber) { 
-                    if(!ia_doc[ip_s][i][ws_actions[j]].isNull()) {
-                        if(!ia_doc[ip_s][i][ws_actions[j]]) {
+                while(!parsingDone && j<actions_number) { 
+                    if(!ia_doc[ip_s][i][actions_endpoint[j]].isNull()) {
+                        if(!ia_doc[ip_s][i][actions_endpoint[j]]) {
                             k = 0;
-                            while(!parsingDone && k<ws_actionsNumber) {
+                            while(!parsingDone && k<actions_number) {
                                 switch(k) {
                                     case 0: {
                                         if(k == j) {
                                             parsingDone = true;
-                                            ia_doc[ip_s][i][ws_actions[j]] = true;
+                                            ia_doc[ip_s][i][actions_endpoint[j]] = true;
                                             //resp = request5(payload);
                                             webSocket.sendTXT(num, resp);
                                         }
@@ -598,5 +593,5 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
     Serial.println();
     serializeJsonPretty(ipia_doc, Serial);
     Serial.println();
-    */
+    
 }
