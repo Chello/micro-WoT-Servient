@@ -34,89 +34,6 @@ void WebSocketBinding::webSocketLoop() {
             }
             case WStype_CONNECTED: {
                 this->_clientConnect(num, pl, length);
-                /*
-                IPAddress ip;
-                String ip_s = "";
-                const char* payload = (char *) pl;
-                String resp = "";
-                bool done = false;
-                bool conn = false;
-                bool isAction = false;
-                JsonObject obj_e;
-                JsonObject obj_ipe;
-                JsonObject obj_ia;
-                JsonObject obj_ipia;
-                bool parsingDone = false;
-
-                ip = webSocket.remoteIP(num);
-                ip_s = ip.toString();
-                Serial.printf("\n%d", num);
-                Serial.print(" -> Connection request from ");
-                Serial.println(ip);
-                Serial.printf("Payload: %s\n", payload);
-
-                //FIRST CHECK IF IS CALLED AN EVENT ENDPOINT
-                //Foreach endpoint defined
-                for(i = 0; !done && i < events_number; i++) {
-                    //if the endpoint called matches one of the endpoint previously set
-                    if(events_endpoint[i].equals(payload)) {
-                        if(e_doc[ip_s].isNull()) {
-                            obj_e = e_doc.createNestedArray(ip_s).createNestedObject();
-                            obj_ipe = ipe_arr.createNestedObject();
-                            obj_ipe["ip"] = ip_s;
-                            obj_ipe["num"] = num;
-                            ipe_doc[ip_s] = num;
-                        }
-                        else {
-                            j = 0;
-                            while(!conn && j<e_doc[ip_s].size()) {
-                                if(!e_doc[ip_s][j][events_list[i]].isNull())
-                                    conn = true;
-                                j++;    
-                            }
-                            if(!conn)
-                                obj_e = e_doc[ip_s].createNestedObject();  
-                        }
-                        
-                        if(conn) {
-                            done = true;
-                            webSocket.sendTXT(num, "Connection already established");
-                        }
-                        else {
-                            done = true;
-                            webSocket.sendTXT(num, "Connection confirmed");
-                            if(events_subscriptionSchema[i]) 
-                                obj_e[events_list[i]] = false;
-                            else {
-                                obj_e[events_list[i]] = true;  
-                                webSocket.sendTXT(num, "Subscription confirmed");  
-                            }
-                        }
-                    }
-                }
-                //mine
-                Serial.printf("Nella callback %s\n", this->properties_endpoint[0].c_str());
-                for(i = 0; !done && i < actions_number; i++) {
-                    Serial.printf("Siamo nelle actions, %d %d %s\n", actions_number, i, this->actions_endpoint[i].c_str());
-                    if (actions_endpoint[i].equals(payload)) {
-                        done = true;
-                        obj_ia[actions_endpoint[i]] = true;
-                        webSocket.sendTXT(num, "Connection confirmed");
-                        resp = actions_cb[i]("{}");
-                        webSocket.sendTXT(num, resp);
-                    }
-                }
-
-                for(i = 0; !done && i < properties_number; i++) {
-                    Serial.printf("Siamo nelle properties, %d %d %s\n", properties_number, i, this->properties_endpoint[i].c_str());
-                    if (properties_endpoint[i].equals(payload)) {
-                        done = true;
-                        obj_ia[properties_endpoint[i]] = true;
-                        webSocket.sendTXT(num, "Connection confirmed");
-                        resp = properties_cb[i]();
-                        webSocket.sendTXT(num, resp);
-                    }
-                }*/
                 break;
             }
             case WStype_TEXT:
@@ -181,33 +98,28 @@ bool WebSocketBinding::_setIAHandled(String ip_s, int num, String endpoint) {
     //PREAMBOLO PER LA CONNESSIONE DI UN NUOVO HOST
     //Se é giá connesso lo avviso e faccio in modo che non venga fatto altro,
     //manipolando il fatto che si é ripresentato di nuovo lo stesso host di prima.
-    // for(i = 0; !done && i<ws_requestsNumber; i++) {
-        //if(ws_endpoint[i].equals(payload)) {
-            //If I can find the endpoint
-            if(ia_doc[ip_s].isNull()) {
-                obj_ia = ia_doc.createNestedArray(ip_s).createNestedObject();
-                obj_ia[endpoint] = true;
-                obj_ipia = ipia_arr.createNestedObject();
-                obj_ipia["ip"] = ip_s;
-                obj_ipia["num"] = num;
-                ipia_doc[ip_s] = num;
-            }
-            else {
-                for(j = 0; !conn && j<ia_doc[ip_s].size(); j++) {
-                    if(!ia_doc[ip_s][j][endpoint].isNull())
-                        conn = true;
-                }
-                if(!conn)
-                    obj_ia = ia_doc[ip_s].createNestedObject();  
-            }
-            
-            if(conn) {
-                done = true;
-                webSocket.sendTXT(num, "Connection already established");
-            }
-            return done;
-        //}
-    // }
+    if(ia_doc[ip_s].isNull()) {
+        obj_ia = ia_doc.createNestedArray(ip_s).createNestedObject();
+        obj_ia[endpoint] = true;
+        obj_ipia = ipia_arr.createNestedObject();
+        obj_ipia["ip"] = ip_s;
+        obj_ipia["num"] = num;
+        ipia_doc[ip_s] = num;
+    }
+    else {
+        for(j = 0; !conn && j<ia_doc[ip_s].size(); j++) {
+            if(!ia_doc[ip_s][j][endpoint].isNull())
+                conn = true;
+        }
+        if(!conn)
+            obj_ia = ia_doc[ip_s].createNestedObject();  
+    }
+    
+    if(conn) {
+        done = true;
+        webSocket.sendTXT(num, "Connection already established");
+    }
+    return done;
 }
 
 void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
@@ -216,9 +128,6 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
     const char* payload = (char *) pl;
     String resp = "";
     bool done = false;
-    bool conn = false;
-    bool isAction = false;
-    bool parsingDone = false;
 
     ip = webSocket.remoteIP(num);
     ip_s = ip.toString();
@@ -228,80 +137,22 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
     Serial.printf("Payload: %s\n", payload);
 
     //FIRST CHECK IF IS CALLED AN EVENT ENDPOINT
-    //Foreach endpoint defined
+    //Foreach event endpoint defined
     for(i = 0; !done && i < events_number; i++) {
-        //if the endpoint called matches one of the endpoint previously set
         Serial.printf("Siamo negli events, %d %d %s\n", events_number, i, this->events_endpoint[i].c_str());
+        //if the endpoint called matches one of the endpoint previously set
         if(events_endpoint[i].equals(payload)) {
             done = this->_setEventHandled(ip_s, num);
             done = true;
-            // if(e_doc[ip_s].isNull()) {
-            //     obj_e = e_doc.createNestedArray(ip_s).createNestedObject();
-            //     obj_ipe = ipe_arr.createNestedObject();
-            //     obj_ipe["ip"] = ip_s;
-            //     obj_ipe["num"] = num;
-            //     ipe_doc[ip_s] = num;
-            // }
-            // else {
-            //     for(j = 0; !conn && j<e_doc[ip_s].size(); j++) {
-            //         if(!e_doc[ip_s][j][events_endpoint[i]].isNull())
-            //             conn = true;    
-            //     }
-            //     if(!conn)
-            //         obj_e = e_doc[ip_s].createNestedObject();  
-            // }
-            
-            // if(conn) {
-            //     done = true;
-            //     webSocket.sendTXT(num, "Connection already established");
-            // }
-            // else {
-            //     done = true;
-            //     webSocket.sendTXT(num, "Connection confirmed - event accomplished");
-            //     if(events_subscriptionSchema[i]) 
-            //         obj_e[events_endpoint[i]] = false;
-            //     else {
-            //         obj_e[events_endpoint[i]] = true;  
-            //         webSocket.sendTXT(num, "Subscription confirmed");  
-            //     }
-            // }
         }
     }
-    
-    //PREAMBOLO PER LA CONNESSIONE DI UN NUOVO HOST
-    //Se é giá connesso lo avviso e faccio in modo che non venga fatto altro,
-    //manipolando il fatto che si é ripresentato di nuovo lo stesso host di prima.
-    /*for(i = 0; !done && i<ws_requestsNumber; i++) {
-        //if(ws_endpoint[i].equals(payload)) {
-            //If I can find the endpoint
-            if(ia_doc[ip_s].isNull()) {
-                obj_ia = ia_doc.createNestedArray(ip_s).createNestedObject();
-                obj_ipia = ipia_arr.createNestedObject();
-                obj_ipia["ip"] = ip_s;
-                obj_ipia["num"] = num;
-                ipia_doc[ip_s] = num;
-            }
-            else {
-                for(j = 0; !conn && j<ia_doc[ip_s].size(); j++) {
-                    if(!ia_doc[ip_s][j][ws_requests[i]].isNull())
-                        conn = true;
-                }
-                if(!conn)
-                    obj_ia = ia_doc[ip_s].createNestedObject();  
-            }
-            
-            if(conn) {
-                done = true;
-                webSocket.sendTXT(num, "Connection already established");
-            }
-        //}
-    }*/
+    // THEN CHECK IF IS CALLED AN ACTION ENDPOINT
+    //Foreach action endpoint defined
 
-
-    //mine
     //Serial.printf("Nella callback %s\n", this->properties_endpoint[0].c_str());
     for(i = 0; !done && i < actions_number; i++) {
         Serial.printf("Siamo nelle actions, %d %d %s\n", actions_number, i, this->actions_endpoint[i].c_str());
+        //if the endpoint called matches one of the actions endpoint
         if (actions_endpoint[i].equals(payload)) {
             done = this->_setIAHandled(ip_s, num, actions_endpoint[i]);
             done = true;
@@ -324,53 +175,6 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
         }
     }
 
-    //for(i = 0; )
-    // verify if the endpoint of this connection request refers to an Action    
-    /*for (j = 0; !done && j<ws_actionsNumber; j++) {
-        if(ws_requests[i].equals(ws_actions[j])) {
-            done = true;
-            isAction = true;
-            webSocket.sendTXT(num, "Connection confirmed");
-            for(k = 0; !parsingDone && k<ws_actionsNumber; k++) {
-                switch(k) {
-                    case 0: {
-                        if(k == j) {
-                            if(action1_inputsNumber == 0) {
-                                parsingDone = true;
-                                obj_ia[ws_requests[i]] = true; 
-                                //resp = request5("{}");
-                                resp = "plutonzo";
-                                webSocket.sendTXT(num, resp);
-                            }
-                        }
-                    }
-                    break;
-
-                }
-            }
-            if(!parsingDone)
-                obj_ia[ws_requests[i]] = false;
-        }
-    }*/
-    //If is not an action, so it is a property
-    /*
-    if(!isAction) {
-        done = true;
-        obj_ia[ws_requests[i]] = true;  
-        
-        if(ws_requests[i].equals(thingName))
-            //resp = request3();
-            ;
-        else if(ws_requests[i].equals(property1_name))
-            //resp = request4();
-            ;
-
-        webSocket.sendTXT(num, resp);  
-    }*/
-    
-
-    //Serial.printf("actions_number=%d, properties_number=%d\n", actions_number, properties_number);
-
     serializeJsonPretty(e_doc, Serial);
     Serial.println();
     serializeJsonPretty(es_doc, Serial);
@@ -384,7 +188,40 @@ void WebSocketBinding::_clientConnect(uint8_t num, uint8_t* pl, size_t length) {
 }
 
 void WebSocketBinding::bindEventSchema(DynamicJsonDocument doc) {
+    int eventsBound = doc.size();
+    JsonObject obj = doc.as<JsonObject>();
+    //JsonObject::iterator it = obj.begin();
+    int i = 0;
+    //setter
     this->es_doc = doc;
+    //for debug
+    serializeJsonPretty(this->es_doc, Serial);
+    this->events_subscriptionSchema[eventsBound];
+    this->events_cancellationSchema[eventsBound];
+
+    for (JsonPair kw : obj) {
+        // String key = it->key;
+        Serial.printf("Subscription for #%d is ", i);
+        if (!doc[kw.key()]["subscription"].isNull()) {
+            Serial.println("true");
+            this->events_subscriptionSchema[i] = true;
+        } else {
+            Serial.println("false");
+            this->events_subscriptionSchema[i] = false;
+        }
+
+        Serial.printf("Cancellation for #%d is ", i);
+        if (!doc[kw.key()]["cancellation"].isNull()) {
+            Serial.println("true");
+            this->events_subscriptionSchema[i] = true;
+        } else {
+            Serial.println("false");
+            this->events_subscriptionSchema[i] = false;
+        }
+
+        i++;
+
+    }
 }
 
 void WebSocketBinding::exposeProperties(const String *endpoints, properties_handler callbacks[], int prop_num) {

@@ -58,9 +58,9 @@ class WebSocketBinding {
         const String req1 = "/";
         */
 
-        const bool events_subscriptionSchema[2] = {false,false};
-        //const bool events_dataSchema[2] = {false,false};
-        const bool events_cancellationSchema[2] = {false,false};
+        bool events_subscriptionSchema[];// = {false,false};
+        //*bool events_dataSchema[2] = {false,false};
+        bool events_cancellationSchema[];// = {false,false};
 
         // DeserializationError err;
         /*

@@ -207,7 +207,8 @@ void setup() {
     wsb->exposeActions(ae, ah, 2);
 
     wsb->exposeEvents(events_endpoint, 2);
-    wsb->test();
+
+    wsb->bindEventSchema(es_doc);
 
     //wsb->bindEventSchema(es_doc);
 
