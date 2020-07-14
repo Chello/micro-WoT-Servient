@@ -14,12 +14,13 @@ WebSocketBinding::WebSocketBinding(int portSocket): ac_doc(2000), ia_doc(1000), 
 void WebSocketBinding::sendWebSocketTXT(String txt, const char* event_name) {
     for(i=0; i<ipe_arr.size(); i++) {
         String ws_ip = ipe_arr[i]["ip"];
-        Serial.printf("Sending Websocket string %s. Triggered event %s\n", txt, event_name);
         JsonArray ae = e_doc[ws_ip];
+        Serial.printf("Sending Websocket string %s. Triggered event %s. Sending to ip %s\n", txt.c_str(), event_name, ws_ip.c_str());
         for(j=0; j<ae.size(); j++) {
             if(!ae[j][event_name].isNull() && ae[j][event_name]) {
                 unsigned char ws_num = ipe_doc[ws_ip];
                 webSocket.sendTXT(ws_num, txt);
+                Serial.println("Done");
             }
         }
     }
@@ -27,6 +28,7 @@ void WebSocketBinding::sendWebSocketTXT(String txt, const char* event_name) {
 
 void WebSocketBinding::webSocketLoop() {
     webSocket.onEvent([this] (uint8_t num, WStype_t type, uint8_t* pl, size_t length) {
+        // this->test();
         switch(type) {
             case WStype_DISCONNECTED: {
                 this->_clientDisconnect(num, pl);
@@ -48,7 +50,7 @@ void WebSocketBinding::webSocketLoop() {
 }
 
 void WebSocketBinding::test() {
-    Serial.printf("Nel test %s\n", actions_endpoint[0].c_str());
+    Serial.printf("Nel test %s\n", this->events_endpoint[0].c_str());
 }
 
 bool WebSocketBinding::_setEventHandled(String ip_s, int num) {
@@ -195,7 +197,7 @@ void WebSocketBinding::bindEventSchema(DynamicJsonDocument doc) {
     //setter
     this->es_doc = doc;
     //for debug
-    serializeJsonPretty(this->es_doc, Serial);
+    // serializeJsonPretty(this->es_doc, Serial);
     this->events_subscriptionSchema[eventsBound];
     this->events_cancellationSchema[eventsBound];
 
@@ -242,6 +244,7 @@ void WebSocketBinding::exposeEvents(const String *endpoints, int evt_num) {
     this->events_endpoint = endpoints;
 
     this->events_number = evt_num;
+    //Serial.printf("Events endpoint 0 is %s\n", this->events_endpoint[0].c_str());
 }
 
 void WebSocketBinding::_clientDisconnect(uint8_t num, uint8_t* pl) {
@@ -300,13 +303,16 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
     String ip_s = "";
     const char* payload = (char *) pl;
     String resp = "";
-    DynamicJsonDocument resp_doc(40);
+    DynamicJsonDocument resp_doc(400);
     DeserializationError err;
     bool parsingDone = false;
     int validInput = 0;
     String t_name = "";
+    String t_value = "";
     String validate = "";
     String message = "";
+    DynamicJsonDocument tmp_doc(400);
+    JsonObject tmp = tmp_doc.createNestedObject();
 
     ip = webSocket.remoteIP(num);
     ip_s = ip.toString();
@@ -321,30 +327,49 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
         webSocket.sendTXT(num, "deserializeJson failed");
     }
     else {
-        String message = "";
+        //HERE CHECK IF THE HOST IS SUBSCRIBED TO A CERTAIN EVENT
+        //SO YOU HAVE TO REFER TO es_doc, THAT IS THE JSON DOCUMENT CONTAINING SCHEMAS
+        // String message = "";
         serializeJson(resp_doc, message);
+        Serial.printf("Il message é %s\n", message.c_str());
+        //foreach pending request for websocket events
         for(i = 0; !parsingDone && i<e_doc[ip_s].size(); i++) {
+            //foreach event
             for(j = 0; !parsingDone && j<events_number; j++) {
+                //if the j event is the connected event to the i request
                 if(!e_doc[ip_s][i][events_endpoint[j]].isNull()) {
+                    //if i'm not already subscribed && the subscription is needed
                     if(!e_doc[ip_s][i][events_endpoint[j]] && events_subscriptionSchema[j]) {
-                        DynamicJsonDocument tmp_doc(40);
-                        JsonObject tmp = tmp_doc.createNestedObject();
                         validInput = 0;
+                        //foreach subscription in es_doc schema
                         for(k = 0; !parsingDone && k<es_doc[events_endpoint[j]]["subscription"].size(); k++) {
                             t_name = "";
                             serializeJson(es_doc[events_endpoint[j]]["subscription"][k]["name"], t_name);
                             t_name.replace("\"", "");
+                            serializeJsonPretty(resp_doc, Serial);
+                            Serial.printf("Prima c'era resp_doc, mentre t_name é %s\n\tevents_endpoint[j] é %s\n\tk é %d\n", t_name.c_str(), events_endpoint[j].c_str(), k);
+                            //if in the text sent via ws there is a key like the one in the subscription schema
                             if(!resp_doc[t_name].isNull()) {
-                                tmp[t_name] = es_doc[events_endpoint[j]]["subscription"][k]["value"];
+                                //set the value in the schema as the value in the temp object
+                                t_value = "";
+                                serializeJson(es_doc[events_endpoint[j]]["subscription"][k]["value"], t_value);
+                                t_value.replace("\"", "");
+                                //tmp["t_name"] = t_value;
+                                tmp[t_name] = t_value.c_str();
+                                //Serial.printf("\tes_doc[events_endpoint[j]]['subscription'][k]['value'] = %s\n", t_value.c_str());
                                 validInput++;
                             }
                             else  
                                 parsingDone = false;
                         }
+                        //if all inputs scanned are valid
                         if(validInput == k) {
                             parsingDone = true;
                             validate = "";
                             serializeJson(tmp, validate);
+                            serializeJsonPretty(tmp, Serial);
+                            //Serial.printf("Sembrerebbe che sia stato parsato tutto bene\n");
+                            //if the validating json array is like the sent message 
                             if(validate.equals(message)) {
                                 e_doc[ip_s][i][events_endpoint[j]] = true;
                                 webSocket.sendTXT(num, "Subscription confirmed");
@@ -353,22 +378,23 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
                                 webSocket.sendTXT(num, "Subscription refused");
                         }
                     }
+                    //else if i'm already subscribed and cancellationschema is needed
                     else if(e_doc[ip_s][i][events_endpoint[j]] && events_cancellationSchema[j]) {
-                        DynamicJsonDocument tmp_doc(40);
-                        JsonObject tmp = tmp_doc.createNestedObject();
+                        // DynamicJsonDocument tmp_doc(40);
+                        // JsonObject tmp = tmp_doc.createNestedObject();
                         validInput = 0;
-                        k = 0;
-                        while(!parsingDone && k<es_doc[events_endpoint[j]]["cancellation"].size()) {
+                        for(k = 0; !parsingDone && k<es_doc[events_endpoint[j]]["cancellation"].size(); k++) {
                             t_name = "";
                             serializeJson(es_doc[events_endpoint[j]]["cancellation"][k]["name"], t_name);
                             t_name.replace("\"", "");
-                            if(!resp_doc[t_name].isNull()) {                                   
-                                tmp[t_name] = es_doc[events_endpoint[j]]["cancellation"][k]["value"];
+                            if(!resp_doc[t_name].isNull()) {  
+                                t_value = "";
+                                serializeJson(es_doc[events_endpoint[j]]["cancellation"][k]["value"], t_value);
+                                tmp[t_name] = t_value;
                                 validInput++;
                             }
                             else
                                 parsingDone = false;
-                            k++;
                         }
                         if(validInput == k) {
                             parsingDone = true;
@@ -385,15 +411,24 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
                 }
             }
         }
+        //If has not matched for subscription or cancellations
         if(!parsingDone) {
-            i = 0;
-            while(!parsingDone && i<ia_doc[ip_s].size()) {
-                j = 0;
-                while(!parsingDone && j<actions_number) { 
-                    if(!ia_doc[ip_s][i][actions_endpoint[j]].isNull()) {
-                        if(!ia_doc[ip_s][i][actions_endpoint[j]]) {
-                            k = 0;
-                            while(!parsingDone && k<actions_number) {
+            //foreach element in interaction afforcance array (so if it is an handled action or an handled property)
+            for(i = 0; !parsingDone && i < ia_doc[ip_s].size(); i++) {
+                //foreach action
+                for(j = 0; !parsingDone && j < actions_number; j++) {
+                    Serial.printf("Sono arrivato alle IA, j=%d\n", j);
+                    //if there is an action handled via websocket
+                    if(!ia_doc[ip_s][i][actions_endpoint[j]].isNull() && ia_doc[ip_s][i][actions_endpoint[j]]) {
+                        //if() {
+                            resp = "";
+                            parsingDone = true;
+                            ia_doc[ip_s][i][actions_endpoint[j]] = true;
+                            //resp = request5(payload);
+                            resp = actions_cb[j](payload);
+                            webSocket.sendTXT(num, resp);
+                            /*
+                            for(k = 0; !parsingDone && k < actions_number; k++) {
                                 switch(k) {
                                     case 0: {
                                         if(k == j) {
@@ -406,13 +441,10 @@ void WebSocketBinding::_clientText(uint8_t num, uint8_t* pl, size_t length) {
                                     break;
 
                                 }
-                                k++;
-                            }
-                        }
+                            }*/
+                        //}
                     }
-                    j++;  
                 }        
-                i++; 
             }
         }
         

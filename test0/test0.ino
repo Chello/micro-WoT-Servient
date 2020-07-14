@@ -61,7 +61,6 @@ bool events_subscriptionSchema[2] = {true,true};
 bool events_dataSchema[2] = {true,false};
 bool events_cancellationSchema[2] = {true,true};
 String events_list[2] = {event1_name,event2_name,};
-String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name,};
 
 // Requests
 
@@ -91,8 +90,9 @@ AsyncLongPoll *alp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
-String ae[2] = {req5, req6};
-String pe[2] = {req3, req4};
+const String ae[2] = {req5, req6};
+const String pe[2] = {req3, req4};
+const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
 String request3();
 String request4();
@@ -203,18 +203,20 @@ void setup() {
     wsb = new WebSocketBinding(portSocket);
 
     wsb->exposeProperties(pe, ph, 2);
-    
     wsb->exposeActions(ae, ah, 2);
-
-    wsb->exposeEvents(events_endpoint, 2);
-
     wsb->bindEventSchema(es_doc);
+    wsb->exposeEvents(events_endpoint, 2);
+    wsb->test();
+
+    Serial.printf("Nel main invece é %s\n", events_endpoint[0].c_str());
+
 
     //wsb->bindEventSchema(es_doc);
 
 
     Serial.println("Server started");
     Serial.println(urlServer);
+    wsb->test();
 }    
 
 void loop() {
@@ -329,7 +331,7 @@ String request4() {
 }
 
 String request5(String body) {
-    DynamicJsonDocument resp_doc(200);
+    DynamicJsonDocument resp_doc(2000);
     String resp = "";
 
     Serial.printf("\nPOST invokeaction %s\n", action1_name);
@@ -372,7 +374,7 @@ String request5(String body) {
 
                 bool output = azione1(action1_input1_value);    
                 resp = (String) output;
-                String ws_msg = "";
+                String ws_msg = "azione1 request5 triggered";
 
                 // evento1 condition
                 String t_name = "";
@@ -476,7 +478,7 @@ String request6(String body) {
                 }
                 if(true) {
                     alp->sendLongPollTXT(ws_msg, event2_name);
-                    wsb->sendWebSocketTXT(output, events_endpoint[1].c_str());
+                    wsb->sendWebSocketTXT(output, events_endpoint[0].c_str());
                 }
             }
             else
