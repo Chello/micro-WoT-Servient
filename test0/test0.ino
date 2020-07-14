@@ -91,7 +91,7 @@ AsyncLongPoll *alp;
 WebSocketBinding *wsb;
 
 const String ae[2] = {req5, req6};
-const String pe[2] = {req3, req4};
+const String pe[2] = {req1, req2, req3, req4};
 const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
 String request3();
@@ -222,7 +222,7 @@ void setup() {
 void loop() {
 
     // handle Requests
-    wsb->webSocketLoop();
+    wsb->loop();
     // delay(1000);
     // wsb->test();
     // Serial.printf("Nel loop, %p %s", ae[0], ae[0].c_str());

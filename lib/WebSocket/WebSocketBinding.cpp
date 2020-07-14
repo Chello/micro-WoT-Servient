@@ -7,26 +7,7 @@ WebSocketBinding::WebSocketBinding(int portSocket): ac_doc(2000), ia_doc(1000), 
     // events data
     ipe_arr = ipe_doc.createNestedArray("clients_list");
     ipia_arr = ipia_doc.createNestedArray("clients_list");
-
-    webSocket.begin();
-}
-
-void WebSocketBinding::sendWebSocketTXT(String txt, const char* event_name) {
-    for(i=0; i<ipe_arr.size(); i++) {
-        String ws_ip = ipe_arr[i]["ip"];
-        JsonArray ae = e_doc[ws_ip];
-        Serial.printf("Sending Websocket string %s. Triggered event %s. Sending to ip %s\n", txt.c_str(), event_name, ws_ip.c_str());
-        for(j=0; j<ae.size(); j++) {
-            if(!ae[j][event_name].isNull() && ae[j][event_name]) {
-                unsigned char ws_num = ipe_doc[ws_ip];
-                webSocket.sendTXT(ws_num, txt);
-                Serial.println("Done");
-            }
-        }
-    }
-}
-
-void WebSocketBinding::webSocketLoop() {
+    //handling callback
     webSocket.onEvent([this] (uint8_t num, WStype_t type, uint8_t* pl, size_t length) {
         // this->test();
         switch(type) {
@@ -45,7 +26,26 @@ void WebSocketBinding::webSocketLoop() {
             }
         }
     });
+    //begin websocket
+    webSocket.begin();
+}
 
+void WebSocketBinding::sendWebSocketTXT(String txt, const char* event_endpoint) {
+    for(i=0; i<ipe_arr.size(); i++) {
+        String ws_ip = ipe_arr[i]["ip"];
+        JsonArray ae = e_doc[ws_ip];
+        Serial.printf("Sending Websocket string %s. Triggered event %s. Sending to ip %s\n", txt.c_str(), event_endpoint, ws_ip.c_str());
+        for(j=0; j<ae.size(); j++) {
+            if(!ae[j][event_endpoint].isNull() && ae[j][event_endpoint]) {
+                unsigned char ws_num = ipe_doc[ws_ip];
+                webSocket.sendTXT(ws_num, txt);
+                Serial.println("Done");
+            }
+        }
+    }
+}
+
+void WebSocketBinding::loop() {
     webSocket.loop();
 }
 
