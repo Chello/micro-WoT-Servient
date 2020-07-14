@@ -1,7 +1,7 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
-#include "AsyncLongPoll/AsyncLongPoll.h"
+#include "HTTP_LongPoll/HTTP_LongPoll.h"
 #include "WebSocket/WebSocketBinding.h"
 
 const char* ssid = "Rachelli-net";
@@ -86,12 +86,12 @@ AsyncWebServer server(portServer);
 
 IPAddress ipS;
 //Longpoll object handler
-AsyncLongPoll *alp;
+HTTP_LongPoll *hlp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
 const String ae[2] = {req5, req6};
-const String pe[2] = {req1, req2, req3, req4};
+const String pe[2] = {req3, req4};
 const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
 String request3();
@@ -199,7 +199,7 @@ void setup() {
 
     server.begin();
     
-    alp = new AsyncLongPoll();
+    hlp = new HTTP_LongPoll();
     wsb = new WebSocketBinding(portSocket);
 
     wsb->exposeProperties(pe, ph, 2);
@@ -301,11 +301,11 @@ void handleReq8(AsyncWebServerRequest *req) {
 }
 
 void handleReq9(AsyncWebServerRequest *req) {
-    alp->longPollHandler(req, event1_name);
+    hlp->longPollHandler(req, event1_name);
 }
 
 void handleReq10(AsyncWebServerRequest *req) {
-    alp->longPollHandler(req, event2_name);
+    hlp->longPollHandler(req, event2_name);
 }
 
 
@@ -391,7 +391,7 @@ String request5(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    alp->sendLongPollTXT(ws_msg, event1_name);
+                    hlp->sendLongPollTXT(ws_msg, event1_name);
                     wsb->sendWebSocketTXT(ws_msg, events_endpoint[0].c_str());
                 }
             }
@@ -477,7 +477,7 @@ String request6(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    alp->sendLongPollTXT(ws_msg, event2_name);
+                    hlp->sendLongPollTXT(ws_msg, event2_name);
                     wsb->sendWebSocketTXT(output, events_endpoint[0].c_str());
                 }
             }

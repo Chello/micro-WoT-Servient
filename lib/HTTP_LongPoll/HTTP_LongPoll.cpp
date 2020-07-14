@@ -1,15 +1,15 @@
 #include "Arduino.h"
 #include <ESPAsyncWebServer.h>
-#include "AsyncLongPoll.h"
+#include "HTTP_LongPoll.h"
 
-AsyncLongPoll::AsyncLongPoll() {
+HTTP_LongPoll::HTTP_LongPoll() {
     //Setup Longpoll hosts list
     for (int i = 0; i < MAX_LONGPOLL_HOSTS; i++){
         longPollRequests[i] = NULL;
     }
 }
 
-void AsyncLongPoll::longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
+void HTTP_LongPoll::longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
     int i = 0;
     bool found = false;
     for(; i < MAX_LONGPOLL_HOSTS; i++){
@@ -36,7 +36,7 @@ void AsyncLongPoll::longPollHandler(AsyncWebServerRequest *req, const char* even
     });
 }
 
-void AsyncLongPoll::sendLongPollTXT(String txt, const char* eventName) {
+void HTTP_LongPoll::sendLongPollTXT(String txt, const char* eventName) {
     int i;
     for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
         if (longPollRequests[i] != NULL && longPollBoundEvents[i] == eventName) {
