@@ -82,7 +82,7 @@ String ws_requests[4] = {thingName,property1_name,action1_name,action2_name};
 String ws_endpoint[4] = {req3,req4,req5,req6}; 
 String ws_actions[2] = {action1_name,action2_name};
 
-AsyncWebServer server(portServer);
+// AsyncWebServer server(portServer);
 
 IPAddress ipS;
 //Longpoll object handler
@@ -91,16 +91,18 @@ HTTP_LongPoll *hlp;
 WebSocketBinding *wsb;
 
 const String ae[2] = {req5, req6};
-const String pe[2] = {req3, req4};
+const String pe[4] = {req4, req3, req2, req1};
 const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
-String request3();
-String request4();
+String handleReq1();
+String handleReq2();
+String handleReq3();
+String handleReq4();
 
 String request5(String body);
 String request6(String body);
 
-properties_handler ph[2] = {request3, request4};
+properties_handler ph[4] = {handleReq4, handleReq3, handleReq2, handleReq1};
 actions_handler ah[2] = {request5, request6};
 
 int i, j, k, n;
@@ -186,37 +188,40 @@ void setup() {
     td = "{\"title\":\"test0\",\"id\":\"test0\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"integer\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"stringa\":{\"type\":\"string\"}},\"output\":{\"type\":\"boolean\"},\"safe\":false,\"idempotent\":false},\"azione2\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"intero\":{\"type\":\"integer\"},\"booleano\":{\"type\":\"boolean\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento1\":{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione1\"],\"condition\":\"true\",\"subscription\":{\"sbs1\":{\"type\":\"boolean\",\"value\":\"true\"}},\"data\":{\"dataschema1\":{\"type\":\"integer\",\"value\":\"100\"}},\"cancellation\":{\"cnc1\":{\"type\":\"boolean\",\"value\":\"true\"}}},\"evento2\":{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione2\"],\"condition\":\"true\",\"subscription\":{\"sbs2\":{\"type\":\"boolean\",\"value\":\"true\"}},\"cancellation\":{\"cnc2\":{\"type\":\"integer\",\"value\":\"3\"}}}}}";
 
     // Server requests
-    server.on(events_endpoint[1].c_str(),HTTP_GET,handleReq10);
-    server.on(events_endpoint[0].c_str(),HTTP_GET,handleReq9);
-    server.on(req5.c_str(),HTTP_GET,handleReq8);
-    server.on(req6.c_str(),HTTP_GET,handleReq7);
-    server.on(req5.c_str(),HTTP_POST,handleReq6);
-    server.on(req6.c_str(),HTTP_POST,handleReq5);
-    server.on(req4.c_str(),HTTP_GET,handleReq4);
-    server.on(req3.c_str(),HTTP_GET,handleReq3);
-    server.on(req2.c_str(),HTTP_GET,handleReq2);
-    server.on(req1.c_str(),HTTP_GET,handleReq1);
+    //events
+    // server.on(events_endpoint[1].c_str(),HTTP_GET,handleReq10);
+    // server.on(events_endpoint[0].c_str(),HTTP_GET,handleReq9);
+    // //actions not allowed
+    // server.on(req5.c_str(),HTTP_GET,handleReq8);
+    // server.on(req6.c_str(),HTTP_GET,handleReq7);
+    // //actions allowed
+    // server.on(req5.c_str(),HTTP_POST,handleReq6);
+    // server.on(req6.c_str(),HTTP_POST,handleReq5);
+    // //properties
+    // server.on(req4.c_str(),HTTP_GET,handleReq4);
+    // server.on(req3.c_str(),HTTP_GET,handleReq3);
+    // server.on(req2.c_str(),HTTP_GET,handleReq2);
+    // server.on(req1.c_str(),HTTP_GET,handleReq1);
 
-    server.begin();
+    // server.begin();
     
-    hlp = new HTTP_LongPoll();
+    hlp = new HTTP_LongPoll(portServer);
+
+    hlp->exposeActions(ae, ah, 2);
+    hlp->exposeProperties(pe, ph, 4);
+    hlp->exposeEvents(events_endpoint, 2);
+
+    hlp->begin();
+
     wsb = new WebSocketBinding(portSocket);
 
-    wsb->exposeProperties(pe, ph, 2);
+    wsb->exposeProperties(pe, ph, 4);
     wsb->exposeActions(ae, ah, 2);
     wsb->bindEventSchema(es_doc);
     wsb->exposeEvents(events_endpoint, 2);
-    wsb->test();
-
-    Serial.printf("Nel main invece é %s\n", events_endpoint[0].c_str());
-
-
-    //wsb->bindEventSchema(es_doc);
-
 
     Serial.println("Server started");
     Serial.println(urlServer);
-    wsb->test();
 }    
 
 void loop() {
@@ -249,64 +254,64 @@ void connection(const char* ssid, const char* password) {
 }
 
 // Request functions
-void handleReq1(AsyncWebServerRequest *req) {
+String handleReq1() {
     String resp = "";
 
     Serial.println("\nGET Thing URL");
     resp = "[\"" + urlServer + "\"]";
-    req->send(200, "application/ld+json", resp);
+    return resp;
 }
 
-void handleReq2(AsyncWebServerRequest *req) {
+String handleReq2() {
     Serial.println("\nGET Thing Description"); 
-    req->send(200, "application/ld+json", td);
+    return td;
 }
 
-void handleReq3(AsyncWebServerRequest *req) {
+String handleReq3() {
     String resp = "";
 
     resp = request3();
-    req->send(200, "application/ld+json", resp);
+    return resp;
 }
 
-void handleReq4(AsyncWebServerRequest *req) {
+String handleReq4() {
     String resp = "";
     
     resp = request4();
-    req->send(200, "application/ld+json", resp);
+    return resp;
 }
 
-void handleReq5(AsyncWebServerRequest *req) {
-    String resp = "";
-    String body = req->arg("plain");
+// void handleReq5(AsyncWebServerRequest *req) {
+//     String resp = "";
+//     String body = req->arg("plain");
     
-    resp = request5(body);
-    req->send(200, "application/ld+json", resp);
-}
-void handleReq6(AsyncWebServerRequest *req) {
-    String resp = "";
-    String body = req->arg("plain");
+//     resp = request5(body);
+//     req->send(200, "application/ld+json", resp);
+// }
+// void handleReq6(AsyncWebServerRequest *req) {
+//     String resp = "";
+//     String body = req->arg("plain");
     
-    resp = request6(body);
-    req->send(200, "application/ld+json", resp);
-}
+//     resp = request6(body);
+//     req->send(200, "application/ld+json", resp);
+// }
 
-void handleReq7(AsyncWebServerRequest *req) {
-    char* resp = "Method Not Allowed";
-    req->send(405, "text/plain", resp);
-}
-void handleReq8(AsyncWebServerRequest *req) {
-    char* resp = "Method Not Allowed";
-    req->send(405, "text/plain", resp);
-}
+// void handleReq7(AsyncWebServerRequest *req) {
+//     char* resp = "Method Not Allowed";
+//     req->send(405, "text/plain", resp);
+// }
+// void handleReq8(AsyncWebServerRequest *req) {
+//     char* resp = "Method Not Allowed";
+//     req->send(405, "text/plain", resp);
+// }
 
-void handleReq9(AsyncWebServerRequest *req) {
-    hlp->longPollHandler(req, event1_name);
-}
+// void handleReq9(AsyncWebServerRequest *req) {
+//     //hlp->longPollHandler(req, event1_name);
+// }
 
-void handleReq10(AsyncWebServerRequest *req) {
-    hlp->longPollHandler(req, event2_name);
-}
+// void handleReq10(AsyncWebServerRequest *req) {
+//     //hlp->longPollHandler(req, event2_name);
+// }
 
 
 String request3() {

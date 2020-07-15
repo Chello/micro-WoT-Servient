@@ -12,14 +12,10 @@ class HTTP_LongPoll {
     public: 
         /**
          * Constructor. Sets up the object
+         * @param serverPort the port which the server will respond
          */
-        HTTP_LongPoll();
-        /**
-         * Handles a new connection of a HTTP Longpoll host, specifying the event 
-         * @param req the Async WS request
-         * @param eventName the event endpoint name which the host connected
-         **/
-        void longPollHandler(AsyncWebServerRequest *req, const char* eventName);
+        HTTP_LongPoll(int serverPort);
+        
         /**
          * Function that sends the specified text for longpoll HTTP hosts connected to a specified event endpoint
          * @param txt the text to send
@@ -52,7 +48,16 @@ class HTTP_LongPoll {
          * @param evt_num the total number of endpoints/callbacks 
          */
         void exposeEvents(const String *endpoints, int evt_num);
+
+        void begin();
     private:
+
+        /**
+         * Handles a new connection of a HTTP Longpoll host, specifying the event 
+         * @param req the Async WS request
+         * @param eventName the event endpoint name which the host connected
+         **/
+        void _longPollHandler(AsyncWebServerRequest *req, const char* eventName);
 
         //contains the event endpoints
         const String* events_endpoint;
@@ -72,17 +77,15 @@ class HTTP_LongPoll {
         int actions_number;
         //Number of events exposed
         int events_number;
-        /**
-         * Max number of longpoll host that can be managed
-         */
+
+        //Server handler
+        AsyncWebServer server;
+        
+        // Max number of longpoll host that can be managed
         static const int MAX_LONGPOLL_HOSTS = 16;
-        /**
-         * Array of pending longpoll requests
-         */
+        // Array of pending longpoll requests
         AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
-        /**
-         * Contains the correspondance between requests and endpoint
-         */
+        // Contains the correspondance between requests and endpoint
         const char* longPollBoundEvents[MAX_LONGPOLL_HOSTS];
 };
 
