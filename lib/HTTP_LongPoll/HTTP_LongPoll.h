@@ -21,7 +21,7 @@ class HTTP_LongPoll {
          * @param txt the text to send
          * @param eventName the event endpoint triggered
          **/
-        void sendLongPollTXT(String txt, const char* eventName);
+        void sendLongPollTXT(String txt, String eventName);
 
         /**
          * Expose properties via HTTP protocol.
@@ -51,6 +51,8 @@ class HTTP_LongPoll {
 
         void begin();
     private:
+        // Max number of longpoll host that can be managed
+        static const int MAX_LONGPOLL_HOSTS = 16;
 
         /**
          * Handles a new connection of a HTTP Longpoll host, specifying the event 
@@ -81,8 +83,6 @@ class HTTP_LongPoll {
         //Server handler
         AsyncWebServer server;
         
-        // Max number of longpoll host that can be managed
-        static const int MAX_LONGPOLL_HOSTS = 16;
         // Array of pending longpoll requests
         AsyncWebServerRequest *longPollRequests[MAX_LONGPOLL_HOSTS];
         // Contains the correspondance between requests and endpoint

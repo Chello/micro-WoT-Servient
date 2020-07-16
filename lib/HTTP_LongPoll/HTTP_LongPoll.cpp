@@ -11,7 +11,6 @@ HTTP_LongPoll::HTTP_LongPoll(int serverPort) : server(serverPort) {
 
 void HTTP_LongPoll::_longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
     int i = 0;
-    bool found = false;
     for(; i < MAX_LONGPOLL_HOSTS; i++){
         if (longPollRequests[i] == NULL) {
             longPollRequests[i] = req;
@@ -36,15 +35,18 @@ void HTTP_LongPoll::_longPollHandler(AsyncWebServerRequest *req, const char* eve
     });
 }
 
-void HTTP_LongPoll::sendLongPollTXT(String txt, const char* eventName) {
+void HTTP_LongPoll::sendLongPollTXT(String txt, String eventName) {
     int i;
+    Serial.printf("Sending text %s to broadcast LongPoll event %s\n", txt.c_str(), eventName.c_str());
     for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
-        if (longPollRequests[i] != NULL && longPollBoundEvents[i] == eventName) {
+        // Serial.printf("\tCurrently analyzing mem endpoint %s\n", longPollBoundEvents[i] == NULL ? "NULL" : longPollBoundEvents[i]);
+        if (longPollRequests[i] != NULL && eventName.equals(longPollBoundEvents[i])) {
             Serial.printf("Handling request from IP %s for event %s, ", 
                             longPollRequests[i]->client()->remoteIP().toString().c_str(),
-                            eventName);
+                            eventName.c_str());
             longPollRequests[i]->send(200, "application/ld+json", txt/*longPollResponse[i]*/);
             Serial.printf("request satisfied.\n");
+            break;
         }
     }
 }
@@ -82,7 +84,7 @@ void HTTP_LongPoll::exposeActions(const String *endpoints, actions_handler callb
         });
 
         //For HTTP_GET method not allowed
-        this->server.on(endpoints[i].c_str(), HTTP_POST, [this, i] (AsyncWebServerRequest *req) {
+        this->server.on(endpoints[i].c_str(), HTTP_GET, [this] (AsyncWebServerRequest *req) {
             String toSend = "Method Not Allowed";
             req->send(405, "text/plain", toSend);
         });

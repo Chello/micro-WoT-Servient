@@ -208,17 +208,17 @@ void setup() {
     hlp = new HTTP_LongPoll(portServer);
 
     hlp->exposeActions(ae, ah, 2);
-    hlp->exposeProperties(pe, ph, 4);
     hlp->exposeEvents(events_endpoint, 2);
+    hlp->exposeProperties(pe, ph, 4);
 
     hlp->begin();
 
     wsb = new WebSocketBinding(portSocket);
 
-    wsb->exposeProperties(pe, ph, 4);
-    wsb->exposeActions(ae, ah, 2);
     wsb->bindEventSchema(es_doc);
+    wsb->exposeActions(ae, ah, 2);
     wsb->exposeEvents(events_endpoint, 2);
+    wsb->exposeProperties(pe, ph, 4);
 
     Serial.println("Server started");
     Serial.println(urlServer);
@@ -396,7 +396,7 @@ String request5(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    hlp->sendLongPollTXT(ws_msg, event1_name);
+                    hlp->sendLongPollTXT(ws_msg, events_endpoint[0]);
                     wsb->sendWebSocketTXT(ws_msg, events_endpoint[0].c_str());
                 }
             }
@@ -482,8 +482,8 @@ String request6(String body) {
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    hlp->sendLongPollTXT(ws_msg, event2_name);
-                    wsb->sendWebSocketTXT(output, events_endpoint[0].c_str());
+                    hlp->sendLongPollTXT(ws_msg, events_endpoint[1]);
+                    wsb->sendWebSocketTXT(output, events_endpoint[1].c_str());
                 }
             }
             else
