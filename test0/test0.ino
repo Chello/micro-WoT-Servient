@@ -16,8 +16,8 @@ String urlSocket = "";
 String thingName = "test0";
 String td = "";
 
-// document to handle Events Schemas
-DynamicJsonDocument es_doc(356);
+// document to handle Events Schemas in WebSocket
+DynamicJsonDocument ws_es_doc(356);
 // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 DeserializationError err;
@@ -50,8 +50,10 @@ String event2_cancellationSchema[1] = {"{\"name\":\"cnc2\",\"value\":\"3\"}"};
 bool events_dataSchema[2] = {true,false};
 
 // Requests
-String req5 = "/" + thingName + "/actions/" + action1_name;
+String req8 = "/" + thingName + "/events/" + event2_name;
+String req7 = "/" + thingName + "/events/" + event1_name;
 String req6 = "/" + thingName + "/actions/" + action2_name;
+String req5 = "/" + thingName + "/actions/" + action1_name;
 String req4 = "/" + thingName + "/properties/" + property1_name;
 String req3 = "/" + thingName + "/all/properties";
 String req2 = "/" + thingName;
@@ -63,27 +65,42 @@ HTTP_LongPoll *hlp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
-const String actions_endpoint[2] = {req5, req6};
-const String properties_endpoint[4] = {req4, req3, req2, req1};
-const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
-
-String handleReq1();
-String handleReq2();
-String handleReq3();
-String handleReq4();
+String request1();
+String request2();
+String request3();
+String request4();
 
 String request5(String body);
 String request6(String body);
 
-properties_handler properties_callback[4] = {handleReq4, handleReq3, handleReq2, handleReq1};
-actions_handler actions_callback[2] = {request5, request6};
+//HTTP - actions
+const String http_actions_endpoint[2] = {req5, req6};
+actions_handler http_actions_callback[2] = {request5, request6};
+
+//WS - actions
+const String ws_actions_endpoint[2] = {req5, req6};
+actions_handler ws_actions_callback[2] = {request5, request6};
+
+//HTTP - properties
+const String http_properties_endpoint[4] = {req4, req3, req2, req1};
+properties_handler http_properties_callback[4] = {request4, request3, request2, request1};
+
+//WS - properties
+const String ws_properties_endpoint[4] = {req4, req3, req2, req1};
+properties_handler ws_properties_callback[4] = {request4, request3, request2, request1};
+
+//HTTP - events
+const String http_events_endpoint[2] = {req7, req8};
+//WS - events
+const String ws_events_endpoint[2] = {req7, req8};
+
 
 int i, j, k, n;
 
 void setup() {
 
-    // properties_callback[] = {handleReq4, handleReq3, handleReq2, handleReq1};
-    // actions_callback[] = {request5, request6};
+    // properties_callback[] = {request4, request3, request2, request1};
+    // http_actions_callback[] = {request5, request6};
 
     int schema_size = 0;
     JsonArray arr;
@@ -94,10 +111,10 @@ void setup() {
 
     // events data
     schema_size = sizeof(event1_subscriptionSchema) / sizeof(String);
-    if(es_doc[events_endpoint[0]].isNull())
-        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("subscription");
+    if(ws_es_doc[ws_events_endpoint[0]].isNull())
+        arr = ws_es_doc.createNestedObject(ws_events_endpoint[0]).createNestedArray("subscription");
     else
-        arr = es_doc[events_endpoint[0]].createNestedArray("subscription");
+        arr = ws_es_doc[ws_events_endpoint[0]].createNestedArray("subscription");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_subscriptionSchema[i]);
@@ -107,10 +124,10 @@ void setup() {
     }
 
     schema_size = sizeof(event1_dataSchema) / sizeof(String);
-    if(es_doc[events_endpoint[0]].isNull())
-        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("data");
+    if(ws_es_doc[ws_events_endpoint[0]].isNull())
+        arr = ws_es_doc.createNestedObject(ws_events_endpoint[0]).createNestedArray("data");
     else
-        arr = es_doc[events_endpoint[0]].createNestedArray("data");
+        arr = ws_es_doc[ws_events_endpoint[0]].createNestedArray("data");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_dataSchema[i]);
@@ -120,10 +137,10 @@ void setup() {
     }
 
     schema_size = sizeof(event1_cancellationSchema) / sizeof(String);
-    if(es_doc[events_endpoint[0]].isNull())
-        arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("cancellation");
+    if(ws_es_doc[ws_events_endpoint[0]].isNull())
+        arr = ws_es_doc.createNestedObject(ws_events_endpoint[0]).createNestedArray("cancellation");
     else
-        arr = es_doc[events_endpoint[0]].createNestedArray("cancellation");
+        arr = ws_es_doc[ws_events_endpoint[0]].createNestedArray("cancellation");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event1_cancellationSchema[i]);
@@ -132,10 +149,10 @@ void setup() {
         obj["value"] = tmp_doc["value"];
     }
 
-    if(es_doc[events_endpoint[1]].isNull())
-        arr = es_doc.createNestedObject(events_endpoint[1]).createNestedArray("subscription");
+    if(ws_es_doc[ws_events_endpoint[1]].isNull())
+        arr = ws_es_doc.createNestedObject(ws_events_endpoint[1]).createNestedArray("subscription");
     else
-        arr = es_doc[events_endpoint[1]].createNestedArray("subscription");
+        arr = ws_es_doc[ws_events_endpoint[1]].createNestedArray("subscription");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event2_subscriptionSchema[i]);
@@ -144,10 +161,10 @@ void setup() {
         obj["value"] = tmp_doc["value"];
     }
 
-    if(es_doc[events_endpoint[1]].isNull())
-        arr = es_doc.createNestedObject(events_endpoint[1]).createNestedArray("cancellation");
+    if(ws_es_doc[ws_events_endpoint[1]].isNull())
+        arr = ws_es_doc.createNestedObject(ws_events_endpoint[1]).createNestedArray("cancellation");
     else
-        arr = es_doc[events_endpoint[1]].createNestedArray("cancellation");
+        arr = ws_es_doc[ws_events_endpoint[1]].createNestedArray("cancellation");
     for(i=0; i<schema_size; i++) {
         DynamicJsonDocument tmp_doc(82);
         deserializeJson(tmp_doc, event2_cancellationSchema[i]);
@@ -159,20 +176,23 @@ void setup() {
     connection(ssid, password);
     td = "{\"title\":\"test0\",\"id\":\"test0\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"integer\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"azione1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"stringa\":{\"type\":\"string\"}},\"output\":{\"type\":\"boolean\"},\"safe\":false,\"idempotent\":false},\"azione2\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"intero\":{\"type\":\"integer\"},\"booleano\":{\"type\":\"boolean\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evento1\":{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione1\"],\"condition\":\"true\",\"subscription\":{\"sbs1\":{\"type\":\"boolean\",\"value\":\"true\"}},\"data\":{\"dataschema1\":{\"type\":\"integer\",\"value\":\"100\"}},\"cancellation\":{\"cnc1\":{\"type\":\"boolean\",\"value\":\"true\"}}},\"evento2\":{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event2_name+"\",\"op\":[\"subscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"azione2\"],\"condition\":\"true\",\"subscription\":{\"sbs2\":{\"type\":\"boolean\",\"value\":\"true\"}},\"cancellation\":{\"cnc2\":{\"type\":\"integer\",\"value\":\"3\"}}}}}";
     
+    // properties_handler properties_callback[4] = {request4, request3, request2, request1};
+    // actions_handler http_actions_callback[2] = {request5, request6};
+
     hlp = new HTTP_LongPoll(portServer);
 
-    hlp->exposeActions(actions_endpoint, actions_callback, 2);
-    hlp->exposeEvents(events_endpoint, 2);
-    hlp->exposeProperties(properties_endpoint, properties_callback, 4);
+    hlp->exposeActions(http_actions_endpoint, http_actions_callback, 2);
+    hlp->exposeEvents(http_events_endpoint, 2);
+    hlp->exposeProperties(http_properties_endpoint, http_properties_callback, 4);
 
     hlp->begin();
 
     wsb = new WebSocketBinding(portSocket);
 
-    wsb->bindEventSchema(es_doc);
-    wsb->exposeActions(actions_endpoint, actions_callback, 2);
-    wsb->exposeEvents(events_endpoint, 2);
-    wsb->exposeProperties(properties_endpoint, properties_callback, 4);
+    wsb->bindEventSchema(ws_es_doc);
+    wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, 2);
+    wsb->exposeEvents(ws_events_endpoint, 2);
+    wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, 4);
 
     Serial.println("Server started");
     Serial.println(urlServer);
@@ -204,7 +224,7 @@ void connection(const char* ssid, const char* password) {
 }
 
 // Request functions
-String handleReq1() {
+String request1() {
     String resp = "";
 
     Serial.println("\nGET Thing URL");
@@ -212,23 +232,9 @@ String handleReq1() {
     return resp;
 }
 
-String handleReq2() {
+String request2() {
     Serial.println("\nGET Thing Description"); 
     return td;
-}
-
-String handleReq3() {
-    String resp = "";
-
-    resp = request3();
-    return resp;
-}
-
-String handleReq4() {
-    String resp = "";
-    
-    resp = request4();
-    return resp;
 }
 
 String request3() {
@@ -304,17 +310,17 @@ String request5(String body) {
                 JsonObject tmp_obj = tmp_doc.createNestedObject();
 
                 if(events_dataSchema[1]) {
-                    for(i=0; i<es_doc[event1_name]["data"].size(); i++) {
+                    for(i=0; i<ws_es_doc[event1_name]["data"].size(); i++) {
                         t_name = "";
-                        serializeJson(es_doc[event1_name]["data"][i]["name"], t_name);
+                        serializeJson(ws_es_doc[event1_name]["data"][i]["name"], t_name);
                         t_name.replace("\"", "");
-                        tmp_obj[t_name] = es_doc[event1_name]["data"][i]["value"];
+                        tmp_obj[t_name] = ws_es_doc[event1_name]["data"][i]["value"];
                     }
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    hlp->sendLongPollTXT(ws_msg, events_endpoint[0]);
-                    wsb->sendWebSocketTXT(ws_msg, events_endpoint[0].c_str());
+                    hlp->sendLongPollTXT(ws_msg, http_events_endpoint[0]);
+                    wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0].c_str());
                 }
             }
             else
@@ -390,17 +396,17 @@ String request6(String body) {
                 JsonObject tmp_obj = tmp_doc.createNestedObject();
 
                 if(events_dataSchema[2]) {
-                    for(i=0; i<es_doc[event2_name]["data"].size(); i++) {
+                    for(i=0; i<ws_es_doc[event2_name]["data"].size(); i++) {
                         t_name = "";
-                        serializeJson(es_doc[event2_name]["data"][i]["name"], t_name);
+                        serializeJson(ws_es_doc[event2_name]["data"][i]["name"], t_name);
                         t_name.replace("\"", "");
-                        tmp_obj[t_name] = es_doc[event2_name]["data"][i]["value"];
+                        tmp_obj[t_name] = ws_es_doc[event2_name]["data"][i]["value"];
                     }
                     serializeJson(tmp_obj, ws_msg);
                 }
                 if(true) {
-                    hlp->sendLongPollTXT(ws_msg, events_endpoint[1]);
-                    wsb->sendWebSocketTXT(output, events_endpoint[1].c_str());
+                    hlp->sendLongPollTXT(ws_msg, http_events_endpoint[1]);
+                    wsb->sendWebSocketTXT(output, ws_events_endpoint[1].c_str());
                 }
             }
             else
@@ -453,11 +459,9 @@ bool handleInputType(String value, String schema) {
 
 // Action functions
 bool azione1(String stringa) {
-	return true;
-	
+	return true;	
 }
 
 String azione2(int intero,bool booleano) {
 	return "pippofranco";
-	
 }
