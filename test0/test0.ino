@@ -31,7 +31,6 @@ int events_number = 2;
 const char* property1_name = "proprieta";
 int property1_value = 0;
 
-
 // Actions
 const char* action1_name = "azione1";
 int action1_inputsNumber = 1;
@@ -64,8 +63,8 @@ HTTP_LongPoll *hlp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
-const String ae[2] = {req5, req6};
-const String pe[4] = {req4, req3, req2, req1};
+const String actions_endpoint[2] = {req5, req6};
+const String properties_endpoint[4] = {req4, req3, req2, req1};
 const String events_endpoint[2] = {"/" + thingName + "/events/" + event1_name,"/" + thingName + "/events/" + event2_name};
 
 String handleReq1();
@@ -76,20 +75,24 @@ String handleReq4();
 String request5(String body);
 String request6(String body);
 
-properties_handler ph[4] = {handleReq4, handleReq3, handleReq2, handleReq1};
-actions_handler ah[2] = {request5, request6};
+properties_handler properties_callback[4] = {handleReq4, handleReq3, handleReq2, handleReq1};
+actions_handler actions_callback[2] = {request5, request6};
 
 int i, j, k, n;
 
 void setup() {
-    Serial.begin(115200);
-    Serial.println();
 
-    // events data
+    // properties_callback[] = {handleReq4, handleReq3, handleReq2, handleReq1};
+    // actions_callback[] = {request5, request6};
+
     int schema_size = 0;
     JsonArray arr;
     JsonObject obj;
 
+    Serial.begin(115200);
+    Serial.println();
+
+    // events data
     schema_size = sizeof(event1_subscriptionSchema) / sizeof(String);
     if(es_doc[events_endpoint[0]].isNull())
         arr = es_doc.createNestedObject(events_endpoint[0]).createNestedArray("subscription");
@@ -158,18 +161,18 @@ void setup() {
     
     hlp = new HTTP_LongPoll(portServer);
 
-    hlp->exposeActions(ae, ah, 2);
+    hlp->exposeActions(actions_endpoint, actions_callback, 2);
     hlp->exposeEvents(events_endpoint, 2);
-    hlp->exposeProperties(pe, ph, 4);
+    hlp->exposeProperties(properties_endpoint, properties_callback, 4);
 
     hlp->begin();
 
     wsb = new WebSocketBinding(portSocket);
 
     wsb->bindEventSchema(es_doc);
-    wsb->exposeActions(ae, ah, 2);
+    wsb->exposeActions(actions_endpoint, actions_callback, 2);
     wsb->exposeEvents(events_endpoint, 2);
-    wsb->exposeProperties(pe, ph, 4);
+    wsb->exposeProperties(properties_endpoint, properties_callback, 4);
 
     Serial.println("Server started");
     Serial.println(urlServer);
