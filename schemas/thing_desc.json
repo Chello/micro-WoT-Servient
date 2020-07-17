@@ -10,6 +10,7 @@
     "security",
     "securityDefinitions",
     "useWS",
+    "useHTTP",
     "properties",
     "links"
   ],
@@ -130,6 +131,12 @@
       "format": "checkbox",
       "default": true
     },
+    "useHTTP": {
+      "type": "boolean",
+      "title": "Is Thing using HTTP?",
+      "format": "checkbox",
+      "default": true
+    },
     "description": {
       "type": "string",
       "title": "Description",
@@ -210,6 +217,7 @@
           "type",
           "forms",
           "useWS",
+          "useHTTP"
           "observable",
           "readOnly",
           "writeOnly"
@@ -270,6 +278,12 @@
           "useWS": {
             "type": "boolean",
             "title": "Is property using WebSocket?",
+            "format": "checkbox",
+            "default": true
+          },
+          "useHTTP": {
+            "type": "boolean",
+            "title": "Is property using HTTP?",
             "format": "checkbox",
             "default": true
           },
@@ -335,6 +349,7 @@
           "forms",
           "actionName",
           "useWS",
+          "useHTTP",
           "body",
           "safe",
           "idempotent"
@@ -389,7 +404,13 @@
           },
           "useWS": {
             "type": "boolean",
-            "title": "Is property using WebSocket?",
+            "title": "Is action available via WebSocket?",
+            "format": "checkbox",
+            "default": true
+          },
+          "useHTTP": {
+            "type": "boolean",
+            "title": "Is action available via HTTP?",
             "format": "checkbox",
             "default": true
           },
@@ -513,7 +534,7 @@
           "actionsTriggered",
           "forms",
           "useWS",
-          "useLP"
+          "useHTTP"
         ],
         "properties": {
           "eventName": {
@@ -575,7 +596,7 @@
             "format": "checkbox",
             "default": true
           },
-          "useLP": {
+          "useHTTP": {
             "type": "boolean",
             "title": "Is event using HTTP LongPolling?",
             "format": "checkbox",
