@@ -9,8 +9,6 @@
     "@context",
     "security",
     "securityDefinitions",
-    "useWS",
-    "useHTTP",
     "properties",
     "links"
   ],
@@ -78,64 +76,24 @@
     },
     "forms": {
       "type": "array",
-      "title": "Operations",
+      "title": "Protocol binding",
       "format": "table",
       "minItems": 1,
-      "maxItems": 1,
+      "maxItems": 2,
       "items": {
-        "title": "",
-        "type": "object",
-        "required": [
-          "op",
-          "contentType",
-          "href"
-        ],
-        "properties": {
-          "contentType": {
-            "const": "application/json",
-            "default": "application/json",
-            "options": {
-              "hidden": true
-            }
+        "title": "Protocol",
+        "headerTemplate":"Protocol #{{i}}",
+        "anyOf": [
+          {
+            "title": "HTTP",
+            "$ref": "#/definitions/td_http_form"
           },
-          "href": {
-            "default": "",
-            "const": "",
-            "options": {
-              "hidden": true
-            }
-          },
-          "op": {
-            "type": "array",
-            "format": "categories",
-            "name": "operations",
-            "description": "Operations supported by the Thing. You can choose one or more of them.",
-            "uniqueItems": true,
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "enum": [
-                "readallproperties",
-                "writeallproperties",
-                "readmultipleproperties",
-                "writemultipleproperties"
-              ]
-            }
+          {
+            "title": "WebSocket",
+            "$ref": "#/definitions/td_ws_form"
           }
-        }
+        ]
       }
-    },
-    "useWS": {
-      "type": "boolean",
-      "title": "Is Thing using WebSocket?",
-      "format": "checkbox",
-      "default": true
-    },
-    "useHTTP": {
-      "type": "boolean",
-      "title": "Is Thing using HTTP?",
-      "format": "checkbox",
-      "default": true
     },
     "description": {
       "type": "string",
@@ -532,9 +490,7 @@
           "eventName",
           "condition",
           "actionsTriggered",
-          "forms",
-          "useWS",
-          "useHTTP"
+          "forms"
         ],
         "properties": {
           "eventName": {
@@ -544,43 +500,35 @@
           },
           "forms": {
             "type": "array",
-            "title": "Operations",
+            "title": "Protocol binding",
             "format": "table",
             "minItems": 1,
             "maxItems": 2,
             "items": {
-              "title": "Protocols",
-              "description": "Choose one or more protocol",
+              "title": "Protocol",
+              "headerTemplate": "Protocol #{{i}}",
               "anyOf": [
                 {
-                  "$ref": "#/definitions/http_form",
+                  "$ref": "#/definitions/event_http_form",
                   "title": "HTTP"
                 },
                 {
-                  "$ref": "#/definitions/ws_form",
+                  "$ref": "#/definitions/event_ws_form",
                   "title": "WebSocket"
                 }
               ]
             }
           },
-          "useWS": {
-            "type": "boolean",
-            "title": "Is event using WebSocket?",
-            "format": "checkbox",
-            "default": true
-          },
-          "useHTTP": {
-            "type": "boolean",
-            "title": "Is event using long polling HTTP?",
-            "format": "checkbox",
-            "default": true
-          },
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
+            "minItems": 1,
+            "options": {
+              "disable_collapse": true
+            },
             "items": {
               "type": "string",
-              "title": "Trigger for this event",
+              "title": "Trigger",
               "description": "Specify which action will be triggered for this event. You can specify more triggers but you cannot duplicate them.",
               "watch": {
                 "actionAssoc": "root.actions"
@@ -754,13 +702,19 @@
     }
   },
   "definitions": {
-    "http_form": {
+    "event_http_form": {
       "type": "object",
       "required": [
         "op",
         "contentType",
         "href"
       ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true,
+        "hidden": true
+      },
       "properties": {
         "contentType": {
           "const": "application/json",
@@ -772,7 +726,7 @@
         "href": {
           "type": "string",
           "default": "http",
-          "const": "http",
+          "enum": ["http"],
           "options": {
             "hidden": true
           }
@@ -784,17 +738,25 @@
           "description": "No operations supported on HTTP Longpoll",
           "uniqueItems": true,
           "minItems": 0,
-          "maxItems": 0
+          "maxItems": 0,
+          "options": {
+            "hidden": true
+          }
         }
       }
     },
-    "ws_form": {
+    "event_ws_form": {
       "type": "object",
       "required": [
         "op",
         "contentType",
         "href"
       ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
       "properties": {
         "contentType": {
           "const": "application/json",
@@ -806,7 +768,7 @@
         "href": {
           "type": "string",
           "default": "ws",
-          "const": "ws",
+          "enum": ["ws"],
           "options": {
             "hidden": true
           }
@@ -815,6 +777,7 @@
           "type": "array",
           "format": "categories",
           "name": "operations",
+          "title": "Operations",
           "description": "Choose one or more operation supported.",
           "uniqueItems": true,
           "minItems": 1,
@@ -824,6 +787,101 @@
             "enum": [
               "subscribeevent",
               "unsubscribeevent"
+            ]
+          }
+        }
+      }
+    },
+    "td_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": ["http"],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
+            ]
+          }
+        }
+      }
+    },
+    "td_ws_form": {
+      "type": "object",
+      "name": "WebSocket TD",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": ["ws"],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
             ]
           }
         }

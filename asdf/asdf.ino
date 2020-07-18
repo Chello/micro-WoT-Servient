@@ -3,7 +3,7 @@
 #include <ArduinoJson.h>
 #include "AsyncLongPoll/AsyncLongPoll.h"
 
-const char* ssid = "asasasasas";
+const char* ssid = "asdfgh";
 const char* password = "";
 String protocolServer = "http";
 int portServer = 80;
@@ -37,7 +37,7 @@ int events_number = 1;
 
 
 // Events
-const char* event1_name = "asas";
+const char* event1_name = "evt";
 bool events_subscriptionSchema[1] = {false};
 bool events_dataSchema[1] = {false};
 bool events_cancellationSchema[1] = {false};
@@ -81,7 +81,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"asdf\",\"id\":\"assdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\"]}],\"useHTTP\":true,\"links\":[],\"properties\":{},\"events\":{\"asas\":{\"eventName\":\"asas\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]}],\"useHTTP\":true,\"actionsTriggered\":[],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]}],\"actionsTriggered\":[\"undefined\"],\"condition\":\"true\"}}}";
 
     // Server requests
     server.on(req3.c_str(),HTTP_GET,handleReq3);
