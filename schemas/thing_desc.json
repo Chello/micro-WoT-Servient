@@ -217,7 +217,7 @@
           "type",
           "forms",
           "useWS",
-          "useHTTP"
+          "useHTTP",
           "observable",
           "readOnly",
           "writeOnly"
@@ -547,47 +547,20 @@
             "title": "Operations",
             "format": "table",
             "minItems": 1,
-            "maxItems": 1,
+            "maxItems": 2,
             "items": {
-              "title": "",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
+              "title": "Protocols",
+              "description": "Choose one or more protocol",
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/http_form",
+                  "title": "HTTP"
                 },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "op": {
-                  "type": "array",
-                  "format": "categories",
-                  "name": "operations",
-                  "description": "Operations supported by the event. You can choose one or more of them.",
-                  "uniqueItems": true,
-                  "minItems": 1,
-                  "items": {
-                    "type": "string",
-                    "minLength": 1,
-                    "enum": [
-                      "subscribeevent",
-                      "unsubscribeevent"
-                    ]
-                  }
+                {
+                  "$ref": "#/definitions/ws_form",
+                  "title": "WebSocket"
                 }
-              }
+              ]
             }
           },
           "useWS": {
@@ -598,7 +571,7 @@
           },
           "useHTTP": {
             "type": "boolean",
-            "title": "Is event using HTTP LongPolling?",
+            "title": "Is event using long polling HTTP?",
             "format": "checkbox",
             "default": true
           },
@@ -775,6 +748,83 @@
           "description": {
             "title": "Event description",
             "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "const": "http",
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "description": "No operations supported on HTTP Longpoll",
+          "uniqueItems": true,
+          "minItems": 0,
+          "maxItems": 0
+        }
+      }
+    },
+    "ws_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "const": "ws",
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "description": "Choose one or more operation supported.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "subscribeevent",
+              "unsubscribeevent"
+            ]
           }
         }
       }
