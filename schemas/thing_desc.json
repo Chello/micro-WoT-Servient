@@ -10,8 +10,13 @@
     "security",
     "securityDefinitions",
     "properties",
-    "links"
+    "links",
+    "actions",
+    "events"
   ],
+  "options": {
+    "disable_collapse": true
+  },
   "properties": {
     "title": {
       "type": "string",
@@ -266,8 +271,6 @@
         "required": [
           "forms",
           "actionName",
-          "useWS",
-          "useHTTP",
           "body",
           "safe",
           "idempotent"
@@ -280,57 +283,25 @@
           },
           "forms": {
             "type": "array",
+            "title": "Protocol binding",
             "format": "table",
             "minItems": 1,
-            "maxItems": 1,
+            "maxItems": 2,
             "uniqueItems": true,
-            "options": {
-              "hidden": true
-            },
             "items": {
-              "title": "Operations",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
+              "title": "Protocol",
+              "headerTemplate":"Protocol #{{i}}",
+              "anyOf": [
+                {
+                  "title": "HTTP",
+                  "$ref": "#/definitions/act_http_form"
                 },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
-                },
-                "op": {
-                  "default": "invokeaction",
-                  "const": "invokeaction",
-                  "options": {
-                    "hidden": true
-                  }
+                {
+                  "title": "WebSocket",
+                  "$ref": "#/definitions/act_ws_form"
                 }
-              }
+              ]              
             }
-          },
-          "useWS": {
-            "type": "boolean",
-            "title": "Is action available via WebSocket?",
-            "format": "checkbox",
-            "default": true
-          },
-          "useHTTP": {
-            "type": "boolean",
-            "title": "Is action available via HTTP?",
-            "format": "checkbox",
-            "default": true
           },
           "input": {
             "type": "array",
@@ -803,7 +774,7 @@
     },
     "td_ws_form": {
       "type": "object",
-      "name": "WebSocket TD",
+      "name": "",
       "required": [
         "op",
         "contentType",
@@ -898,7 +869,7 @@
     },
     "prop_ws_form": {
       "type": "object",
-      "name": "WebSocket TD",
+      "name": "",
       "required": [
         "op",
         "contentType",
@@ -939,6 +910,83 @@
               "readproperty",
               "writeproperty"
             ]
+          }
+        }
+      }
+    },
+    "act_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true,
+        "hidden": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": ["http"],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "act_ws_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "hidden": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": ["ws"],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
           }
         }
       }

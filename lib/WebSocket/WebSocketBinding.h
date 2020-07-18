@@ -1,7 +1,7 @@
 #ifndef WebSocketBinding_h
 #define WebSocketBinding_h
 #include "Arduino.h"
-//#include <WebSocketsServer.h>
+#include <WebSocketsServer.h>
 
 #ifndef WOT_HANDLER_FUNC
 #define WOT_HANDLER_FUNC

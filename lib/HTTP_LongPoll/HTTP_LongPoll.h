@@ -1,6 +1,7 @@
 #ifndef HTTP_LongPoll_h
 #define HTTP_LongPoll_h
 #include "Arduino.h"
+#include <ESPAsyncWebServer.h>
 
 #ifndef WOT_HANDLER_FUNC
 #define WOT_HANDLER_FUNC

@@ -1,19 +1,23 @@
 {% macro updateTD() -%}
 {%- for item in td['forms'] if 'href' in item %}
-    {%- if loop.index == 2 -%}
-    {%- do item.update(href='" + urlSocket + "/all/properties') -%} 
-    {%- else -%}
-    {%- do item.update(href='" + urlServer + "/all/properties') -%}    
+    {%- if item['href'] == 'ws' -%}
+    {%- do item.update(href='" + urlSocket + "/all/properties') -%}
+    {%- do global.update({'isWS':True}) -%}
+    {%- elif item['href'] == 'http' -%}
+    {%- do item.update(href='" + urlServer + "/all/properties') -%}
+    {%- do global.update({'isHTTP':True}) -%}
     {%- endif -%}
 {%- endfor %}    
 {#- EndPoint Properties #}
 {%- for property in template['properties'] %}
     {%- set i = loop.index -%}
     {%- for item in td['properties'][property['name']]['forms'] if 'href' in item -%}
-        {%- if loop.index == 2 -%}
+        {%- if item['href'] == 'ws' -%}
         {%- do item.update(href='" + urlSocket + "/properties/" + property' + i | string + '_name + "' ) -%}
-        {%- else -%}
+        {%- do global.update({'isWS':True}) -%}
+        {%- elif item['href'] == 'http' -%}
         {%- do item.update(href='" + urlServer + "/properties/" + property' + i | string + '_name + "' ) -%}
+        {%- do global.update({'isHTTP':True}) -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}
@@ -21,10 +25,12 @@
 {%- for action in template['actions'] %}
     {%- set i = loop.index -%}
     {%- for item in td['actions'][action['name']]['forms'] if 'href' in item -%}
-        {%- if loop.index == 2 -%}
+        {%- if item['href'] == 'ws' -%}
+        {%- do global.update({'isWS':True}) -%}
         {%- do item.update(href='" + urlSocket + "/actions/" + action' + i | string + '_name + "' ) -%}
-        {%- else -%}
+        {%- elif item['href'] == 'http' -%}
         {%- do item.update(href='" + urlServer + "/actions/" + action' + i | string + '_name + "' ) -%}
+        {%- do global.update({'isHTTP':True}) -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}     
@@ -32,10 +38,12 @@
 {%- for event in template['events'] %}
     {%- set i = loop.index -%}
     {%- for item in td['events'][event['name']]['forms'] if 'href' in item -%}
-        {% if loop.index == 3 %}
+        {% if item['href'] == 'ws' %}
         {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
-        {% else %}
+        {%- do global.update({'isWS':True}) -%}
+        {% elif item['href'] == 'http' %}
         {%- do item.update(href='" + urlSocket + "/events/" + event' + i | string + '_name + "' ) -%}
+        {%- do global.update({'isHTTP':True}) -%}
         {% endif %}
     {%- endfor -%}
 {%- endfor %}   
@@ -535,8 +543,8 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {{ defineVariable(interaction['type'], interactionName + '_value', 'iv') }}
 {% endif %}
 {% endmacro -%}
-{{ updateTD() }}
 {%- set global = {} -%}
+{{ updateTD() }}
 {{ updateGlobal() }}
 {%- set ssid = template['ssid'] -%}
 {%- set password = template['password'] -%}
@@ -553,10 +561,14 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- set capacity = {} -%}
 {%- do capacity.update({'maxSchema':20}) -%}
 {%- do capacity.update({'maxInputSchema':0}) -%}
-#include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
-#include "AsyncLongPoll/AsyncLongPoll.h"
+{% if global['isHTTP'] %}
+#include "HTTP_LongPoll/HTTP_LongPoll.h"
+{% endif %}
+{% if global['isWS'] %}
+#include "WebSocket/WebSocketBinding.h"
+{% endif %}
 {% if template['libraries'] | length > 0 %}
 {% for lib in template['libraries'] %}
 #include <{{ lib }}>
