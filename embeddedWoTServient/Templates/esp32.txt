@@ -3,6 +3,7 @@
     {%- if item['href'] == 'ws' -%}
     {%- do item.update(href='" + urlSocket + "/all/properties') -%}
     {%- do global.update({'isWS':True}) -%}
+    {%- do protocols.update({'http':True}) -%}
     {%- elif item['href'] == 'http' -%}
     {%- do item.update(href='" + urlServer + "/all/properties') -%}
     {%- do global.update({'isHTTP':True}) -%}
@@ -544,6 +545,7 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% endif %}
 {% endmacro -%}
 {%- set global = {} -%}
+{%- set protocols = {} -%}
 {{ updateTD() }}
 {{ updateGlobal() }}
 {%- set ssid = template['ssid'] -%}
@@ -561,7 +563,6 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- set capacity = {} -%}
 {%- do capacity.update({'maxSchema':20}) -%}
 {%- do capacity.update({'maxInputSchema':0}) -%}
-#include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 {% if global['isHTTP'] %}
 #include "HTTP_LongPoll/HTTP_LongPoll.h"
@@ -613,25 +614,20 @@ DynamicJsonDocument p_doc(
     {{ capacity['properties'] }});
 {% endif %}
 {% if global['isWS'] %}
-// document to handle Interaction Affordances WebSocket requests
-DynamicJsonDocument ia_doc(
+
     {%- do capacity.update({'actions':0}) -%}
     {%- for action in template['actions'] -%}
     {%- if td['actions'][action['name']]['forms'] | length == 2 -%}
     {%- do capacity.update({'actions' : capacity['actions'] + 1}) -%}
     {%- endif -%}
     {%- endfor -%}
-    {{ capacity['actions'] * 1000 }});
-// document to store the ip addresses of clients connected to WebSocket channel for Interaction Affordances requests   
-DynamicJsonDocument ipia_doc(2000);
-JsonArray ipia_arr;
+    
 {% endif %}
 {% if template['numevents'] > 0 %}
-// document to handle Events WebSocket requests
-DynamicJsonDocument e_doc({{ template['numevents'] * 1000 }});
+
 {% if global['isSubscription'] or global['isData'] or global['isCancellation'] -%}
-// document to handle Events Schemas
-DynamicJsonDocument es_doc(
+// document to handle Events Schemas in WebSocket
+DynamicJsonDocument ws_es_doc(
     {%- do capacity.update({'events':0}) -%}
     {%- for event in template['events'] -%}
     {%- for data in dataType -%}
@@ -645,10 +641,8 @@ DynamicJsonDocument es_doc(
     {%- endfor -%}
     {{ capacity['events'] * 2 }});
 {% else %}
-DynamicJsonDocument es_doc(20);
+DynamicJsonDocument ws_es_doc(20);
 {% endif %}
-// document to store the ip addresses of clients connected to WebSocket channel for Events requests   
-DynamicJsonDocument ipe_doc(2000);
 // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 {% endif %}
@@ -785,41 +779,37 @@ String events_endpoint[{{ template['numevents'] }}] = {
 
 // Requests
 {% if global['isWS'] %}
-    {% set reqWS = [] %}
-    {% set reqPropertyWS = [] %}
-    {% if td['forms'] | length == 2 %}
-    {% do reqWS.append(('thingName', 3)) %}
-    {% do reqPropertyWS.append(('thingName', 3)) %}
+{% set reqWS = [] %}
+{% set reqPropertyWS = [] %}
+{% if td['forms'] | length == 2 %}
+{% do reqWS.append(('thingName', 3)) %}
+{% do reqPropertyWS.append(('thingName', 3)) %}
 {% endif %}
 {% for property in template['properties'] %}
-    {% if td['properties'][property['name']]['forms'] | length == 2 %}
-        {% do reqWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
-        {% do reqPropertyWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
-    {% endif %}
+{% if td['properties'][property['name']]['forms'] | length == 2 %}
+{% do reqWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
+{% do reqPropertyWS.append(('property' + loop.index | string + '_name', loop.index+3)) %}
+{% endif %}
 {% endfor %}
 {% for action in template['actions'] %}
-    {% if td['actions'][action['name']]['forms'] | length == 2 %}
-        {% do reqWS.append(('action' + loop.index | string + '_name', loop.index+3+template['numproperties'])) %}
-    {% endif %}
+{% if td['actions'][action['name']]['forms'] | length == 2 %}
+{% do reqWS.append(('action' + loop.index | string + '_name', loop.index+3+template['numproperties'])) %}
+{% endif %}
 {% endfor %}
-
 {% for i in range(1, template['numactions']+1) %}
-    {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
-    {% do req.append((request, 'HTTP_GET')) %}
+{% set request = 'req' + (i + 3 + template['numproperties']) | string %}
+{% do req.append((request, 'HTTP_GET')) %}
 {% endfor %}
-
 {% for i in range(1, template['numactions']+1) %}
-    {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
-    {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
-    {% do req.append((request, 'HTTP_POST')) %}
+{% set request = 'req' + (i + 3 + template['numproperties']) | string %}
+{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
+{% do req.append((request, 'HTTP_POST')) %}
 {% endfor %}
-
 {% for i in range(1, template['numproperties']+1) %}
-    {% set request = 'req' + (i + 3) | string %}
-    {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
-    {% do req.append((request, 'HTTP_GET')) %}
+{% set request = 'req' + (i + 3) | string %}
+{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
+{% do req.append((request, 'HTTP_GET')) %}
 {% endfor %}
-
 {{ defineVariable('String', 'req3', ['"/"', '+', 'thingName', '+', '"/all/properties"' ]) }}
 {% do req.append(('req3', 'HTTP_GET')) %}
 
@@ -1026,10 +1016,9 @@ void loop() {
     {% if 'loop' in template %}
     {{ template['loop'] | replace('{', '\n\t{\n\t') | replace('}', '}\n\t') | replace(';', ';\n\t') }}
     {% endif %}
-
-    // handle Requests
     {% if template['numevents'] != 0 or global['isWS'] %}
-    webSocket.loop();
+    // handle Requests via WebSocket
+    wsb->loop();
     {% endif %}
     {# server.handleClient(); #}
 }
@@ -1057,70 +1046,18 @@ void connection(const char* ssid, const char* password) {
 }
 
 // Request functions
-void handleReq1(AsyncWebServerRequest *req) {
+String request1() {
     {{ defineVariable('String', 'resp', 'iv') }}
 
     Serial.println("\nGET Thing URL");
     {{ setVariable(True, 'resp', '[\\"" + urlServer + "\\"]') }}
-    req->send(200, "application/ld+json", resp);
+    return resp;
 }
 
-void handleReq2(AsyncWebServerRequest *req) {
+String request2() {
     Serial.println("\nGET Thing Description"); 
-    req->send(200, "application/ld+json", td);
+    return td;
 }
-
-void handleReq3(AsyncWebServerRequest *req) {
-    {{ defineVariable('String', 'resp', 'iv') }}
-
-    {{ setVariable(False, 'resp', 'request3()') }}
-    req->send(200, "application/ld+json", resp);
-}
-
-{# HandleReq for Properties #}
-{% for property in template['properties'] %}
-{% set i = loop.index %}
-{% set n = i+3 %}
-void handleReq{{ n }}(AsyncWebServerRequest *req) {
-    {{ defineVariable('String', 'resp', '') }}
-    
-    {{ setVariable(False, 'resp', 'request' + n | string + '()') }}
-    req->send(200, "application/ld+json", resp);
-}
-
-{% endfor -%}
-
-{# HandleReq for Actions #}
-{% for action in template['actions'] %}
-{%- set a = loop.index -%}
-{% set n = a+3+template['numproperties'] %}
-void handleReq{{ n }}(AsyncWebServerRequest *req) {
-    {{ defineVariable('String', 'resp', '') }}
-    String body = req->arg("plain");
-    
-    {{ setVariable(False, 'resp', 'request' + n | string + '(body)') }}
-    req->send(200, "application/ld+json", resp);
-}
-{% endfor %}
-
-{# HandleReq for Events in LongPoll #}
-{% for action in template['actions'] %}
-{%- set a = loop.index -%}
-void handleReq{{ a+3+template['numproperties']+template['numactions'] }}(AsyncWebServerRequest *req) {
-    {{ defineVariable('char*', 'resp', 'Method Not Allowed') }}
-    req->send(405, "text/plain", resp);
-}
-{% endfor %}
-
-{% if global['isLP'] %}
-{% for action in template['events'] %}
-{%- set a = loop.index -%}
-void handleReq{{ a+3+template['numproperties']+template['numactions']*2 }}(AsyncWebServerRequest *req) {
-    alp->longPollHandler(req, {{'event' + a | string + '_name'}});
-}
-
-{% endfor %}
-{% endif %}
 
 {# functions for property and actions used for HTTP Requests and WebSocket #}
 String request3() {
