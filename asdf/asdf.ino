@@ -1,4 +1,7 @@
 
+//pippo
+['http', 'ws']
+
 #include <ArduinoJson.h>
 #include "HTTP_LongPoll/HTTP_LongPoll.h"
 #include "WebSocket/WebSocketBinding.h"

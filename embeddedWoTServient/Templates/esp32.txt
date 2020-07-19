@@ -3,10 +3,11 @@
     {%- if item['href'] == 'ws' -%}
     {%- do item.update(href='" + urlSocket + "/all/properties') -%}
     {%- do global.update({'isWS':True}) -%}
-    {%- do protocols.update({'http':True}) -%}
+    {%- do protocols_td.append('ws') -%}
     {%- elif item['href'] == 'http' -%}
     {%- do item.update(href='" + urlServer + "/all/properties') -%}
     {%- do global.update({'isHTTP':True}) -%}
+    {%- do protocols_td.append('http') -%}
     {%- endif -%}
 {%- endfor %}    
 {#- EndPoint Properties #}
@@ -545,8 +546,11 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% endif %}
 {% endmacro -%}
 {%- set global = {} -%}
-{%- set protocols = {} -%}
+{%- set protocols_td = [] -%}
 {{ updateTD() }}
+//pippo
+{{ protocols_td }}
+
 {{ updateGlobal() }}
 {%- set ssid = template['ssid'] -%}
 {%- set password = template['password'] -%}
