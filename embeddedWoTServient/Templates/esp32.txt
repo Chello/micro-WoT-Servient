@@ -13,13 +13,16 @@
 {#- EndPoint Properties #}
 {%- for property in template['properties'] %}
     {%- set i = loop.index -%}
+    {%- do protocols_prop.update({property['name']: []}) -%}
     {%- for item in td['properties'][property['name']]['forms'] if 'href' in item -%}
         {%- if item['href'] == 'ws' -%}
         {%- do item.update(href='" + urlSocket + "/properties/" + property' + i | string + '_name + "' ) -%}
         {%- do global.update({'isWS':True}) -%}
+        {%- do protocols_prop[property['name']].append('ws') -%}
         {%- elif item['href'] == 'http' -%}
         {%- do item.update(href='" + urlServer + "/properties/" + property' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
+        {%- do protocols_prop[property['name']].append('http') -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}
@@ -547,11 +550,11 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% endmacro -%}
 {%- set global = {} -%}
 {%- set protocols_td = [] -%}
+{%- set protocols_prop = {} -%}
 {{ updateTD() }}
-//pippo
-{{ protocols_td }}
-
 {{ updateGlobal() }}
+//pippoo
+{{ protocols_prop }}
 {%- set ssid = template['ssid'] -%}
 {%- set password = template['password'] -%}
 {%- set protocolServer = 'http' -%}
