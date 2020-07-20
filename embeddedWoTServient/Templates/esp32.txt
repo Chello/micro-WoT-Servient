@@ -562,8 +562,6 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- do protocols.update({'actions' : {} }) -%}
 {{ updateTD() }}
 {{ updateGlobal() }}
-//pippoo
-{{ protocols }}
 {%- set ssid = template['ssid'] -%}
 {%- set password = template['password'] -%}
 {%- set protocolServer = 'http' -%}
@@ -770,22 +768,9 @@ bool events_cancellationSchema[{{ template['numevents'] }}] = {
     {%- endif -%}
     {%- endfor -%}
 };
-String events_endpoint[{{ template['numevents'] }}] = {
-    {%- for i in range(1, template['numevents']+1) -%}
-    {%- if i == loop.last -%}
-    {{ '"/" + thingName + "/events/" + event' + i | string + '_name' }}
-    {%- else -%}
-    {{ '"/" + thingName + "/events/" + event' + i | string + '_name' }},
-    {%- endif -%}
-    {% if global['isLP'] %}
-    {% do req.append(('events_endpoint[' + ((template['numevents'] - i) | string) + ']', 'HTTP_GET')) %}
-    {% endif %}
-    {%- endfor -%}
-};
 {% endif %}
 
 // Endpoints
-{% if global['isWS'] %}
 {% set reqWS = [] %}
 {% set reqPropertyWS = [] %}
 {% if td['forms'] | length == 2 %}
@@ -803,28 +788,22 @@ String events_endpoint[{{ template['numevents'] }}] = {
 {% do reqWS.append(('action' + loop.index | string + '_name', loop.index+3+template['numproperties'])) %}
 {% endif %}
 {% endfor %}
-{% for i in range(1, template['numactions']+1) %}
-{% set request = 'req' + (i + 3 + template['numproperties']) | string %}
-{% do req.append((request, 'HTTP_GET')) %}
+{% for i in range(1, template['numevents']+1) %}
+{% set request = 'req' + (i + 3 + template['numproperties'] + template['numactions']) | string %}
+{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/events/"', '+', 'event' + i | string + '_name']) }}
 {% endfor %}
 {% for i in range(1, template['numactions']+1) %}
 {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
 {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
-{% do req.append((request, 'HTTP_POST')) %}
 {% endfor %}
 {% for i in range(1, template['numproperties']+1) %}
 {% set request = 'req' + (i + 3) | string %}
 {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
-{% do req.append((request, 'HTTP_GET')) %}
 {% endfor %}
 {{ defineVariable('String', 'req3', ['"/"', '+', 'thingName', '+', '"/all/properties"' ]) }}
-{% do req.append(('req3', 'HTTP_GET')) %}
 {{ defineVariable('String', 'req2', ['"/"', '+', 'thingName']) }}
-{% do req.append(('req2', 'HTTP_GET')) %}
 {{ defineVariable('String', 'req1', '/') }}
-{% do req.append(('req1', 'HTTP_GET')) %}
 
-{% endif %}
 IPAddress ipS;
 {% if global['isHTTP'] %}
 //Longpoll object handler
@@ -871,6 +850,18 @@ WebSocketBinding *wsb;
 {% endif %}
 {% endif %}
 {% endfor %}
+int i, j, k, n;
+
+String request1();
+String request2();
+String request3();
+{% for i in range(1, template['numproperties'] +1) %}
+String request{{i + 3}}();
+{% endfor %}
+{% for i in range(1, template['numactions'] +1) %}
+String request{{i + 3 + template['numproperties']}}(String body);
+{% endfor %}
+
 {# Start defining endpoints and callbacks #}
 //HTTP - actions
 {% set req = [] %}
@@ -879,8 +870,9 @@ WebSocketBinding *wsb;
     {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
     {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
 {% endfor %}
-const String http_actions_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
-actions_handler http_actions_callback[{{ req|length }}] = { {{ request|join(', ') }} };
+const int http_actions_num = {{ req|length }};
+const String http_actions_endpoint[http_actions_num] = { {{ req|join(', ') }} };
+actions_handler http_actions_callback[http_actions_num] = { {{ request|join(', ') }} };
 
 //WS - actions
 {% set req = [] %}
@@ -889,8 +881,9 @@ actions_handler http_actions_callback[{{ req|length }}] = { {{ request|join(', '
     {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
         {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
 {% endfor %}
-const String ws_actions_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
-actions_handler ws_actions_callback[{{ req|length }}] = { {{ request|join(', ') }} };
+const int ws_actions_num = {{ req|length }};
+const String ws_actions_endpoint[ws_actions_num] = { {{ req|join(', ') }} };
+actions_handler ws_actions_callback[ws_actions_num] = { {{ request|join(', ') }} };
 
 //HTTP - Properties
 {% set req = [] %}
@@ -903,8 +896,9 @@ actions_handler ws_actions_callback[{{ req|length }}] = { {{ request|join(', ') 
     {% do req.append('req' + (loop.index + 3) | string) %}
     {% do request.append('request' + (loop.index + 3) | string) %}
 {% endfor %}
-const String http_properties_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
-properties_handler http_properties_callback[{{ req|length }}] = { {{ request|join(', ') }} };
+const int http_properties_num = {{ req|length }};
+const String http_properties_endpoint[http_properties_num] = { {{ req|join(', ') }} };
+properties_handler http_properties_callback[http_properties_num] = { {{ request|join(', ') }} };
 
 //WS - Properties
 {% set req = [] %}
@@ -917,9 +911,28 @@ properties_handler http_properties_callback[{{ req|length }}] = { {{ request|joi
     {% do req.append('req' + (loop.index + 3) | string) %}
     {% do request.append('request' + (loop.index + 3) | string) %}
 {% endfor %}
-const String ws_properties_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
-properties_handler ws_properties_callback[{{ req|length }}] = { {{ request|join(', ') }} };
-int i, j, k, n;
+const int ws_properties_num = {{ req|length }};
+const String ws_properties_endpoint[ws_properties_num] = { {{ req|join(', ') }} };
+properties_handler ws_properties_callback[ws_properties_num] = { {{ request|join(', ') }} };
+
+//HTTP - events
+{% set req = [] %}
+{% set request = [] %}
+{% for event in protocols['events'] if 'http' in protocols['events'][event] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties'] + template['numactions']) | string) %}
+        {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const int http_events_num = {{ req|length }};
+const String http_events_endpoint[http_events_num] = { {{ req|join(', ') }} };
+//WS - events
+{% set req = [] %}
+{% set request = [] %}
+{% for event in protocols['events'] if 'ws' in protocols['events'][event] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
+        {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const int ws_events_num = {{ req|length }};
+const String ws_events_endpoint[ws_events_num] = { {{ req|join(', ') }} };
 
 void setup() {
     Serial.begin(115200);
@@ -999,26 +1012,28 @@ void setup() {
     {% endfor %}
     {% endfor %}
     {% endif %}
-
-    {{ setVariable(False, 'ipe_arr', 'ipe_doc.createNestedArray("clients_list")') }}
-    {% endif %}
-    {% if global['isWS'] %}
-    {{ setVariable(False, 'ipia_arr', 'ipia_doc.createNestedArray("clients_list")') }}
     {% endif %}
   
     connection(ssid, password);
     
     td = "{{ thingD }}";
 
-    // Server requests
-    {% for r in req %}
-    server.on({{ r[0] + '.c_str()' | string }},{{ r[1] }},{{ 'handleReq' + (req | length - (loop.index-1)) | string }});
-    {% endfor %}
+    {% if global['isHTTP'] %}
+    hlp = new HTTP_LongPoll(portServer);
 
-    server.begin();
-    {% if template['numevents'] != 0 or global['isWS'] %}
-    webSocket.begin();
-    webSocket.onEvent(webSocketEvent);
+    hlp->exposeActions(http_actions_endpoint, http_actions_callback, http_actions_num);
+    hlp->exposeEvents(http_events_endpoint, http_events_num);
+    hlp->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
+
+    hlp->begin();
+    {% endif %}
+    {% if global['isWS'] %}
+    wsb = new WebSocketBinding(portSocket);
+
+    wsb->bindEventSchema(ws_es_doc);
+    wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
+    wsb->exposeEvents(ws_events_endpoint, ws_events_num);
+    wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     {% endif %}
     {% if global['isLP'] %}
     alp = new AsyncLongPoll();
@@ -1282,19 +1297,12 @@ String request{{ a+3+template['numproperties'] }}(String body) {
                 }
                 {% endif %}
                 if({{ event['condition'] }}) {
-                    {% if global['isLP'] %}
-                    alp->sendLongPollTXT(ws_msg, {{'event' + enum | string + '_name'}});
+                    {% if 'http' in protocols['events'][event['name']] %}
+                    hlp->sendLongPollTXT(ws_msg, http_events_endpoint[{{ (enum -1) | string }}]);
                     {% endif %}
-                    for(i=0; i<ipe_arr.size(); i++) {
-                        {{ defineVariable('string_nq', 'ws_ip', 'ipe_arr[i]["ip"]') }}
-                        {{ defineVariable('JsonArray', 'ae', 'e_doc[ws_ip]') }}
-                        for(j=0; j<ae.size(); j++) {
-                            if(!ae[j][event{{ enum }}_name].isNull() && ae[j][event{{ enum }}_name]) {
-                                {{ defineVariable('unsigned char', 'ws_num', 'ipe_doc[ws_ip]') }}
-                                webSocket.sendTXT(ws_num, ws_msg);
-                            }
-                        }
-                    }
+                    {% if 'ws' in protocols['events'][event['name']] %}
+                    wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[{{ (enum -1) | string }}]);
+                    {% endif %}
                 }
                 {% endif %}
                 {% endfor %}
@@ -1346,17 +1354,14 @@ String request{{ a+3+template['numproperties'] }}(String body) {
             {{ setVariable(False, 'serializeJson(tmp_obj, ws_msg)') }}
         }
         {% endif %}
-        if({{ event['condition'] }}) {
-            for(i=0; i<ipe_arr.size(); i++) {
-                {{ defineVariable('string_nq', 'ws_ip', 'ipe_arr[i]["ip"]') }}
-                {{ defineVariable('JsonArray', 'ae', 'e_doc[ws_ip]') }}
-                for(j=0; j<ae.size(); j++) {
-                    if(!ae[j][event{{ enum }}_name].isNull() && ae[j][event{{ enum }}_name]) {
-                        {{ defineVariable('unsigned char', 'ws_num', 'ipe_doc[ws_ip]') }}
-                        webSocket.sendTXT(ws_num, ws_msg);
-                    }
-                }
-            }
+         if({{ event['condition'] }}) {
+            {% if 'http' in protocols['events'][event['name']] %}
+            hlp->sendLongPollTXT(ws_msg, http_events_endpoint[{{ (enum -1) | string }}]);
+            {% endif %}
+            {% if 'ws' in protocols['events'][event['name']] %}
+            wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[{{ (enum -1) | string }}]);
+            {% endif %}
+            
         }
         {% endif %}
         {% endfor %}

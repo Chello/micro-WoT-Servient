@@ -30,13 +30,13 @@ WebSocketBinding::WebSocketBinding(int portSocket): ac_doc(2000), ia_doc(1000), 
     webSocket.begin();
 }
 
-void WebSocketBinding::sendWebSocketTXT(String txt, const char* event_endpoint) {
+void WebSocketBinding::sendWebSocketTXT(String txt, String event_endpoint) {
     for(i=0; i<ipe_arr.size(); i++) {
         String ws_ip = ipe_arr[i]["ip"];
         JsonArray ae = e_doc[ws_ip];
-        Serial.printf("Sending Websocket string %s. Triggered event %s. Sending to ip %s\n", txt.c_str(), event_endpoint, ws_ip.c_str());
+        Serial.printf("Sending Websocket string %s. Triggered event %s. Sending to ip %s\n", txt.c_str(), event_endpoint.c_str(), ws_ip.c_str());
         for(j=0; j<ae.size(); j++) {
-            if(!ae[j][event_endpoint].isNull() && ae[j][event_endpoint]) {
+            if(!ae[j][event_endpoint.c_str()].isNull() && ae[j][event_endpoint.c_str()]) {
                 unsigned char ws_num = ipe_doc[ws_ip];
                 webSocket.sendTXT(ws_num, txt);
                 Serial.println("Done");

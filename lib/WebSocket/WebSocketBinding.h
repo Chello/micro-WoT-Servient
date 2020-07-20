@@ -26,7 +26,7 @@ class WebSocketBinding {
          * @param txt the text to send
          * @param event_endpoint the endpoint to send message to
          */
-        void sendWebSocketTXT(String txt, const char* event_endpoint);
+        void sendWebSocketTXT(String txt, String event_endpoint);
 
         /**
          * Loops the webSocket for accepting requests.
