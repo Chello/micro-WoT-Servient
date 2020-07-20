@@ -941,6 +941,34 @@ actions_handler http_actions_callback[{{ req|length }}] = { {{ request|join(', '
 {% endfor %}
 const String ws_actions_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
 actions_handler ws_actions_callback[{{ req|length }}] = { {{ request|join(', ') }} };
+
+//HTTP - Properties
+{% set req = [] %}
+{% set request = [] %}
+{% if 'http' in protocols['td'] %}
+{% set req = ['req1', 'req2', 'req3'] %}
+{% set request = ['request1', 'request2', 'request3'] %}
+{% endif %}
+{% for property in protocols['properties'] if 'http' in protocols['properties'][property] %}
+    {% do req.append('req' + (loop.index + 3) | string) %}
+    {% do request.append('request' + (loop.index + 3) | string) %}
+{% endfor %}
+const String http_properties_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
+properties_handler http_properties_callback[{{ req|length }}] = { {{ request|join(', ') }} };
+
+//WS - Properties
+{% set req = [] %}
+{% set request = [] %}
+{% if 'ws' in protocols['td'] %}
+{% set req = ['req1', 'req2', 'req3'] %}
+{% set request = ['request1', 'request2', 'request3'] %}
+{% endif %}
+{% for property in protocols['properties'] if 'ws' in protocols['properties'][property] %}
+    {% do req.append('req' + (loop.index + 3) | string) %}
+    {% do request.append('request' + (loop.index + 3) | string) %}
+{% endfor %}
+const String ws_properties_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
+properties_handler ws_properties_callback[{{ req|length }}] = { {{ request|join(', ') }} };
 int i, j, k, n;
 
 void setup() {

@@ -81,6 +81,14 @@ actions_handler http_actions_callback[1] = { request5 };
 //WS - actions
 const String ws_actions_endpoint[2] = { req5, req6 };
 actions_handler ws_actions_callback[2] = { request5, request6 };
+
+//HTTP - Properties
+const String http_properties_endpoint[4] = { req1, req2, req3, req4 };
+properties_handler http_properties_callback[4] = { request1, request2, request3, request4 };
+
+//WS - Properties
+const String ws_properties_endpoint[4] = { req1, req2, req3, req4 };
+properties_handler ws_properties_callback[4] = { request1, request2, request3, request4 };
 int i, j, k, n;
 
 void setup() {
@@ -97,6 +105,8 @@ void setup() {
     td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false},\"act2\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\"}}}";
 
     // Server requests
+    server.on(r.c_str(),e,handleReq4);
+    server.on(r.c_str(),e,handleReq3);
     server.on(r.c_str(),e,handleReq2);
     server.on(r.c_str(),e,handleReq1);
 
