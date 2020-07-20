@@ -1,7 +1,7 @@
 
 
 //pippoo
-{'td': ['http', 'ws'], 'properties': {'proprieta': ['http', 'ws']}, 'events': {'evt': ['http', 'ws']}, 'actions': {'act': ['ws', 'http']}}#include <ArduinoJson.h>
+{'td': ['http', 'ws'], 'properties': {'proprieta': ['http', 'ws']}, 'events': {'evt': ['http', 'ws']}, 'actions': {'act1': ['ws', 'http'], 'act2': ['ws']}}#include <ArduinoJson.h>
 #include "HTTP_LongPoll/HTTP_LongPoll.h"
 #include "WebSocket/WebSocketBinding.h"
 
@@ -25,7 +25,7 @@ DeserializationError err;
 
 int properties_number = 1;
 int objectProperties_number = 0;
-int actions_number = 1;
+int actions_number = 2;
 int events_number = 1;
 
 // Properties
@@ -34,9 +34,12 @@ bool property1_value = false;
 
 
 // Actions
-const char* action1_name = "act";
+const char* action1_name = "act1";
 int action1_inputsNumber = 0;
 String action1_schema[0] = {};
+const char* action2_name = "act2";
+int action2_inputsNumber = 0;
+String action2_schema[0] = {};
 
 // Events
 const char* event1_name = "evt";
@@ -48,6 +51,7 @@ String events_endpoint[1] = {"/" + thingName + "/events/" + event1_name};
 
 // Requests
 String req5 = "/" + thingName + "/actions/" + action1_name;
+String req6 = "/" + thingName + "/actions/" + action2_name;
 String req4 = "/" + thingName + "/properties/" + property1_name;
 String req3 = "/" + thingName + "/all/properties";
 
@@ -59,7 +63,7 @@ int ws_requestsNumber = 3;
 int ws_actionsNumber = 1;
 String ws_requests[3] = {thingName,property1_name,action1_name};
 String ws_endpoint[3] = {req3,req4,req5}; 
-String ws_actions[1] = {action1_name};
+String ws_actions[1] = {action1_name,};
 
 AsyncWebServer server(portServer);
 WebSocketsServer webSocket = WebSocketsServer(portSocket);
@@ -70,7 +74,13 @@ HTTP_LongPoll *hlp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
+//HTTP - actions
+const String http_actions_endpoint[1] = { req5 };
+actions_handler http_actions_callback[1] = { request5 };
 
+//WS - actions
+const String ws_actions_endpoint[2] = { req5, req6 };
+actions_handler ws_actions_callback[2] = { request5, request6 };
 int i, j, k, n;
 
 void setup() {
@@ -84,15 +94,11 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false},\"act2\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\"}}}";
 
     // Server requests
-    server.on(req5.c_str(),HTTP_GET,handleReq6);
-    server.on(req5.c_str(),HTTP_POST,handleReq5);
-    server.on(req4.c_str(),HTTP_GET,handleReq4);
-    server.on(req3.c_str(),HTTP_GET,handleReq3);
-    server.on(req2.c_str(),HTTP_GET,handleReq2);
-    server.on(req1.c_str(),HTTP_GET,handleReq1);
+    server.on(r.c_str(),e,handleReq2);
+    server.on(r.c_str(),e,handleReq1);
 
     server.begin();
     webSocket.begin();
@@ -175,22 +181,27 @@ String request5(String body) {
         return resp;
     }
     else {
-        act(); 
+        act1(); 
         resp = "";
-        // evt condition
-        String ws_msg = "";
-        if(true) {
-            for(i=0; i<ipe_arr.size(); i++) {
-                String ws_ip = ipe_arr[i]["ip"];
-                JsonArray ae = e_doc[ws_ip];
-                for(j=0; j<ae.size(); j++) {
-                    if(!ae[j][event1_name].isNull() && ae[j][event1_name]) {
-                        unsigned char ws_num = ipe_doc[ws_ip];
-                        webSocket.sendTXT(ws_num, ws_msg);
-                    }
-                }
-            }
-        }
+    }
+    return resp;
+}
+String request6(String body) {
+    DynamicJsonDocument resp_doc(20);
+    String resp = "";
+
+    Serial.printf("\nPOST invokeaction %s\n", action2_name);
+    Serial.printf("Body received: %s\n", body.c_str());
+    
+    err = deserializeJson(resp_doc, body);
+    if(err) {
+        Serial.printf("deserializeJson() failed with code %s", err.c_str());
+        resp = err.c_str();
+        return resp;
+    }
+    else {
+        act2(); 
+        resp = "";
     }
     return resp;
 }
@@ -213,8 +224,13 @@ bool handleInputType(String value, String schema) {
 }
 
 // Action functions
-void act() {
+void act1() {
 	return in1;
+	
+}
+
+void act2() {
+	delay(90);
 	
 }
 

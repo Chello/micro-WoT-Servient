@@ -921,7 +921,26 @@ WebSocketBinding *wsb;
 {% endif %}
 {% endif %}
 {% endfor %}
+{# Start defining endpoints and callbacks #}
+//HTTP - actions
+{% set req = [] %}
+{% set request = [] %}
+{% for action in protocols['actions'] if 'http' in protocols['actions'][action] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
+    {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const String http_actions_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
+actions_handler http_actions_callback[{{ req|length }}] = { {{ request|join(', ') }} };
 
+//WS - actions
+{% set req = [] %}
+{% set request = [] %}
+{% for action in protocols['actions'] if 'ws' in protocols['actions'][action] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
+        {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const String ws_actions_endpoint[{{ req|length }}] = { {{ req|join(', ') }} };
+actions_handler ws_actions_callback[{{ req|length }}] = { {{ request|join(', ') }} };
 int i, j, k, n;
 
 void setup() {
