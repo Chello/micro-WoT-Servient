@@ -1,7 +1,7 @@
 
 
 //pippoo
-{'proprieta': ['http', 'ws']}#include <ArduinoJson.h>
+{'td': ['http', 'ws'], 'properties': {'proprieta': ['http', 'ws']}, 'events': {'evt': ['http', 'ws']}, 'actions': {'act': ['ws', 'http']}}#include <ArduinoJson.h>
 #include "HTTP_LongPoll/HTTP_LongPoll.h"
 #include "WebSocket/WebSocketBinding.h"
 
@@ -66,7 +66,9 @@ WebSocketsServer webSocket = WebSocketsServer(portSocket);
 
 IPAddress ipS;
 //Longpoll object handler
-AsyncLongPoll *alp;
+HTTP_LongPoll *hlp;
+//WebSocket object handler
+WebSocketBinding *wsb;
 
 
 int i, j, k, n;

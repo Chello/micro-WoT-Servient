@@ -42,13 +42,13 @@ $(document).ready(function() {
         iconlib: "fontawesome4"
     });
 
-    var initbuild = JSON.parse("{\"ssid\":\"asdffg\",\"password\":\"\",\"portserver\":\"80\",\"portsocket\":\"81\",\"libraries\":[]}")
+    var initbuild = JSON.parse("{\"ssid\":\"Rachelli-net\",\"password\":\"3eKLtrdFwfQXgpv!\",\"portserver\":\"80\",\"portsocket\":\"81\",\"libraries\":[]}");
 
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
         
-        //startval: initbuild,
+        startval: initbuild,
         // The schema for the editor
         schema: {
             type: "object",

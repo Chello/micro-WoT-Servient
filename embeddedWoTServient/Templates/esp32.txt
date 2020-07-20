@@ -3,52 +3,58 @@
     {%- if item['href'] == 'ws' -%}
     {%- do item.update(href='" + urlSocket + "/all/properties') -%}
     {%- do global.update({'isWS':True}) -%}
-    {%- do protocols_td.append('ws') -%}
+    {%- do protocols['td'].append('ws') -%}
     {%- elif item['href'] == 'http' -%}
     {%- do item.update(href='" + urlServer + "/all/properties') -%}
     {%- do global.update({'isHTTP':True}) -%}
-    {%- do protocols_td.append('http') -%}
+    {%- do protocols['td'].append('http') -%}
     {%- endif -%}
 {%- endfor %}    
 {#- EndPoint Properties #}
 {%- for property in template['properties'] %}
     {%- set i = loop.index -%}
-    {%- do protocols_prop.update({property['name']: []}) -%}
+    {%- do protocols['properties'].update({property['name']: []}) -%}
     {%- for item in td['properties'][property['name']]['forms'] if 'href' in item -%}
         {%- if item['href'] == 'ws' -%}
         {%- do item.update(href='" + urlSocket + "/properties/" + property' + i | string + '_name + "' ) -%}
         {%- do global.update({'isWS':True}) -%}
-        {%- do protocols_prop[property['name']].append('ws') -%}
+        {%- do protocols['properties'][property['name']].append('ws') -%}
         {%- elif item['href'] == 'http' -%}
         {%- do item.update(href='" + urlServer + "/properties/" + property' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
-        {%- do protocols_prop[property['name']].append('http') -%}
+        {%- do protocols['properties'][property['name']].append('http') -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}
 {#- EndPoint Actions #}    
 {%- for action in template['actions'] %}
     {%- set i = loop.index -%}
+    {%- do protocols['actions'].update({action['name']: []}) -%}
     {%- for item in td['actions'][action['name']]['forms'] if 'href' in item -%}
         {%- if item['href'] == 'ws' -%}
         {%- do global.update({'isWS':True}) -%}
         {%- do item.update(href='" + urlSocket + "/actions/" + action' + i | string + '_name + "' ) -%}
+        {%- do protocols['actions'][action['name']].append('ws') -%}
         {%- elif item['href'] == 'http' -%}
         {%- do item.update(href='" + urlServer + "/actions/" + action' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
+        {%- do protocols['actions'][action['name']].append('http') -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}     
 {#- EndPoint Events #}    
 {%- for event in template['events'] %}
     {%- set i = loop.index -%}
+    {%- do protocols['events'].update({event['name']: []}) -%}
     {%- for item in td['events'][event['name']]['forms'] if 'href' in item -%}
         {% if item['href'] == 'ws' %}
         {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
         {%- do global.update({'isWS':True}) -%}
+        {%- do protocols['events'][event['name']].append('ws') -%}
         {% elif item['href'] == 'http' %}
         {%- do item.update(href='" + urlSocket + "/events/" + event' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
+        {%- do protocols['events'][event['name']].append('http') -%}
         {% endif %}
     {%- endfor -%}
 {%- endfor %}   
@@ -549,12 +555,15 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% endif %}
 {% endmacro -%}
 {%- set global = {} -%}
-{%- set protocols_td = [] -%}
-{%- set protocols_prop = {} -%}
+{%- set protocols = {} -%}
+{%- do protocols.update({'td' : [] }) -%}
+{%- do protocols.update({'properties' : {} }) -%}
+{%- do protocols.update({'events' : {} }) -%}
+{%- do protocols.update({'actions' : {} }) -%}
 {{ updateTD() }}
 {{ updateGlobal() }}
 //pippoo
-{{ protocols_prop }}
+{{ protocols }}
 {%- set ssid = template['ssid'] -%}
 {%- set password = template['password'] -%}
 {%- set protocolServer = 'http' -%}
@@ -867,8 +876,14 @@ WebSocketsServer webSocket = WebSocketsServer(portSocket);
 {% endif %}
 
 IPAddress ipS;
+{% if global['isHTTP'] %}
 //Longpoll object handler
-AsyncLongPoll *alp;
+HTTP_LongPoll *hlp;
+{% endif %}
+{% if global['isWS'] %}
+//WebSocket object handler
+WebSocketBinding *wsb;
+{% endif %}
 
 {% for var in template['globals'] %}
 {% set i = loop.index %}
