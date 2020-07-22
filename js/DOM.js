@@ -73,7 +73,6 @@ $("#save").on('click', function() {
         ]
     }).then(result => {
         if (result.canceled) return;
-        // console.log(result.filePath);
         zip .generateNodeStream({type: 'nodebuffer', streamFiles: true})
             .pipe(fs.createWriteStream(result.filePath))
             .on('finish', function() {
@@ -91,11 +90,9 @@ $("#load").on('click', function() {
             {name: 'Zip file', extensions:['zip']}
         ]
     }).then(result => {
-        console.log(result.filePaths);
         fs.readFile(result.filePaths[0], function(err, data) {
             // if (err) throw err;
             JSZip.loadAsync(data).then(function(zip) {
-                    console.log(zip);
                     zip.file('td.json').async("string").then(function (data) {
                         editor.setValue(JSON.parse(data));
                     });

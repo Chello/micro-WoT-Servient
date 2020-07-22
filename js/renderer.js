@@ -256,7 +256,7 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File ${{thingName}}.json created successfully!'); 
+                    console.log('File td created successfully!'); 
                 })
     //write builder option file into dir
     fs.writeFile(optFile, 
@@ -265,7 +265,7 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File ${{thingName}}.json created successfully!'); 
+                    console.log('File build created successfully!'); 
                 })
     //generate exec string
     console.log($("#serial_port").val());
@@ -276,7 +276,6 @@ var createTDFiles = function(thingName) {
                     ' -o ' + optFile +
                     ' -t ' + tmplFile +
                     serial_port;
-    console.log(exec_str)
     term.exec(exec_str)
 }
 
@@ -302,7 +301,6 @@ var build_compile_flash = function() {
     }
 
     var thingName = editor.getValue()['title'];
-    console.log(thingName)
 
     //generate directory path name
     var dirPath = path.join(__dirname, thingName);
