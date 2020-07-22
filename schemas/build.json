@@ -9,6 +9,9 @@
     "portsocket",
     "libraries"
   ],
+  "options": {
+    "disable_collapse": true
+  },
   "properties": {
     "ssid": {
       "type": "string",

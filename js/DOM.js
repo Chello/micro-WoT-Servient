@@ -58,3 +58,53 @@ var hide_show_terminal = function(force) {
         $('#footer').css("height", "30px");
     }
 }
+
+$("#save").on('click', function() {
+    var zip = JSZip();
+    zip.file('td.json', JSON.stringify(editor.getValue()));
+    zip.file('build.json', JSON.stringify(builder.getValue()));
+
+    dialog.showSaveDialog(options = {
+        title: "Save embeddedWoTServient file",
+        defaultPath: "./.wotsrv",
+        filters: [
+            {name: 'WoT Servient', extensions:['wot', 'wotsrv']},
+            {name: 'Zip file', extensions:['zip']}
+        ]
+    }).then(result => {
+        if (result.canceled) return;
+        // console.log(result.filePath);
+        zip .generateNodeStream({type: 'nodebuffer', streamFiles: true})
+            .pipe(fs.createWriteStream(result.filePath))
+            .on('finish', function() {
+                console.log("file saved");
+            });
+    });
+});
+
+$("#load").on('click', function() {
+    dialog.showOpenDialog(options = {
+        title: "Open embeddedWoTServient file",
+        defaultPath: ".",
+        filters: [
+            {name: 'WoT Servient', extensions:['wot', 'wotsrv']},
+            {name: 'Zip file', extensions:['zip']}
+        ]
+    }).then(result => {
+        console.log(result.filePaths);
+        fs.readFile(result.filePaths[0], function(err, data) {
+            // if (err) throw err;
+            JSZip.loadAsync(data).then(function(zip) {
+                    console.log(zip);
+                    zip.file('td.json').async("string").then(function (data) {
+                        editor.setValue(JSON.parse(data));
+                    });
+
+                    zip.file('build.json').async("string").then(function (data) {
+                        builder.setValue(JSON.parse(data));
+                    });
+
+                });
+        });
+    });
+});

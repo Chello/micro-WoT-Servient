@@ -1,4 +1,6 @@
 const fs = require('fs');
+const JSZip = require('jszip');
+const dialog = require('electron').remote.dialog 
 const path = require('path');
 const {JSONEditor} = require(path.resolve('node_modules/@json-editor/json-editor/dist/jsoneditor'));
 const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
@@ -26,7 +28,6 @@ $(document).ready(function() {
         schema: {
             type: "object",
             $ref: "schemas/thing_desc.json",
-            //$ref: "embeddedWoTServient/thing-schema.json"
         },
         //are fields all required? no
         required_by_default: false,
@@ -94,13 +95,6 @@ var composeTD = function() {
             var name = element.propertyName
             td['properties'][name] = element;
 
-            //check if property using websocket
-            if (td["properties"][name]["useWS"]) {
-                td["properties"][name]["forms"][1] = td["properties"][name]["forms"][0]
-                //delete useWS
-                td["properties"][name]["useWS"] = undefined;
-            }
-
             //delete propertyName 
             td['properties'][name]['propertyName'] = undefined;
         });
@@ -120,12 +114,6 @@ var composeTD = function() {
         actionArr.forEach(element => { //foreach action provided
             var name = element.actionName
             td['actions'][name] = element;
-            
-            if (td["actions"][name]["useWS"]) {
-                td["actions"][name]["forms"][1] = td["actions"][name]["forms"][0]
-                //delete useWS
-                td["actions"][name]["useWS"] = undefined;
-            }
 
             //create array actionFunctions
             var actionCurrentFunction = {
@@ -182,23 +170,7 @@ var composeTD = function() {
         evtArr.forEach(element => { //foreach event provided
             var name = element.eventName
             td['events'][name] = element;
-            //check if event using websocket
-            if (td["events"][name]["useWS"]) {
-                //td["events"][name]["forms"][1] = td["events"][name]["forms"][0];
-                td["events"][name]["forms"].push(td["events"][name]["forms"][0]);
-                //delete useWS
-                td["events"][name]["useWS"] = undefined;
-            }
-            //check if event using longpoll http
-            if (td["events"][name]["useLP"]) {
-                //td["events"][name]["forms"][2] = td["events"][name]["forms"][0];
-                var longPollForm = JSON.parse(JSON.stringify(td["events"][name]["forms"][0]));
-                longPollForm["subprotocol"] = "longpoll";
-                td["events"][name]["forms"].push(longPollForm);
-                //delete useLP
-                td["events"][name]["useLP"] = undefined;
-            }
-
+            
             eventCurrentCondition = {
                 "condition": element.condition,
                 "actions": element.actionsTriggered
@@ -284,7 +256,7 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File ${thingName}.json created successfully!'); 
+                    console.log('File ${{thingName}}.json created successfully!'); 
                 })
     //write builder option file into dir
     fs.writeFile(optFile, 
@@ -293,7 +265,7 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File ${thingName}.json created successfully!'); 
+                    console.log('File ${{thingName}}.json created successfully!'); 
                 })
     //generate exec string
     console.log($("#serial_port").val());

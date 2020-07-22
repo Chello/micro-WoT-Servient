@@ -7,6 +7,11 @@ body{
     color: white;
 }
 
+.upper_buttons {
+    border-radius: 5px;
+    background: lightblue;
+}
+
 #content{
     position: absolute;
     width: 100%;
