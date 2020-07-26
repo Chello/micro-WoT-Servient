@@ -7,10 +7,16 @@
     "password",
     "portserver",
     "portsocket",
-    "libraries"
+    "libraries",
+    "constants",
+    "globals",
+    "setup",
+    "loop"
   ],
   "options": {
-    "disable_collapse": true
+    "disable_edit_json": true,
+    "disable_collapse": true,
+    "disable_properties": true
   },
   "properties": {
     "ssid": {

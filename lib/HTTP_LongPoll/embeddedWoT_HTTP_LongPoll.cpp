@@ -1,15 +1,15 @@
 #include "Arduino.h"
 #include <ESPAsyncWebServer.h>
-#include "HTTP_LongPoll.h"
+#include "embeddedWoT_HTTP_LongPoll.h"
 
-HTTP_LongPoll::HTTP_LongPoll(int serverPort) : server(serverPort) {
+embeddedWoT_HTTP_LongPoll::embeddedWoT_HTTP_LongPoll(int serverPort) : server(serverPort) {
     //Setup Longpoll hosts list
     for (int i = 0; i < MAX_LONGPOLL_HOSTS; i++){
         longPollRequests[i] = NULL;
     }
 }
 
-void HTTP_LongPoll::_longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
+void embeddedWoT_HTTP_LongPoll::_longPollHandler(AsyncWebServerRequest *req, const char* eventName) {
     int i = 0;
     for(; i < MAX_LONGPOLL_HOSTS; i++){
         if (longPollRequests[i] == NULL) {
@@ -35,7 +35,7 @@ void HTTP_LongPoll::_longPollHandler(AsyncWebServerRequest *req, const char* eve
     });
 }
 
-void HTTP_LongPoll::sendLongPollTXT(String txt, String eventName) {
+void embeddedWoT_HTTP_LongPoll::sendLongPollTXT(String txt, String eventName) {
     int i;
     Serial.printf("Sending text %s to broadcast LongPoll event %s\n", txt.c_str(), eventName.c_str());
     for(i = 0; i < MAX_LONGPOLL_HOSTS; i++) {
@@ -51,7 +51,7 @@ void HTTP_LongPoll::sendLongPollTXT(String txt, String eventName) {
     }
 }
 
-void HTTP_LongPoll::exposeProperties(const String *endpoints, properties_handler callbacks[], int prop_num) {
+void embeddedWoT_HTTP_LongPoll::exposeProperties(const String *endpoints, properties_handler callbacks[], int prop_num) {
     int i = 0;
     this->properties_endpoint = endpoints;
     this->properties_cb = callbacks;
@@ -68,7 +68,7 @@ void HTTP_LongPoll::exposeProperties(const String *endpoints, properties_handler
     }
 }
 
-void HTTP_LongPoll::exposeActions(const String *endpoints, actions_handler callbacks[], int act_num) {
+void embeddedWoT_HTTP_LongPoll::exposeActions(const String *endpoints, actions_handler callbacks[], int act_num) {
     int i = 0;
     this->actions_endpoint = endpoints;
     this->actions_cb = callbacks;
@@ -91,7 +91,7 @@ void HTTP_LongPoll::exposeActions(const String *endpoints, actions_handler callb
     }
 }
 
-void HTTP_LongPoll::exposeEvents(const String *endpoints, int evt_num) {
+void embeddedWoT_HTTP_LongPoll::exposeEvents(const String *endpoints, int evt_num) {
     int i = 0;
     this->events_endpoint = endpoints;
 
@@ -104,6 +104,6 @@ void HTTP_LongPoll::exposeEvents(const String *endpoints, int evt_num) {
     }
 }
 
-void HTTP_LongPoll::begin() {
+void embeddedWoT_HTTP_LongPoll::begin() {
     this->server.begin();
 }

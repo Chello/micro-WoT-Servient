@@ -31,7 +31,13 @@ body{
     background-color:#eee;
     padding-left: 65vw;
     height: 100%;
+    /* overflow: auto; */
+    /* position: relative; */
+}
+
+#builder {
     overflow: auto;
+    max-height: 100%;
 }
 
 #footer{

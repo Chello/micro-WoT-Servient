@@ -441,7 +441,7 @@
               "anyOf": [
                 {
                   "$ref": "#/definitions/event_http_form",
-                  "title": "HTTP"
+                  "title": "HTTP Longpoll"
                 },
                 {
                   "$ref": "#/definitions/event_ws_form",
@@ -638,7 +638,8 @@
       "required": [
         "op",
         "contentType",
-        "href"
+        "href",
+        "subprotocol"
       ],
       "options": {
         "disable_edit_json": true,
@@ -658,6 +659,14 @@
           "type": "string",
           "default": "http",
           "enum": ["http"],
+          "options": {
+            "hidden": true
+          }
+        },
+        "subprotocol": {
+          "type": "string",
+          "default": "longpoll",
+          "enum": ["longpoll"],
           "options": {
             "hidden": true
           }

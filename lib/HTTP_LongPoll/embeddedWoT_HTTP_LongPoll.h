@@ -1,5 +1,5 @@
-#ifndef HTTP_LongPoll_h
-#define HTTP_LongPoll_h
+#ifndef embeddedWoT_HTTP_LongPoll_h
+#define embeddedWoT_HTTP_LongPoll_h
 #include "Arduino.h"
 #include <ESPAsyncWebServer.h>
 
@@ -9,13 +9,13 @@ typedef String (*properties_handler)();
 typedef String (*actions_handler)(String);
 #endif
 
-class HTTP_LongPoll {
+class embeddedWoT_HTTP_LongPoll {
     public: 
         /**
          * Constructor. Sets up the object
          * @param serverPort the port which the server will respond
          */
-        HTTP_LongPoll(int serverPort);
+        embeddedWoT_HTTP_LongPoll(int serverPort);
         
         /**
          * Function that sends the specified text for longpoll HTTP hosts connected to a specified event endpoint
@@ -90,5 +90,5 @@ class HTTP_LongPoll {
         const char* longPollBoundEvents[MAX_LONGPOLL_HOSTS];
 };
 
-#include "HTTP_LongPoll.cpp"
+#include "embeddedWoT_HTTP_LongPoll.cpp"
 #endif

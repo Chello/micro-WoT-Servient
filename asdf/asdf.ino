@@ -1,6 +1,6 @@
 
 #include <ArduinoJson.h>
-#include "HTTP_LongPoll/HTTP_LongPoll.h"
+#include "HTTP_LongPoll/embeddedWoT_HTTP_LongPoll.h"
 #include "WebSocket/WebSocketBinding.h"
 
 const char* ssid = "Rachelli-net";
@@ -58,7 +58,7 @@ String req1 = "/";
 
 IPAddress ipS;
 //Longpoll object handler
-HTTP_LongPoll *hlp;
+embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 WebSocketBinding *wsb;
 
@@ -108,7 +108,7 @@ void setup() {
     
     td = "{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in1\":{\"type\":\"boolean\"}},\"output\":{\"type\":\"boolean\"},\"safe\":false,\"idempotent\":false},\"act2\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt1\":{\"eventName\":\"evt1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act1\"],\"condition\":\"true\"},\"evt2\":{\"eventName\":\"evt2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event2_name+"\",\"op\":[]}],\"actionsTriggered\":[\"act2\"],\"condition\":\"true\"}}}";
 
-    hlp = new HTTP_LongPoll(portServer);
+    hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
     hlp->exposeActions(http_actions_endpoint, http_actions_callback, http_actions_num);
     hlp->exposeEvents(http_events_endpoint, http_events_num);
