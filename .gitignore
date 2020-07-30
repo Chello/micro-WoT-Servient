@@ -1,4 +1,5 @@
 node_modules
 asd*
 tmp
-test*
+# test*
+libs_old
