@@ -9,14 +9,8 @@
     "@context",
     "security",
     "securityDefinitions",
-    "properties",
-    "links",
-    "actions",
-    "events"
+    "useWS"
   ],
-  "options": {
-    "disable_collapse": true
-  },
   "properties": {
     "title": {
       "type": "string",
@@ -37,7 +31,6 @@
       "description": "JSON schema(s) for Thing",
       "items": {
         "type": "string",
-        "title": "Context URI",
         "properties": {
           "name": "thing_schema"
         }
@@ -81,58 +74,86 @@
     },
     "forms": {
       "type": "array",
-      "title": "Protocol binding",
+      "title": "Operations",
       "format": "table",
       "minItems": 1,
-      "maxItems": 2,
+      "maxItems": 1,
       "items": {
-        "title": "Protocol",
-        "headerTemplate":"Protocol #{{i}}",
-        "anyOf": [
-          {
-            "title": "HTTP",
-            "$ref": "#/definitions/td_http_form"
+        "title": "",
+        "type": "object",
+        "required": [
+          "op",
+          "contentType",
+          "href"
+        ],
+        "properties": {
+          "contentType": {
+            "const": "application/json",
+            "default": "application/json",
+            "options": {
+              "hidden": true
+            }
           },
-          {
-            "title": "WebSocket",
-            "$ref": "#/definitions/td_ws_form"
+          "href": {
+            "default": "",
+            "const": "",
+            "options": {
+              "hidden": true
+            }
+          },
+          "op": {
+            "type": "array",
+            "format": "categories",
+            "name": "operations",
+            "description": "Operations supported by the Thing. You can choose one or more of them.",
+            "uniqueItems": true,
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "enum": [
+                "readallproperties",
+                "writeallproperties",
+                "readmultipleproperties",
+                "writemultipleproperties"
+              ]
+            }
           }
-        ]
+        }
       }
+    },
+    "useWS": {
+      "type": "boolean",
+      "title": "Is Thing using WebSocket?",
+      "format": "checkbox",
+      "default": true
     },
     "description": {
       "type": "string",
       "title": "Description",
-      "description": "Thing description",
-      "default": ""
+      "description": "Thing description"
     },
     "version": {
       "type": "string",
       "title": "Version",
-      "description": "Thing version",
-      "default": ""
+      "description": "Thing version"
     },
     "support": {
       "type": "string",
-      "title": "Thing support URI",
-      "default": ""
+      "title": "Thing support URI"
     },
     "base": {
       "type": "string",
-      "title": "Thing base URI",
-      "default": ""
+      "title": "Thing base URI"
     },
     "created": {
       "type": "string",
       "format": "date",
-      "title": "Thing creation date",
-      "default": ""
+      "title": "Thing creation date"
     },
     "modified": {
       "type": "string",
       "format": "date",
-      "title": "Thing modification date",
-      "default": ""
+      "title": "Thing modification date"
     },
     "links": {
       "type": "array",
@@ -140,7 +161,6 @@
       "options": {
         "collapsed": true
       },
-      "default": [],
       "items": {
         "headerTemplate": "Link {{i}}",
         "type": "object",
@@ -170,7 +190,6 @@
       "options": {
         "collapsed": true
       },
-      "default": [],
       "items": {
         "type": "object",
         "title": "Thing property",
@@ -179,6 +198,7 @@
           "propertyName",
           "type",
           "forms",
+          "useWS",
           "observable",
           "readOnly",
           "writeOnly"
@@ -192,23 +212,55 @@
           "forms": {
             "type": "array",
             "format": "table",
-            "title": "Protocol binding",
+            "title": "Operations",
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 1,
             "items": {
-              "title": "Protocol",
-              "headerTemplate":"Protocol #{{i}}", 
-              "anyOf": [
-                {
-                  "title": "HTTP",
-                  "$ref": "#/definitions/prop_http_form"
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
                 },
-                {
-                  "title": "WebSocket",
-                  "$ref": "#/definitions/prop_ws_form"
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operations supported by the property. You can choose one or more of them.",
+                  "uniqueItems": true,
+                  "items": {
+                    "minItems": 1,
+                    "type": "string",
+                    "enum": [
+                      "readproperty",
+                      "writeproperty"
+                    ]
+                  }
                 }
-              ]
+              }
             }
+          },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is property using WebSocket?",
+            "format": "checkbox",
+            "default": true
           },
           "type": {
             "title": "Property type",
@@ -271,6 +323,7 @@
         "required": [
           "forms",
           "actionName",
+          "useWS",
           "body",
           "safe",
           "idempotent"
@@ -283,25 +336,51 @@
           },
           "forms": {
             "type": "array",
-            "title": "Protocol binding",
             "format": "table",
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 1,
             "uniqueItems": true,
+            "options": {
+              "hidden": true
+            },
             "items": {
-              "title": "Protocol",
-              "headerTemplate":"Protocol #{{i}}",
-              "anyOf": [
-                {
-                  "title": "HTTP",
-                  "$ref": "#/definitions/act_http_form"
+              "title": "Operations",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
                 },
-                {
-                  "title": "WebSocket",
-                  "$ref": "#/definitions/act_ws_form"
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "default": "invokeaction",
+                  "const": "invokeaction",
+                  "options": {
+                    "hidden": true
+                  }
                 }
-              ]              
+              }
             }
+          },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is property using WebSocket?",
+            "format": "checkbox",
+            "default": true
           },
           "input": {
             "type": "array",
@@ -383,7 +462,7 @@
             "type": "boolean"
           },
           "idempotent": {
-            "title": "Function is idempotent",
+            "title": "Function is idempotent?",
             "format": "checkbox",
             "type": "boolean"
           },
@@ -421,7 +500,9 @@
           "eventName",
           "condition",
           "actionsTriggered",
-          "forms"
+          "forms",
+          "useWS",
+          "useLP"
         ],
         "properties": {
           "eventName": {
@@ -431,35 +512,70 @@
           },
           "forms": {
             "type": "array",
-            "title": "Protocol binding",
+            "title": "Operations",
             "format": "table",
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 1,
             "items": {
-              "title": "Protocol",
-              "headerTemplate": "Protocol #{{i}}",
-              "anyOf": [
-                {
-                  "$ref": "#/definitions/event_http_form",
-                  "title": "HTTP Longpoll"
+              "title": "",
+              "type": "object",
+              "required": [
+                "op",
+                "contentType",
+                "href"
+              ],
+              "properties": {
+                "contentType": {
+                  "const": "application/json",
+                  "default": "application/json",
+                  "options": {
+                    "hidden": true
+                  }
                 },
-                {
-                  "$ref": "#/definitions/event_ws_form",
-                  "title": "WebSocket"
+                "href": {
+                  "default": "",
+                  "const": "",
+                  "options": {
+                    "hidden": true
+                  }
+                },
+                "op": {
+                  "type": "array",
+                  "format": "categories",
+                  "name": "operations",
+                  "description": "Operations supported by the event. You can choose one or more of them.",
+                  "uniqueItems": true,
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "enum": [
+                      "subscribeevent",
+                      "unsubscribeevent"
+                    ]
+                  }
                 }
-              ]
+              }
             }
+          },
+          "useWS": {
+            "type": "boolean",
+            "title": "Is event using WebSocket?",
+            "format": "checkbox",
+            "default": true
+          },
+          "useLP": {
+            "type": "boolean",
+            "title": "Is event using HTTP LongPolling?",
+            "format": "checkbox",
+            "default": true
           },
           "actionsTriggered": {
             "type": "array",
             "title": "Triggers for the event",
-            "minItems": 1,
-            "options": {
-              "disable_collapse": true
-            },
             "items": {
               "type": "string",
-              "title": "Trigger",
+              "title": "Trigger for this event",
               "description": "Specify which action will be triggered for this event. You can specify more triggers but you cannot duplicate them.",
               "watch": {
                 "actionAssoc": "root.actions"
@@ -627,375 +743,6 @@
           "description": {
             "title": "Event description",
             "type": "string"
-          }
-        }
-      }
-    }
-  },
-  "definitions": {
-    "event_http_form": {
-      "type": "object",
-      "required": [
-        "op",
-        "contentType",
-        "href",
-        "subprotocol"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true,
-        "hidden": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "http",
-          "enum": ["http"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "subprotocol": {
-          "type": "string",
-          "default": "longpoll",
-          "enum": ["longpoll"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "No operations supported on HTTP Longpoll",
-          "uniqueItems": true,
-          "minItems": 0,
-          "maxItems": 0,
-          "options": {
-            "hidden": true
-          }
-        }
-      }
-    },
-    "event_ws_form": {
-      "type": "object",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "ws",
-          "enum": ["ws"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "Choose one or more operation supported.",
-          "uniqueItems": true,
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "enum": [
-              "subscribeevent",
-              "unsubscribeevent"
-            ]
-          }
-        }
-      }
-    },
-    "td_http_form": {
-      "type": "object",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "http",
-          "enum": ["http"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "Operations supported by the Thing. You can choose one or more of them.",
-          "uniqueItems": true,
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "enum": [
-              "readallproperties",
-              "writeallproperties",
-              "readmultipleproperties",
-              "writemultipleproperties"
-            ]
-          }
-        }
-      }
-    },
-    "td_ws_form": {
-      "type": "object",
-      "name": "",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "ws",
-          "enum": ["ws"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "Operations supported by the Thing. You can choose one or more of them.",
-          "uniqueItems": true,
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "enum": [
-              "readallproperties",
-              "writeallproperties",
-              "readmultipleproperties",
-              "writemultipleproperties"
-            ]
-          }
-        }
-      }
-    },
-    "prop_http_form": {
-      "type": "object",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "http",
-          "enum": ["http"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "Operations supported by the Thing. You can choose one or more of them.",
-          "uniqueItems": true,
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "enum": [
-              "readproperty",
-              "writeproperty"
-            ]
-          }
-        }
-      }
-    },
-    "prop_ws_form": {
-      "type": "object",
-      "name": "",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "ws",
-          "enum": ["ws"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "type": "array",
-          "format": "categories",
-          "name": "operations",
-          "title": "Operations",
-          "description": "Operations supported by the Thing. You can choose one or more of them.",
-          "uniqueItems": true,
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "enum": [
-              "readproperty",
-              "writeproperty"
-            ]
-          }
-        }
-      }
-    },
-    "act_http_form": {
-      "type": "object",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "disable_properties": true,
-        "hidden": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "http",
-          "enum": ["http"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "default": "invokeaction",
-          "const": "invokeaction",
-          "options": {
-            "hidden": true
-          }
-        }
-      }
-    },
-    "act_ws_form": {
-      "type": "object",
-      "name": "",
-      "required": [
-        "op",
-        "contentType",
-        "href"
-      ],
-      "options": {
-        "disable_edit_json": true,
-        "disable_collapse": true,
-        "hidden": true,
-        "disable_properties": true
-      },
-      "properties": {
-        "contentType": {
-          "const": "application/json",
-          "default": "application/json",
-          "options": {
-            "hidden": true
-          }
-        },
-        "href": {
-          "type": "string",
-          "default": "ws",
-          "enum": ["ws"],
-          "options": {
-            "hidden": true
-          }
-        },
-        "op": {
-          "default": "invokeaction",
-          "const": "invokeaction",
-          "options": {
-            "hidden": true
           }
         }
       }

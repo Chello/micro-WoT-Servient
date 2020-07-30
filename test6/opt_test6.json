@@ -1,1 +1,0 @@
-{"ssid":"Rachelli-net","password":"3eKLtrdFwfQXgpv!","portserver":"80","portsocket":"81","libraries":[],"actionFunctions":[{"source":"cli","name":"act","body":"return \"pippo é pirla\";","output":{"name":"","type":"string"},"input":[]}],"eventConditions":[{"condition":"true","actions":["act"]}]}

@@ -1,6 +1,4 @@
 const fs = require('fs');
-const JSZip = require('jszip');
-const dialog = require('electron').remote.dialog 
 const path = require('path');
 const {JSONEditor} = require(path.resolve('node_modules/@json-editor/json-editor/dist/jsoneditor'));
 const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
@@ -15,24 +13,24 @@ $(document).ready(function() {
     $('#footer').resizable();
     window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
-    var initial = JSON.parse("{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"act\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":\"invokeaction\"}],\"input\":[{\"inputName\":\"in1\",\"type\":\"boolean\"}],\"output\":{\"type\":\"boolean\"},\"body\":\"return in1;\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\",\"subscription\":[{\"subscriptionName\":\"sbs1\",\"type\":\"boolean\",\"value\":\"true\"}],\"data\":[{\"dataName\":\"dat1\",\"type\":\"boolean\",\"value\":\"true\"}],\"cancellation\":[{\"cancellationName\":\"cnc1\",\"type\":\"boolean\",\"value\":\"true\"}]}]}");
-    //var initial = "";
+    var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
 
     editor = new JSONEditor(document.getElementById('editor_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
 
-        startval: initial,
+        //startval: initial,
         
         // The schema for the editor
         schema: {
             type: "object",
             $ref: "schemas/thing_desc.json",
+            //$ref: "embeddedWoTServient/thing-schema.json"
         },
         //are fields all required? no
         required_by_default: false,
 
-        object_layout: "normal",
+        object_layout: "table",
         //show checkbox for non-required opt
         show_opt_in: true,
         //show errors in editor
@@ -43,13 +41,10 @@ $(document).ready(function() {
         iconlib: "fontawesome4"
     });
 
-    var initbuild = JSON.parse("{\"ssid\":\"Rachelli-net\",\"password\":\"3eKLtrdFwfQXgpv!\",\"portserver\":\"80\",\"portsocket\":\"81\",\"libraries\":[]}");
-
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
         
-        startval: initbuild,
         // The schema for the editor
         schema: {
             type: "object",
@@ -95,6 +90,13 @@ var composeTD = function() {
             var name = element.propertyName
             td['properties'][name] = element;
 
+            //check if property using websocket
+            if (td["properties"][name]["useWS"]) {
+                td["properties"][name]["forms"][1] = td["properties"][name]["forms"][0]
+                //delete useWS
+                td["properties"][name]["useWS"] = undefined;
+            }
+
             //delete propertyName 
             td['properties'][name]['propertyName'] = undefined;
         });
@@ -114,6 +116,12 @@ var composeTD = function() {
         actionArr.forEach(element => { //foreach action provided
             var name = element.actionName
             td['actions'][name] = element;
+            
+            if (td["actions"][name]["useWS"]) {
+                td["actions"][name]["forms"][1] = td["actions"][name]["forms"][0]
+                //delete useWS
+                td["actions"][name]["useWS"] = undefined;
+            }
 
             //create array actionFunctions
             var actionCurrentFunction = {
@@ -170,7 +178,23 @@ var composeTD = function() {
         evtArr.forEach(element => { //foreach event provided
             var name = element.eventName
             td['events'][name] = element;
-            
+            //check if event using websocket
+            if (td["events"][name]["useWS"]) {
+                //td["events"][name]["forms"][1] = td["events"][name]["forms"][0];
+                td["events"][name]["forms"].push(td["events"][name]["forms"][0]);
+                //delete useWS
+                td["events"][name]["useWS"] = undefined;
+            }
+            //check if event using longpoll http
+            if (td["events"][name]["useLP"]) {
+                //td["events"][name]["forms"][2] = td["events"][name]["forms"][0];
+                var longPollForm = JSON.parse(JSON.stringify(td["events"][name]["forms"][0]));
+                longPollForm["subprotocol"] = "longpoll";
+                td["events"][name]["forms"].push(longPollForm);
+                //delete useLP
+                td["events"][name]["useLP"] = undefined;
+            }
+
             eventCurrentCondition = {
                 "condition": element.condition,
                 "actions": element.actionsTriggered
@@ -223,6 +247,65 @@ var composeTD = function() {
 }
 
 /**
+ * Action triggered when submit-button is clicked
+ */
+$('#submit_button').on('click', function() {
+    hide_show_terminal(true);
+    
+    var editorErrors = editor.validate();
+    var builderErrors = builder.validate();
+
+    if (editorErrors.length || builderErrors.length) {
+        alert("Some errors found in forms. Please check");
+        if (editorErrors.length) {
+            term.write(
+                "\n\nErrors found in Thing description:\n" + JSON.stringify(editorErrors, 
+                ["path","message"], ' '));
+        }
+        if (builderErrors.length) {
+            term.write(
+                "\n\nErrors found in builder description:\n" + JSON.stringify(builderErrors, 
+                ["path","message"], ' '));
+        }
+        return;
+    }
+
+    var thingName = editor.getValue()['title'];
+    console.log(thingName)
+
+    //generate directory path name
+    var dirPath = path.join(__dirname, thingName);
+    //if does not exist directory
+    if (!fs.existsSync(dirPath)) {
+        //create it
+        createThingFiles(dirPath, thingName);
+    } else {
+        //else ask if wanted to overwrite   
+        if (confirm("Thing "+dirPath+" already exists! Do you want to overwrite it?")) {
+            createThingFiles(dirPath, thingName);
+        }
+    }
+});
+
+$("#hide_show").on('click', function() {
+    hide_show_terminal();
+})
+
+var hide_show_terminal = function(force) {
+    if ($('#terminal_holder').is(":hidden") || force) {
+        //show terminal
+        $('#terminal_holder').show();
+        $('#content').css("bottom", "300px");
+        $('#footer').css("height", "300px");
+    }
+    else {
+        $('#terminal_holder').hide();
+        $('#content').css("bottom", "30px");
+        $('#footer').css("height", "30px");
+    }
+}
+
+/**
  * Creates thing directory. 
  * If creation success, then creates files
  * @param {String} dirPath the path that will contain files
@@ -256,7 +339,7 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File td created successfully!'); 
+                    console.log('File ${thingName}.json created successfully!'); 
                 })
     //write builder option file into dir
     fs.writeFile(optFile, 
@@ -265,53 +348,12 @@ var createTDFiles = function(thingName) {
                     if (err) { 
                         return console.error(err); 
                     } 
-                    console.log('File build created successfully!'); 
+                    console.log('File ${thingName}.json created successfully!'); 
                 })
     //generate exec string
-    console.log($("#serial_port").val());
-    //create serial port
-    var serial_port = ($('#flash').is(":checked")) ? ' -p ' + $("#serial_port").val() : "";
     var exec_str =  'embeddedWoTServient/embeddedWoTServient.py build' +
                     ' -T ' + tdFile + 
                     ' -o ' + optFile +
-                    ' -t ' + tmplFile +
-                    serial_port;
+                    ' -t ' + tmplFile;
     term.exec(exec_str)
-}
-
-var build_compile_flash = function() {
-    hide_show_terminal(true);
-    
-    var editorErrors = editor.validate();
-    var builderErrors = builder.validate();
-
-    if (editorErrors.length || builderErrors.length) {
-        alert("Some errors found in forms. Please check");
-        if (editorErrors.length) {
-            term.write(
-                "\n\nErrors found in Thing description:\n" + JSON.stringify(editorErrors, 
-                ["path","message"], ' '));
-        }
-        if (builderErrors.length) {
-            term.write(
-                "\n\nErrors found in builder description:\n" + JSON.stringify(builderErrors, 
-                ["path","message"], ' '));
-        }
-        return;
-    }
-
-    var thingName = editor.getValue()['title'];
-
-    //generate directory path name
-    var dirPath = path.join(__dirname, thingName);
-    //if does not exist directory
-    if (!fs.existsSync(dirPath)) {
-        //create it
-        createThingFiles(dirPath, thingName);
-    } else {
-        //else ask if wanted to overwrite   
-        if (confirm("Thing "+dirPath+" already exists! Do you want to overwrite it?")) {
-            createThingFiles(dirPath, thingName);
-        }
-    }
 }

@@ -32,36 +32,32 @@
     </div>
     
     <div id="rightbar">
-      <i id='save' class="upper_buttons fa fa-2x fa-save" aria-hidden="true"></i>
-      <i id='load' class="upper_buttons fa fa-2x fa-folder-open" aria-hidden="true"></i>
-      <div id='builder'>
-        <div id='build_holder'></div>
-      </div>
+      <div id='build_holder'></div>
     </div>
   </div>
 
   <div id="footer">
-    <div>
-      <label class='labels' for="board">Choose target board:</label>
-      <select name="board" id="board">
-        <option value="esp32.txt">ESP32</option>
-        <option value="esp8266.txt">ESP8266</option>
-      </select>
-      <label for="flash" class='labels'>Flash board</label>
-      <input type="checkbox" id='flash'>
+    <label id="target_board">Choose target board:</label>
+    <select name="board" id="board">
+      <option value="esp32.txt">ESP32</option>
+      <option value="esp8266.txt">ESP8266</option>
+    </select>
+    <button id="submit_button">Build, compile and flash</button>
 
-      <select name="serial_port" id="serial_port"></select>
+    <i id='hide_show' class="fa fa-eye-slash" aria-hidden="true"></i>
 
-      <button type="button" class='btn btn-sm btn-primary' id="build_compile_button">Build & compile</button>
-
-      <i id='hide_show' class="fa fa-eye-slash" aria-hidden="true"></i>
-    </div>
     <div id='terminal_holder'></div>
   </div>
 
+  <!--<script>window.$ = window.jQuery = require('jquery');</script>-->
   <script src="./js/renderer.js"></script>
+  <!--<script src="node_modules/ace-code-editor/lib/ace/ace.js"></script>-->
+  <!--<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
+  <!--<script>const cp = require("child_process");</script>-->
+  <!--<script>const path = require('path');</script>-->
   <script src="./js/terminal.js"></script>
-  <script src="./js/DOM.js"></script>
+    <!--<script src="node_modules/xterm/lib/xterm.js"></script>-->
+    <!--<script src="./node_modules/@json-editor/json-editor/dist/jsoneditor.js"></script>-->
     
   </body>
 </html>

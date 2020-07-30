@@ -7,17 +7,8 @@
     "password",
     "portserver",
     "portsocket",
-    "libraries",
-    "constants",
-    "globals",
-    "setup",
-    "loop"
+    "libraries"
   ],
-  "options": {
-    "disable_edit_json": true,
-    "disable_collapse": true,
-    "disable_properties": true
-  },
   "properties": {
     "ssid": {
       "type": "string",
@@ -100,31 +91,15 @@
     },
     "setup": {
       "type": "string",
-      "format": "c++",
-      "options": {
-        "ace": {
-          "theme": "ace/theme/twilight",
-          "tabSize": 2,
-          "useSoftTabs": true,
-          "wrap": true
-        }
-      },
-      "title": "Additional setup() code",
-      "description": "Code will be added to void setup() function"
+      "format": "textarea",
+      "title": "Setup code",
+      "description": "Code will be added to setup() function"
     },
     "loop": {
       "type": "string",
-      "format": "c++",
-      "options": {
-        "ace": {
-          "theme": "ace/theme/twilight",
-          "tabSize": 2,
-          "useSoftTabs": true,
-          "wrap": true
-        }
-      },
-      "title": "Additional loop() code",
-      "description": "Code will be added to void loop() function"
+      "format": "textarea",
+      "title": "Loop code",
+      "description": "Code will be added to loop() function"
     }
   }
 }
