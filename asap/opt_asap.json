@@ -1,0 +1,1 @@
+{"ssid":"Socc'mel busàn","password":"chellol96","portserver":"80","portsocket":"81","libraries":[],"constants":[],"globals":[],"setup":"","loop":"","actionFunctions":[{"source":"cli","name":"act","body":"return in1;","output":{},"input":[]}],"eventConditions":[{"condition":"true","actions":["act"]}]}

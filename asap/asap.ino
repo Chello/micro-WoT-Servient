@@ -1,10 +1,10 @@
 
 #include <ArduinoJson.h>
-#include "HTTP_LongPoll/HTTP_LongPoll.h"
-#include "WebSocket/WebSocketBinding.h"
+#include <embeddedWoT_HTTP_LongPoll.h>
+#include <embeddedWoT_WebSocket.h>
 
-const char* ssid = "Rachelli-net";
-const char* password = "3eKLtrdFwfQXgpv!";
+const char* ssid = "Socc'mel busàn";
+const char* password = "chellol96";
 String protocolServer = "http";
 int portServer = 80;
 String urlServer = "";
@@ -12,7 +12,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "asdfggtg";
+String thingName = "asap";
 String td = "";
 
 
@@ -52,9 +52,9 @@ String req1 = "/";
 
 IPAddress ipS;
 //Longpoll object handler
-HTTP_LongPoll *hlp;
+embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
-WebSocketBinding *wsb;
+embeddedWoT_WebSocket *wsb;
 
 int i, j, k, n;
 
@@ -99,16 +99,16 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"asdfggtg\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"asap\",\"id\":\"asap\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"proprieta\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\"}}}";
 
-    hlp = new HTTP_LongPoll(portServer);
+    hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
     hlp->exposeActions(http_actions_endpoint, http_actions_callback, http_actions_num);
     hlp->exposeEvents(http_events_endpoint, http_events_num);
     hlp->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
 
     hlp->begin();
-    wsb = new WebSocketBinding(portSocket);
+    wsb = new embeddedWoT_WebSocket(portSocket);
 
     wsb->bindEventSchema(ws_es_doc);
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
@@ -116,9 +116,12 @@ void setup() {
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     Serial.println("Server started");
     Serial.println(urlServer);
+
+    
 }    
 
 void loop() {
+    
     // handle Requests via WebSocket
     wsb->loop();
 }

@@ -579,10 +579,10 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- do capacity.update({'maxInputSchema':0}) -%}
 #include <ArduinoJson.h>
 {% if global['isHTTP'] %}
-#include "HTTP_LongPoll/HTTP_LongPoll.h"
+#include <embeddedWoT_HTTP_LongPoll.h>
 {% endif %}
 {% if global['isWS'] %}
-#include "WebSocket/WebSocketBinding.h"
+#include <embeddedWoT_WebSocket.h>
 {% endif %}
 {% if template['libraries'] | length > 0 %}
 {% for lib in template['libraries'] %}
@@ -807,11 +807,11 @@ bool events_cancellationSchema[{{ template['numevents'] }}] = {
 IPAddress ipS;
 {% if global['isHTTP'] %}
 //Longpoll object handler
-HTTP_LongPoll *hlp;
+embeddedWoT_HTTP_LongPoll *hlp;
 {% endif %}
 {% if global['isWS'] %}
 //WebSocket object handler
-WebSocketBinding *wsb;
+embeddedWoT_WebSocket *wsb;
 {% endif %}
 
 {% for var in template['globals'] %}
@@ -1019,7 +1019,7 @@ void setup() {
     td = "{{ thingD }}";
 
     {% if global['isHTTP'] %}
-    hlp = new HTTP_LongPoll(portServer);
+    hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
     hlp->exposeActions(http_actions_endpoint, http_actions_callback, http_actions_num);
     hlp->exposeEvents(http_events_endpoint, http_events_num);
@@ -1028,7 +1028,7 @@ void setup() {
     hlp->begin();
     {% endif %}
     {% if global['isWS'] %}
-    wsb = new WebSocketBinding(portSocket);
+    wsb = new embeddedWoT_WebSocket(portSocket);
 
     wsb->bindEventSchema(ws_es_doc);
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);

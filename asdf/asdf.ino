@@ -1,7 +1,7 @@
 
 #include <ArduinoJson.h>
-#include "HTTP_LongPoll/embeddedWoT_HTTP_LongPoll.h"
-#include "WebSocket/WebSocketBinding.h"
+#include <embeddedWoT_HTTP_LongPoll.h>
+#include <embeddedWoT_WebSocket.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
@@ -60,7 +60,7 @@ IPAddress ipS;
 //Longpoll object handler
 embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
-WebSocketBinding *wsb;
+embeddedWoT_WebSocket *wsb;
 
 int i, j, k, n;
 
@@ -115,7 +115,7 @@ void setup() {
     hlp->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
 
     hlp->begin();
-    wsb = new WebSocketBinding(portSocket);
+    wsb = new embeddedWoT_WebSocket(portSocket);
 
     wsb->bindEventSchema(ws_es_doc);
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
