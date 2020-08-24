@@ -1,1 +1,0 @@
-{"ssid":"Rachelli-net","password":"3eKLtrdFwfQXgpv!","portserver":"80","portsocket":"81","libraries":[],"actionFunctions":[{"source":"cli","name":"azione","body":"Serial.println(\"Azione triggered\");\nSerial.println(body);","output":{"name":"","type":"boolean"},"input":[{"name":"body","type":"string"}]}],"eventConditions":[{"condition":"true","actions":[]}]}
