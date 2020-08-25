@@ -1254,9 +1254,8 @@ def start(ctx, **kwargs):
 @click.option('-t', '--template', 'templateFile', help='Specify compiling template.')
 @click.option('-o', '--options', 'optionsFile', help='Specify options via JSON file. If provided, will next compile and flash code.')
 @click.option('-T', '--thingdesc', 'thing_desctription', help='Specify thing description')
-@click.option('-p', '--port', 'serial_port', help='Specify flashing port. If not specified will be requested.')
 @click.pass_context
-def build(ctx, templateFile, optionsFile, thing_desctription, serial_port):
+def build(ctx, templateFile, optionsFile, thing_desctription):
     '''Build executable Embedded-C File'''
     click.echo('Start building...\n')
     global thingProperties
@@ -1275,12 +1274,10 @@ def build(ctx, templateFile, optionsFile, thing_desctription, serial_port):
         template = env.get_template(templateFile)
     else:
         template = env.get_template('esp8266.txt')
-    
+
+
     ctx.ensure_object(dict)
     ctx.obj.setdefault('template', {})  
-
-    if serial_port is not None:
-        ctx.obj.setdefault('serial_port', serial_port)
 
     if((ctx.obj is None) or ('td' not in ctx.obj)):
         # IF OPTION FILE IS SPECIFIED
@@ -1644,13 +1641,14 @@ def compile(ctx):
     if('error' in output):
         sys.exit()
     click.echo('\nSTART FLASHING')        
-    if('serial_port' in ctx.obj or click.confirm('Flash the Embedded-C File?', default=True)):
+    if(click.confirm('Flash the Embedded-C File?', default=True)):
         click.echo()
         ctx.invoke(flash)
 
 @cli.command()
 @click.pass_context
-def prepareArduinoEnvironment(ctx):
+@click.option('-t', '--template', 'templateFile', help='Specify compiling template.')
+def prepareArduinoEnvironment(ctx, templateFile):
     '''Prepares the environment for execting the program'''
     global template
     click.echo('Hint: Before compiling or flashing, be sure that the board which the Embedded-C File will be compiled on is connected to the Serial Port')
@@ -1681,7 +1679,7 @@ def prepareArduinoEnvironment(ctx):
         click.echo(pr.communicate()[0])
     # verify that the esp core is installed in arduino-cli    
     coreUrl = ''
-    if template.name == "esp32.txt":
+    if template.name == "esp32.txt" or templateFile == "esp32.txt":
         coreUrl = 'https://raw.githubusercontent.com/espressif/arduino-esp32/master/package/package_esp32_index.template.json'
     elif template.name == "esp8266.txt":
         coreUrl = 'https://arduino.esp8266.com/stable/package_esp8266com_index.json'
@@ -1706,7 +1704,7 @@ def prepareArduinoEnvironment(ctx):
             click.echo(output.strip())
     # install esp8266 core
     c = ''
-    if template.name == "esp32.txt":
+    if template.name == "esp32.txt" or templateFile == "esp32.txt":
         c = 'arduino-cli core install esp32:esp32'    
     elif template.name == "esp8266.txt":
         c = 'arduino-cli core install esp8266:esp8266'    
@@ -1746,11 +1744,27 @@ def prepareArduinoEnvironment(ctx):
             click.echo(pr.communicate()[0])
             input("Press Enter to continue...")
     os.chdir(library_path)
+    # ADD ESPASYNCWEBSERVER FROM GITHUB
     if not os.path.isdir(library_path + 'ESPAsyncWebServer'):
         click.echo('Installing ESPAsyncWebServer from GitHub')
         c = 'git clone https://github.com/me-no-dev/ESPAsyncWebServer.git'
         pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
         pr.wait()
+
+    # ADD embeddedWoT_HTTP_LongPoll FROM GITHUB
+    if not os.path.isdir(library_path + 'embeddedWoT_HTTP_LongPoll'):
+        click.echo('Installing embeddedWoT_HTTP_LongPoll from GitHub')
+        c = 'git clone https://github.com/Chello/embeddedWoT_HTTP_LongPoll'
+        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+        pr.wait()
+
+    # ADD embeddedWoT_WebSocket FROM GITHUB
+    if not os.path.isdir(library_path + 'embeddedWoT_WebSocket'):
+        click.echo('Installing embeddedWoT_WebSocket from GitHub')
+        c = 'git clone https://github.com/Chello/embeddedWoT_WebSocket'
+        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+        pr.wait()
+    
     os.chdir(cwd)    
     global environmentPrepared
     environmentPrepared = True
@@ -1768,8 +1782,6 @@ def flash(ctx):
         ctx.invoke(prepareArduinoEnvironment)
     click.echo('\nStart flashing...\n') 
     sketchDir = ''
-    serialPort = ''
-
     if(ctx.obj is None):
         sketchDir = click.prompt('Insert the path of the directory where the Embedded-C File to flash is located', type=click.Path(exists=True, readable=True, resolve_path=True))
         ctx.ensure_object(dict)
@@ -1778,17 +1790,12 @@ def flash(ctx):
             sketchDir = ctx.obj['sketchdir']
         elif('td' in ctx.obj):    
             sketchDir = ctx.obj['td']['title'].lower()
-
-    # IF SERIAL PORT IS SPECIFIED
-    if 'serial_port' in ctx.obj:
-        serialPort = ctx.obj['serial_port']
-    else:
-        click.echo('\nList of serial ports connected to boards:')
-        c = 'arduino-cli board list'      
-        pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
-        click.echo(pr.communicate()[0])
-        serialPort = click.prompt('Serial Port to flash', type=str)
-        click.echo()
+    click.echo('\nList of serial ports connected to boards:')
+    c = 'arduino-cli board list'      
+    pr = sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE)
+    click.echo(pr.communicate()[0])
+    serialPort = click.prompt('Serial Port to flash', type=str)
+    click.echo()
 
     c = 'arduino-cli compile %s %s' % (boardFQBN, sketchDir)
 

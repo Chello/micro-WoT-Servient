@@ -3,13 +3,8 @@ body{
     overflow-y: hidden;
 }
 
-.labels {
+#target_board {
     color: white;
-}
-
-.upper_buttons {
-    border-radius: 5px;
-    background: lightblue;
 }
 
 #content{
@@ -31,13 +26,7 @@ body{
     background-color:#eee;
     padding-left: 65vw;
     height: 100%;
-    /* overflow: auto; */
-    /* position: relative; */
-}
-
-#builder {
     overflow: auto;
-    max-height: 100%;
 }
 
 #footer{
