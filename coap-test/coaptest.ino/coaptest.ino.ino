@@ -1,8 +1,5 @@
-#include <SPI.h>
-#include <Dhcp.h>
-#include <Dns.h>
-#include <Ethernet.h>
 #include <EthernetUdp.h>
+#include "Arduino.h"
 #include <coap-simple.h>
 
 byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
