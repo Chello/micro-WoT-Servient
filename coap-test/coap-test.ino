@@ -1,12 +1,16 @@
 
 #include <ArduinoJson.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
+#include <embeddedWoT_WebSocket.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXGpv!";
 String protocolServer = "http";
 int portServer = 80;
 String urlServer = "";
+String protocolSocket = "ws";
+int portSocket = 81;
+String urlSocket = "";
 
 String thingName = "coap-test";
 String td = "";
@@ -29,6 +33,8 @@ String req1 = "/";
 IPAddress ipS;
 //Longpoll object handler
 embeddedWoT_HTTP_LongPoll *hlp;
+//WebSocket object handler
+embeddedWoT_WebSocket *wsb;
 
 int i, j, k, n;
 
@@ -52,9 +58,9 @@ const String http_properties_endpoint[http_properties_num] = { req1, req2, req3 
 properties_handler http_properties_callback[http_properties_num] = { request1, request2, request3 };
 
 //WS - Properties
-const int ws_properties_num = 0;
-const String ws_properties_endpoint[ws_properties_num] = {  };
-properties_handler ws_properties_callback[ws_properties_num] = {  };
+const int ws_properties_num = 3;
+const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3 };
+properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3 };
 
 //HTTP - events
 const int http_events_num = 0;
@@ -69,7 +75,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"coap-test\",\"id\":\"coap-test\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writemultipleproperties\"]}],\"links\":[],\"properties\":{},\"actions\":{},\"events\":{}}";
+    td = "{\"title\":\"coap-test\",\"id\":\"coap-test\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"writemultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"writeallproperties\"]}],\"links\":[],\"properties\":{},\"actions\":{},\"events\":{}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -78,6 +84,12 @@ void setup() {
     hlp->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
 
     hlp->begin();
+    wsb = new embeddedWoT_WebSocket(portSocket);
+
+    wsb->bindEventSchema(ws_es_doc);
+    wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
+    wsb->exposeEvents(ws_events_endpoint, ws_events_num);
+    wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     Serial.println("Server started");
     Serial.println(urlServer);
 
@@ -86,6 +98,8 @@ void setup() {
 
 void loop() {
     
+    // handle Requests via WebSocket
+    wsb->loop();
 }
 
 void connection(const char* ssid, const char* password) {
@@ -105,6 +119,7 @@ void connection(const char* ssid, const char* password) {
     Serial.println(ipS);
 
     urlServer = protocolServer + "://" + ipS.toString() + ":" + portServer + "/" + thingName;
+    urlSocket = protocolSocket + "://" + ipS.toString() + ":" + portSocket + "/" + thingName;
 }
 
 // Request functions
