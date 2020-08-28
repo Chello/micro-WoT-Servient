@@ -1,6 +1,6 @@
 {
     "board": "esp32:esp32:esp32doit-devkit-v1",
     "configuration": "FlashFreq=80,UploadSpeed=921600,DebugLevel=none",
-    "sketch": "test2/test2.ino",
+    "sketch": "coap-test/coapserver/coapserver.ino",
     "port": "/dev/ttyUSB0"
 }

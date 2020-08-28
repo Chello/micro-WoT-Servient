@@ -1,5 +1,7 @@
 #include <EthernetUdp.h>
-#include "Arduino.h"
+#include <WiFiUdp.h>
+#include <WiFi.h>
+#include <Arduino.h>
 #include <coap-simple.h>
 
 byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
@@ -9,7 +11,7 @@ IPAddress dev_ip/*(192,168,1,106)*/;
 void callback_response(CoapPacket &packet, IPAddress ip, int port);
 
 // UDP and CoAP class
-EthernetUDP Udp;
+WiFiUDP Udp;
 Coap coap(Udp);
 
 // CoAP client response callback
@@ -36,8 +38,8 @@ void connection(const char* ssid, const char* password) {
 
     Serial.println("\nConnected");
     Serial.print("IP address: ");
-    ipS = WiFi.localIP();
-    Serial.println(ipS);
+    dev_ip = WiFi.localIP();
+    Serial.println(dev_ip);
 
 }
 
@@ -58,13 +60,24 @@ void setup() {
   // start coap server/client
   coap.start();
 }
-
+bool check = true;
 void loop() {
   // send GET or PUT coap request to CoAP server.
   // To test, use libcoap, microcoap server...etc
-  // int msgid = coap.put(IPAddress(10, 0, 0, 1), 5683, "light", "1");
-  Serial.println("Send Request");
-  int msgid = coap.get(IPAddress(192, 168, 1, 3), 5683, "time");
+  if (check) {
+    int msgid = coap.put(IPAddress(192, 168, 1, 106), 5683, "light", "1");
+    check = false;
+    Serial.println("Check is false");
+  }
+  else if (!check) {
+    int msgid = coap.put(IPAddress(192, 168, 1, 106), 5683, "light", "0");
+    check = true;
+    Serial.println("Check is true");
+  }
+//  int msgid = coap.put(IPAddress(192, 168, 1, 106), 5683, "light", c);
+  Serial.print("Send Request, led: ");
+  Serial.println(check);
+  //int msgid = coap.get(IPAddress(192, 168, 1, 3), 5683, "date");
 
   delay(1000);
   coap.loop();
