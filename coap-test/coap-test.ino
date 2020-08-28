@@ -5,13 +5,14 @@
 #include <embeddedWoT_CoAP.h>
 
 const char* ssid = "Rachelli-net";
-const char* password = "3eKLtrdFwfQXGpv!";
+const char* password = "3eKLtrdFwfQXgpv!";
 String protocolServer = "http";
 int portServer = 80;
 String urlServer = "";
 String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
+int portCoap = 5683;
 
 String thingName = "coap-test";
 String td = "";
@@ -45,6 +46,8 @@ IPAddress ipS;
 embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 embeddedWoT_WebSocket *wsb;
+//CoAP object handler
+embeddedWoT_CoAP *coap;
 
 int i, j, k, n;
 
@@ -101,16 +104,21 @@ void setup() {
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
     wsb->exposeEvents(ws_events_endpoint, ws_events_num);
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
+
+    coap = new embeddedWoT_CoAP(portCoap);
+    coap->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
+    coap->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
+    coap->start();
+
     Serial.println("Server started");
     Serial.println(urlServer);
-
-    
 }    
 
 void loop() {
     
     // handle Requests via WebSocket
     wsb->loop();
+    coap->loop();
 }
 
 void connection(const char* ssid, const char* password) {
