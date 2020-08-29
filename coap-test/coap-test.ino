@@ -107,7 +107,7 @@ void setup() {
 
     coap = new embeddedWoT_CoAP(portCoap);
     coap->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
-    coap->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
+    coap->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
     coap->start();
 
     Serial.println("Server started");

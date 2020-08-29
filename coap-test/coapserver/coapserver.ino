@@ -108,6 +108,7 @@ bool f = true;
 void loop() {
   // send GET or PUT coap request to CoAP server.
   // To test, use libcoap, microcoap server...etc
+  /*
   if (f) {
     f = false;
     int msgid = coap.put(IPAddress(192, 168, 1, 106), 5683, "light/light", "0");
@@ -115,7 +116,7 @@ void loop() {
     f = true;
     int msgid = coap.put(IPAddress(192, 168, 1, 106), 5683, "light/light", "1");
   }
-  Serial.println("Send Request");
+  Serial.println("Send Request");*/
 //  int msgid = coap.get(IPAddress(XXX, XXX, XXX, XXX), 5683, "time");
 
   delay(1000);
