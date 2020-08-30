@@ -641,7 +641,7 @@ DynamicJsonDocument p_doc(
 
 {% if global['isSubscription'] or global['isData'] or global['isCancellation'] -%}
 // document to handle Events Schemas in WebSocket
-DynamicJsonDocument ws_es_doc(
+DynamicJsonDocument es_doc(
     {%- do capacity.update({'events':0}) -%}
     {%- for event in template['events'] -%}
     {%- for data in dataType -%}
@@ -655,7 +655,7 @@ DynamicJsonDocument ws_es_doc(
     {%- endfor -%}
     {{ capacity['events'] * 2 }});
 {% else %}
-DynamicJsonDocument ws_es_doc(20);
+DynamicJsonDocument es_doc(20);
 {% endif %}
 // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
@@ -1030,7 +1030,7 @@ void setup() {
     {% if global['isWS'] %}
     wsb = new embeddedWoT_WebSocket(portSocket);
 
-    wsb->bindEventSchema(ws_es_doc);
+    wsb->bindEventSchema(es_doc);
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
     wsb->exposeEvents(ws_events_endpoint, ws_events_num);
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
