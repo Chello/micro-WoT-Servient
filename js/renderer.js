@@ -67,6 +67,34 @@ $(document).ready(function() {
     });
 
     term = new CustomTerminal();
+
+    //set array onchange
+    editor.on('change',() => {
+        const watcherCallback = function (path) {
+            console.log(`field with path: [${path}] changed to [${JSON.stringify(this.getEditor(path).getValue())}]`);
+            let re_prop_type = /root\.properties\.[\d+]\.type/;
+            //let re_prop = /root\.properties/;
+            // if respect the regex of properties change item type
+            if (re_prop_type.test(path)) {
+                let editorPath = path.replace('type', 'items');
+                console.log(editorPath);
+                console.log(this.getEditor(path).getValue())
+                if (this.getEditor(path).getValue() == 'array') {
+                    console.log("should enable");
+                    this.getEditor(editorPath).enable();
+                } else {
+                    console.log("should disable");
+                    this.getEditor(editorPath).disable();
+                }
+            }
+            
+        }
+        for (let key in editor.editors) {
+            if (editor.editors.hasOwnProperty(key) && key !== 'root') {
+                editor.watch(key, watcherCallback.bind(editor, key));
+            }
+        }
+    });
 });
 
 /**

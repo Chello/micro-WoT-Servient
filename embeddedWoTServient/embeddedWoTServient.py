@@ -698,6 +698,8 @@ def handleTemplateTypes(ctx, interactionTypeTD, interactionName, dataType='', te
                     t['maximum'] = ctx.obj['td'][interactionTypeTD][interactionName][dataType][termName]['maximum']
     elif(termType == 'array'):
         if(interactionTypeTD == 'properties'):
+            click.echo(ctx.obj['td'][interactionTypeTD][interactionName])
+            click.echo(t)
             t['items'] = ctx.obj['td'][interactionTypeTD][interactionName]['items']
             if('minItems' in ctx.obj['td'][interactionTypeTD][interactionName]):
                 t['minItems'] = ctx.obj['td'][interactionTypeTD][interactionName]['minItems']

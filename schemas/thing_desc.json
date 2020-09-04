@@ -178,6 +178,7 @@
         "required": [
           "propertyName",
           "type",
+          "items",
           "forms",
           "observable",
           "readOnly",
@@ -214,6 +215,7 @@
             "title": "Property type",
             "description": "Type of property",
             "type": "string",
+            "default": "array",
             "enum": [
               "boolean",
               "integer",
@@ -223,6 +225,35 @@
               "array",
               "null"
             ]
+          },
+          "items": {
+            "title": "Array type",
+            "type": "object",
+            "required": ["type"],
+            "editable": false,
+            "options": {
+              "show_opt_in": true,
+              "disable_edit_json": true,
+              "disable_collapse": true,
+              "disable_properties": true
+            },
+            "properties": {
+              "type": {
+                "title": "Array type",
+                "description": "Type of array",
+                "type": "string",
+                "default": "null",
+                "enum": [
+                  "boolean",
+                  "integer",
+                  "number",
+                  "string",
+                  "object",
+                  "array",
+                  "null"
+                ]
+              }
+            }
           },
           "@type": {
             "type": "array",

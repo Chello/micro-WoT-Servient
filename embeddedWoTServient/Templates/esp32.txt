@@ -516,7 +516,7 @@ JsonObject
 {% if 'maxItems' in interaction %}
 {{ defineVariable('int', interactionName + '_minItems', interaction['maxItems']) }}
 {%- endif %}
-{{ handleInputType(interaction['items'], interactionName, True) }}
+{# { handleInputType(interaction['items'], interactionName, True) } #}
 {% elif interaction['type'] == 'object' %}
 {{ defineVariable('JsonObject', interactionName + '_value', 'iv') }}
 {% if 'properties' in interaction %}
