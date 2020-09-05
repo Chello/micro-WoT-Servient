@@ -12,7 +12,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "bike-rack";
+String thingName = "bike-rack_tmp";
 String td = "";
 
 
@@ -92,7 +92,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false}},\"events\":{}}";
+    td = "{\"title\":\"bike-rack_tmp\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false}},\"events\":{}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -110,14 +110,11 @@ void setup() {
     Serial.println("Server started");
     Serial.println(urlServer);
 
-    // property1_value = property1_jdoc.to<JsonArray>();
-
-    // property1_value.add(false);
-    // property1_value.add(false);
-    // property1_value.add(false);
-    property1_value[0] = false;	
-    property1_value[1] = false;
-    property1_value[2] = false;
+    property1_value[0] = false;
+	
+property1_value[1] = false;
+	
+property1_value[2] = false;
 	
 }    
 
@@ -162,7 +159,7 @@ String request2() {
 }
 
 String request3() {
-    DynamicJsonDocument tmp(2000);
+    DynamicJsonDocument tmp(220);
     String resp = "";
     JsonObject obj = tmp.createNestedObject();
 

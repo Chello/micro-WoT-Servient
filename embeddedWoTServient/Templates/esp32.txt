@@ -509,7 +509,9 @@ JsonObject
 {%- endmacro %}
 {% macro handleInputType(interaction, interactionName, array=False) -%}
 {% if interaction['type'] == 'array' %}
-{{ defineVariable('JsonArray', interactionName + '_value', 'iv') }}
+DynamicJsonDocument {{ interactionName + '_jdoc' }}(300);
+{# { defineVariable('JsonArray', interactionName + '_value', 'iv') } #}
+JsonArray {{ interactionName + '_value' }} = {{ interactionName + '_jdoc' }}.to<JsonArray>();
 {% if 'minItems' in property %}
 {{ defineVariable('int', interactionName + '_minItems', interaction['minItems']) }}
 {% endif %}
@@ -1095,7 +1097,7 @@ String request2() {
 
 {# functions for property and actions used for HTTP Requests and WebSocket #}
 String request3() {
-    {% do capacity.update({'nump':0}) %}
+    {% do capacity.update({'nump':10}) %}
     {% for property in template['properties'] %}
     {% if property['type'] != 'object' and property['type'] != 'array' %}
     {% do capacity.update({'nump': capacity['nump'] + 1}) %}
