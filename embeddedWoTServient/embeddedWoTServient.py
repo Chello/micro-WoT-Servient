@@ -1812,13 +1812,12 @@ def flash(ctx):
             click.echo(output.strip())
     if(click.confirm('\nOpen serial monitor?', default=False)):
         click.echo('Hint: The serial monitor will be open throw screen library')
-        click.echo('To close the serial monitor use the combination Ctrl+A Ctrl+D')
+        click.echo('To close the serial monitor use the combination Ctrl+A and then k -> y')
         baudRate = 115200
         if(not(click.confirm('\nUse the default baud rate (115200)?', default=True))):
             baudRate = click.prompt('Baud rate', type=int)
-        c = 'gnome-terminal --tab -- bash -c "screen %s %d"' % (serialPort, baudRate)
+        c = 'screen %s %d' % (serialPort, baudRate)
         sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE) 
-
 
 if __name__ == "__main__":
     # la funzione che viene richiamata nel main è la sola ad essere esguita dalla cli,

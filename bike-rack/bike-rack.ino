@@ -23,7 +23,7 @@ DeserializationError err;
 
 int properties_number = 1;
 int objectProperties_number = 0;
-int actions_number = 1;
+int actions_number = 2;
 int events_number = 0;
 
 // Properties
@@ -35,10 +35,14 @@ JsonArray property0_value = property0_jdoc.to<JsonArray>();
 const char* action1_name = "isParkFree";
 int action1_inputsNumber = 1;
 String action1_schema[1] = {"{\"name\":\"rack_num\",\"type\":\"integer\"}"};
+const char* action2_name = "changeParkState";
+int action2_inputsNumber = 1;
+String action2_schema[1] = {"{\"name\":\"park\",\"type\":\"integer\"}"};
 
 
 // Endpoints
 String req5 = "/" + thingName + "/actions/" + action1_name;
+String req6 = "/" + thingName + "/actions/" + action2_name;
 String req4 = "/" + thingName + "/properties/" + property0_name;
 String req3 = "/" + thingName + "/all/properties";
 String req2 = "/" + thingName;
@@ -54,6 +58,8 @@ const int GREENLED = 33;
 const int SENSOR0 = 14;
 const int REDLED = 12;
 const int SENSOR1 = 13;
+int sensor0_prev = LOW;
+int sensor1_prev = LOW;
 int i, j, k, n;
 
 String request1();
@@ -61,11 +67,12 @@ String request2();
 String request3();
 String request4();
 String request5(String body);
+String request6(String body);
 
 //HTTP - actions
-const int http_actions_num = 1;
-const String http_actions_endpoint[http_actions_num] = { req5 };
-actions_handler http_actions_callback[http_actions_num] = { request5 };
+const int http_actions_num = 2;
+const String http_actions_endpoint[http_actions_num] = { req5, req6 };
+actions_handler http_actions_callback[http_actions_num] = { request5, request6 };
 
 //WS - actions
 const int ws_actions_num = 0;
@@ -95,7 +102,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false}},\"events\":{}}";
+    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -133,15 +140,13 @@ pinMode(SENSOR1, INPUT);
 }    
 
 void loop() {
-    // digitalRead function stores the Push button state 
-// in variable push_button_state
-int Push_button_state0 = digitalRead(SENSOR0);
+    //get pushbutton state
+int state0 = digitalRead(SENSOR0);
 	
-int Push_button_state1 = digitalRead(SENSOR1);
+int state1 = digitalRead(SENSOR1);
 	
-// if condition checks if push button is pressed
-// if pressed LED will turn on otherwise remain off 
-if ( Push_button_state0 == HIGH && Push_button_state1 == HIGH ) 
+//Set semaphore status
+if (state0 == HIGH && state1 == HIGH) 
 	{
 	
   digitalWrite(GREENLED, HIGH);
@@ -158,7 +163,19 @@ if ( Push_button_state0 == HIGH && Push_button_state1 == HIGH )
 	
 }
 	
-//Serial.printf("0:%d, 1:%d\n", Push_button_state0, Push_button_state1);
+
+Serial.printf("here %d and %d\n", state0, sensor0_prev);
+	
+if (state0 != sensor0_prev) 
+	{
+	
+  sensor0_prev = state0;
+	
+  changeParkState(0);
+	
+}
+	
+delay(400);
 	
     // handle Requests via WebSocket
     wsb->loop();
@@ -272,6 +289,57 @@ String request5(String body) {
     }
     return resp;
 }
+String request6(String body) {
+    DynamicJsonDocument resp_doc(200);
+    String resp = "";
+
+    Serial.printf("\nPOST invokeaction %s\n", action2_name);
+    Serial.printf("Body received: %s\n", body.c_str());
+    
+    err = deserializeJson(resp_doc, body);
+    if(err) {
+        Serial.printf("deserializeJson() failed with code %s", err.c_str());
+        resp = err.c_str();
+        return resp;
+    }
+    else {
+        if(resp_doc["park"].isNull())
+            resp = "InvalidInput";
+        else {
+            bool validInput = true;
+            String value = "";
+
+            String action2_input[1] = {};    
+            int action2_input1_value = 0;
+
+            i = 0;
+            while(validInput and i<action2_inputsNumber) {
+                switch(i) {
+                    case 0: {
+                        value = "";
+                        serializeJson(resp_doc["park"], value);
+                        action2_input[0] = value;
+                        validInput = handleInputType(value,action2_schema[0]);
+                    }
+                    break;
+
+                }
+                i++;
+            }    
+
+            if(validInput) {
+
+                action2_input1_value = action2_input[0].toInt();
+
+                String output = changeParkState(action2_input1_value);    
+                resp = (String) output;
+            }
+            else
+                resp = "InvalidInput";
+        }
+    }
+    return resp;
+}
 
 // handle Input Types
 bool handleInputType(String value, String schema) {   
@@ -307,6 +375,21 @@ bool handleInputType(String value, String schema) {
 // Action functions
 bool isParkFree(int rack_num) {
 	return property0_value[rack_num].as<bool>();
+	
+}
+
+String changeParkState(int park) {
+	String s;
+	
+property0_value[park] = !property0_value[park];
+	
+s = "Changed park 1 to ";
+	
+s += (property0_value[park]) ? "occupied" : "free";
+	
+Serial.println(s);
+	
+return s;
 	
 }
 
