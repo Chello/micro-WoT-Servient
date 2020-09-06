@@ -7,6 +7,7 @@ const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
 window.$ = window.jQuery = require('jquery');
 require('jquery-ui-dist/jquery-ui');
 const cp = require("child_process");
+const {handlebars} = require("handlebars");
 
 var term = {};
 
@@ -71,19 +72,14 @@ $(document).ready(function() {
     //set array onchange
     editor.on('change',() => {
         const watcherCallback = function (path) {
-            console.log(`field with path: [${path}] changed to [${JSON.stringify(this.getEditor(path).getValue())}]`);
+            // console.log(`field with path: [${path}] changed to [${JSON.stringify(this.getEditor(path).getValue())}]`);
             let re_prop_type = /root\.properties\.[\d+]\.type/;
-            //let re_prop = /root\.properties/;
             // if respect the regex of properties change item type
             if (re_prop_type.test(path)) {
                 let editorPath = path.replace('type', 'items');
-                console.log(editorPath);
-                console.log(this.getEditor(path).getValue())
                 if (this.getEditor(path).getValue() == 'array') {
-                    console.log("should enable");
                     this.getEditor(editorPath).enable();
                 } else {
-                    console.log("should disable");
                     this.getEditor(editorPath).disable();
                 }
             }

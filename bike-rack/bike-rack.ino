@@ -51,9 +51,10 @@ embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 embeddedWoT_WebSocket *wsb;
 
-const int GREENLED = 13;
+const int GREENLED = 33;
 const int SENSOR0 = 14;
 const int REDLED = 12;
+const int SENSOR1 = 13;
 int i, j, k, n;
 
 String request1();
@@ -127,17 +128,21 @@ pinMode(REDLED, OUTPUT);
 // This statement will declare pin 15 as digital input 
 pinMode(SENSOR0, INPUT);
 	
+pinMode(SENSOR1, INPUT);
+	
 
 }    
 
 void loop() {
     // digitalRead function stores the Push button state 
 // in variable push_button_state
-int Push_button_state = digitalRead(SENSOR0);
+int Push_button_state0 = digitalRead(SENSOR0);
+	
+int Push_button_state1 = digitalRead(SENSOR1);
 	
 // if condition checks if push button is pressed
 // if pressed LED will turn on otherwise remain off 
-if ( Push_button_state == HIGH ) 
+if ( Push_button_state0 == HIGH && Push_button_state1 == HIGH ) 
 	{
 	
   digitalWrite(GREENLED, HIGH);
@@ -153,6 +158,8 @@ if ( Push_button_state == HIGH )
   digitalWrite(REDLED, HIGH);
 	
 }
+	
+Serial.printf("0:%d, 1:%d\n", Push_button_state0, Push_button_state1);
 	
     // handle Requests via WebSocket
     wsb->loop();

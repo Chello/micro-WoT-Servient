@@ -174,7 +174,7 @@
       "items": {
         "type": "object",
         "title": "Thing property",
-        "headerTemplate": "{{self.propertyName}}",
+        "headerTemplate": "property{{i}}_value - {{self.propertyName}}",
         "required": [
           "propertyName",
           "type",
@@ -297,7 +297,7 @@
       },
       "items": {
         "type": "object",
-        "headerTemplate": "{{self.actionName}}",
+        "headerTemplate": "{{self.actionName}}(...)",
         "title": "Thing action",
         "required": [
           "forms",

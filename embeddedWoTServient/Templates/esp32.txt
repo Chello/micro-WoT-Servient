@@ -798,7 +798,7 @@ bool events_cancellationSchema[{{ template['numevents'] }}] = {
 {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
 {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
 {% endfor %}
-{% for i in range(1, template['numproperties']+1) %}
+{% for i in range(0, template['numproperties']) %}
 {% set request = 'req' + (i + 3) | string %}
 {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
 {% endfor %}
@@ -1113,7 +1113,7 @@ String request3() {
     {{ defineVariable('JsonObject', 'obj', 'tmp.createNestedObject()') }}
 
     Serial.println("\nGET all properties");
-    {% for i in range(1, template['numproperties']+1) %}
+    {% for i in range(0, template['numproperties']) %}
     {{ setVariable(False, 'obj[property' + i | string + '_name]', 'property' + i | string + '_value') }}
     {% endfor %}
     {{ setVariable(False, 'serializeJson(obj, resp)') }}
