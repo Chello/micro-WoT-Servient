@@ -24,7 +24,7 @@ DeserializationError err;
 int properties_number = 1;
 int objectProperties_number = 0;
 int actions_number = 2;
-int events_number = 0;
+int events_number = 1;
 
 // Properties
 const char* property0_name = "parks";
@@ -39,8 +39,14 @@ const char* action2_name = "changeParkState";
 int action2_inputsNumber = 1;
 String action2_schema[1] = {"{\"name\":\"park\",\"type\":\"integer\"}"};
 
+// Events
+const char* event1_name = "hasParkChanged";
+bool events_subscriptionSchema[1] = {false};
+bool events_dataSchema[1] = {false};
+bool events_cancellationSchema[1] = {false};
 
 // Endpoints
+String req7 = "/" + thingName + "/events/" + event1_name;
 String req5 = "/" + thingName + "/actions/" + action1_name;
 String req6 = "/" + thingName + "/actions/" + action2_name;
 String req4 = "/" + thingName + "/properties/" + property0_name;
@@ -90,8 +96,8 @@ const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req
 properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
 
 //HTTP - events
-const int http_events_num = 0;
-const String http_events_endpoint[http_events_num] = {  };
+const int http_events_num = 1;
+const String http_events_endpoint[http_events_num] = { req7 };
 //WS - events
 const int ws_events_num = 0;
 const String ws_events_endpoint[ws_events_num] = {  };
@@ -99,10 +105,12 @@ const String ws_events_endpoint[ws_events_num] = {  };
 void setup() {
     Serial.begin(115200);
     Serial.println();
+
+    // events data
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{}}";
+    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -164,8 +172,7 @@ if (state0 == HIGH && state1 == HIGH)
 }
 	
 
-Serial.printf("here %d and %d\n", state0, sensor0_prev);
-	
+//Change status of park 0
 if (state0 != sensor0_prev) 
 	{
 	
@@ -175,7 +182,16 @@ if (state0 != sensor0_prev)
 	
 }
 	
-delay(400);
+
+//Change status of park 1
+if (state1 != sensor1_prev) 
+	{
+	
+  sensor1_prev = state1;
+	
+  changeParkState(1);
+	
+}
 	
     // handle Requests via WebSocket
     wsb->loop();
@@ -282,6 +298,7 @@ String request5(String body) {
 
                 bool output = isParkFree(action1_input1_value);    
                 resp = (String) output;
+                String ws_msg = "";
             }
             else
                 resp = "InvalidInput";
@@ -333,6 +350,12 @@ String request6(String body) {
 
                 String output = changeParkState(action2_input1_value);    
                 resp = (String) output;
+                String ws_msg = "";
+
+                // hasParkChanged condition
+                if(true) {
+                    hlp->sendLongPollTXT(ws_msg, http_events_endpoint[0]);
+                }
             }
             else
                 resp = "InvalidInput";
@@ -379,13 +402,15 @@ bool isParkFree(int rack_num) {
 }
 
 String changeParkState(int park) {
-	String s;
+	char s[25];
 	
 property0_value[park] = !property0_value[park];
 	
-s = "Changed park 1 to ";
+sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
 	
-s += (property0_value[park]) ? "occupied" : "free";
+// s = "Changed park 1 to ";
+	
+// s += (property0_value[park]) ? "occupied" : "free";
 	
 Serial.println(s);
 	
