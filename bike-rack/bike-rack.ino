@@ -51,6 +51,9 @@ embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 embeddedWoT_WebSocket *wsb;
 
+const int GREENLED = 13;
+const int SENSOR0 = 14;
+const int REDLED = 12;
 int i, j, k, n;
 
 String request1();
@@ -110,19 +113,47 @@ void setup() {
     Serial.println("Server started");
     Serial.println(urlServer);
 
-    // property1_value = property1_jdoc.to<JsonArray>();
-
-    // property1_value.add(false);
-    // property1_value.add(false);
-    // property1_value.add(false);
-    property1_value[0] = false;	
-    property1_value[1] = false;
-    property1_value[2] = false;
+    property1_value[0] = false;
 	
+property1_value[1] = false;
+	
+property1_value[2] = false;
+	
+// This statement will declare pin 22 as digital output 
+pinMode(GREENLED, OUTPUT);
+	
+pinMode(REDLED, OUTPUT);
+	
+// This statement will declare pin 15 as digital input 
+pinMode(SENSOR0, INPUT);
+	
+
 }    
 
 void loop() {
-    
+    // digitalRead function stores the Push button state 
+// in variable push_button_state
+int Push_button_state = digitalRead(SENSOR0);
+	
+// if condition checks if push button is pressed
+// if pressed LED will turn on otherwise remain off 
+if ( Push_button_state == HIGH ) 
+	{
+	
+  digitalWrite(GREENLED, HIGH);
+	
+  digitalWrite(REDLED, LOW);
+	
+}
+	 else 
+	{
+	
+  digitalWrite(GREENLED, LOW);
+	 
+  digitalWrite(REDLED, HIGH);
+	
+}
+	
     // handle Requests via WebSocket
     wsb->loop();
 }
@@ -162,7 +193,7 @@ String request2() {
 }
 
 String request3() {
-    DynamicJsonDocument tmp(2000);
+    DynamicJsonDocument tmp(2020);
     String resp = "";
     JsonObject obj = tmp.createNestedObject();
 
