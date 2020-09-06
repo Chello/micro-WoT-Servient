@@ -27,10 +27,9 @@ int actions_number = 1;
 int events_number = 0;
 
 // Properties
-const char* property1_name = "parks";
-DynamicJsonDocument property1_jdoc(300);
-JsonArray property1_value = property1_jdoc.to<JsonArray>();
-
+const char* property0_name = "parks";
+DynamicJsonDocument property0_jdoc(300);
+JsonArray property0_value = property0_jdoc.to<JsonArray>();
 
 // Actions
 const char* action1_name = "isParkFree";
@@ -40,7 +39,7 @@ String action1_schema[1] = {"{\"name\":\"rack_num\",\"type\":\"integer\"}"};
 
 // Endpoints
 String req5 = "/" + thingName + "/actions/" + action1_name;
-String req4 = "/" + thingName + "/properties/" + property1_name;
+String req4 = "/" + thingName + "/properties/" + property0_name;
 String req3 = "/" + thingName + "/all/properties";
 String req2 = "/" + thingName;
 String req1 = "/";
@@ -96,7 +95,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false}},\"events\":{}}";
+    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false}},\"events\":{}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -114,11 +113,11 @@ void setup() {
     Serial.println("Server started");
     Serial.println(urlServer);
 
-    property1_value[0] = false;
+    property0_value[0] = false;
 	
-property1_value[1] = false;
+property0_value[1] = false;
 	
-property1_value[2] = false;
+property0_value[2] = false;
 	
 // This statement will declare pin 22 as digital output 
 pinMode(GREENLED, OUTPUT);
@@ -159,7 +158,7 @@ if ( Push_button_state0 == HIGH && Push_button_state1 == HIGH )
 	
 }
 	
-Serial.printf("0:%d, 1:%d\n", Push_button_state0, Push_button_state1);
+//Serial.printf("0:%d, 1:%d\n", Push_button_state0, Push_button_state1);
 	
     // handle Requests via WebSocket
     wsb->loop();
@@ -205,7 +204,7 @@ String request3() {
     JsonObject obj = tmp.createNestedObject();
 
     Serial.println("\nGET all properties");
-    obj[property1_name] = property1_value;
+    obj[property0_name] = property0_value;
     serializeJson(obj, resp);
 
     return resp;
@@ -215,9 +214,9 @@ String request4() {
     String resp = "";
     String tmp = "";
 
-    Serial.printf("\nGET %s value\n", property1_name);
-    serializeJson(property1_value, tmp);
-    resp = "{\"" + (String) property1_name + "\":" + tmp + "}";
+    Serial.printf("\nGET %s value\n", property0_name);
+    serializeJson(property0_value, tmp);
+    resp = "{\"" + (String) property0_name + "\":" + tmp + "}";
     
     return resp;
 }
@@ -307,7 +306,7 @@ bool handleInputType(String value, String schema) {
 
 // Action functions
 bool isParkFree(int rack_num) {
-	return property1_value[rack_num].as<bool>();
+	return property0_value[rack_num].as<bool>();
 	
 }
 

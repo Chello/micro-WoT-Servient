@@ -16,11 +16,11 @@
     {%- do protocols['properties'].update({property['name']: []}) -%}
     {%- for item in td['properties'][property['name']]['forms'] if 'href' in item -%}
         {%- if item['href'] == 'ws' -%}
-        {%- do item.update(href='" + urlSocket + "/properties/" + property' + i | string + '_name + "' ) -%}
+        {%- do item.update(href='" + urlSocket + "/properties/" + property' + (i -1) | string + '_name + "' ) -%}
         {%- do global.update({'isWS':True}) -%}
         {%- do protocols['properties'][property['name']].append('ws') -%}
         {%- elif item['href'] == 'http' -%}
-        {%- do item.update(href='" + urlServer + "/properties/" + property' + i | string + '_name + "' ) -%}
+        {%- do item.update(href='" + urlServer + "/properties/" + property' + (i -1) | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
         {%- do protocols['properties'][property['name']].append('http') -%}
         {%- endif -%}
@@ -672,11 +672,10 @@ DeserializationError err;
 {% if template['numproperties'] > 0 %}
 // Properties
 {% for property in template['properties'] %}
-{{ defineVariable('const char*', 'property' + loop.index | string + '_name', property['name']) }}
-{{ handleInputType(property, 'property' + loop.index | string) }}
+{{ defineVariable('const char*', 'property' + (loop.index -1) | string + '_name', property['name']) }}
+{{ handleInputType(property, 'property' + (loop.index -1) | string) }}
 {% endfor %}
 {% endif %}
-
 {% if template['numactions'] > 0 %}
 // Actions
 {% for action in template['actions'] %}
@@ -798,9 +797,9 @@ bool events_cancellationSchema[{{ template['numevents'] }}] = {
 {% set request = 'req' + (i + 3 + template['numproperties']) | string %}
 {{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/actions/"', '+', 'action' + i | string + '_name']) }}
 {% endfor %}
-{% for i in range(0, template['numproperties']) %}
+{% for i in range(1, template['numproperties']+1) %}
 {% set request = 'req' + (i + 3) | string %}
-{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + i | string + '_name']) }}
+{{ defineVariable('String', request, ['"/"', '+', 'thingName', '+', '"/properties/"', '+', 'property' + (i -1) | string + '_name']) }}
 {% endfor %}
 {{ defineVariable('String', 'req3', ['"/"', '+', 'thingName', '+', '"/all/properties"' ]) }}
 {{ defineVariable('String', 'req2', ['"/"', '+', 'thingName']) }}
@@ -1129,12 +1128,12 @@ String request{{ i+3 }}() {
     {{ defineVariable('String', 'tmp', '') }}
     {% endif %}
 
-    Serial.printf("\nGET %s value\n", property{{ i }}_name);
+    Serial.printf("\nGET %s value\n", property{{ (i -1) }}_name);
     {% if property['type'] == 'object' or property['type'] == 'array' %}
-    {{ setVariable(False, 'serializeJson(property' + i | string + '_value, tmp)') }}
-    {{ setVariable(True, 'resp', '{\\"" + (String) property' + i | string + '_name + "\\":" + tmp + "}') }}
+    {{ setVariable(False, 'serializeJson(property' + (i -1) | string + '_value, tmp)') }}
+    {{ setVariable(True, 'resp', '{\\"" + (String) property' + (i -1) | string + '_name + "\\":" + tmp + "}') }}
     {% else %}
-    {{ setVariable(True, 'resp', '{\\"" + (String) property' + i | string + '_name + "\\":" + property' + i | string + '_value + "}') }}
+    {{ setVariable(True, 'resp', '{\\"" + (String) property' + (i -1) | string + '_name + "\\":" + property' + i | string + '_value + "}') }}
     {% endif %}
     
     return resp;
