@@ -7,16 +7,12 @@
     "password",
     "portserver",
     "portsocket",
-<<<<<<< HEAD
-    "libraries"
-=======
     "portcoap",
     "libraries",
     "constants",
     "globals",
     "setup",
     "loop"
->>>>>>> coap-test-2
   ],
   "properties": {
     "ssid": {

@@ -13,12 +13,8 @@ $(document).ready(function() {
     $('#footer').resizable();
     window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
-<<<<<<< HEAD
-    var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
-=======
     createEditor(undefined);
     createBuilder(undefined);
->>>>>>> coap-test-2
 
     term = new CustomTerminal();
 
@@ -50,31 +46,16 @@ var createBuilder = function(initval) {
     builder = new JSONEditor(document.getElementById('build_holder'),{
         // Enable fetching schemas via ajax
         ajax: true,
-<<<<<<< HEAD
-
-        //startval: initial,
-=======
->>>>>>> coap-test-2
         
         startval: initval,
         // The schema for the editor
         schema: {
             type: "object",
-<<<<<<< HEAD
-            $ref: "schemas/thing_desc.json",
-            //$ref: "embeddedWoTServient/thing-schema.json"
-=======
             $ref: "schemas/build.json",
->>>>>>> coap-test-2
         },
         
         // Require all properties by default
         required_by_default: false,
-<<<<<<< HEAD
-
-        object_layout: "table",
-=======
->>>>>>> coap-test-2
         //show checkbox for non-required opt
         show_opt_in: true,
         //set theme
@@ -86,12 +67,8 @@ var createBuilder = function(initval) {
     });
 }
 
-<<<<<<< HEAD
-    builder = new JSONEditor(document.getElementById('build_holder'),{
-=======
 var createEditor = function(initval) {
     editor = new JSONEditor(document.getElementById('editor_holder'),{
->>>>>>> coap-test-2
         // Enable fetching schemas via ajax
         ajax: true,
 
