@@ -87,7 +87,7 @@
       "maxItems": 2,
       "items": {
         "title": "Protocol",
-        "headerTemplate":"Protocol #{{i}}",
+        "headerTemplate": "Protocol #{{i}}",
         "anyOf": [
           {
             "title": "HTTP",
@@ -198,7 +198,7 @@
             "maxItems": 2,
             "items": {
               "title": "Protocol",
-              "headerTemplate":"Protocol #{{i}}", 
+              "headerTemplate": "Protocol #{{i}}",
               "anyOf": [
                 {
                   "title": "HTTP",
@@ -207,6 +207,10 @@
                 {
                   "title": "WebSocket",
                   "$ref": "#/definitions/prop_ws_form"
+                },
+                {
+                  "title": "CoAP",
+                  "$ref": "#/definitions/prop_coap_form"
                 }
               ]
             }
@@ -229,7 +233,9 @@
           "items": {
             "title": "Array type",
             "type": "object",
-            "required": ["type"],
+            "required": [
+              "type"
+            ],
             "editable": false,
             "options": {
               "show_opt_in": true,
@@ -321,7 +327,7 @@
             "uniqueItems": true,
             "items": {
               "title": "Protocol",
-              "headerTemplate":"Protocol #{{i}}",
+              "headerTemplate": "Protocol #{{i}}",
               "anyOf": [
                 {
                   "title": "HTTP",
@@ -331,7 +337,7 @@
                   "title": "WebSocket",
                   "$ref": "#/definitions/act_ws_form"
                 }
-              ]              
+              ]
             }
           },
           "input": {
@@ -645,7 +651,7 @@
             "type": "array",
             "title": "Property meta-type",
             "options": {
-              "collapsed": true 
+              "collapsed": true
             },
             "items": {
               "type": "string"
@@ -689,7 +695,9 @@
         "href": {
           "type": "string",
           "default": "http",
-          "enum": ["http"],
+          "enum": [
+            "http"
+          ],
           "options": {
             "hidden": true
           }
@@ -697,7 +705,9 @@
         "subprotocol": {
           "type": "string",
           "default": "longpoll",
-          "enum": ["longpoll"],
+          "enum": [
+            "longpoll"
+          ],
           "options": {
             "hidden": true
           }
@@ -740,7 +750,9 @@
         "href": {
           "type": "string",
           "default": "ws",
-          "enum": ["ws"],
+          "enum": [
+            "ws"
+          ],
           "options": {
             "hidden": true
           }
@@ -787,7 +799,9 @@
         "href": {
           "type": "string",
           "default": "http",
-          "enum": ["http"],
+          "enum": [
+            "http"
+          ],
           "options": {
             "hidden": true
           }
@@ -836,7 +850,9 @@
         "href": {
           "type": "string",
           "default": "ws",
-          "enum": ["ws"],
+          "enum": [
+            "ws"
+          ],
           "options": {
             "hidden": true
           }
@@ -884,7 +900,9 @@
         "href": {
           "type": "string",
           "default": "http",
-          "enum": ["http"],
+          "enum": [
+            "http"
+          ],
           "options": {
             "hidden": true
           }
@@ -931,7 +949,58 @@
         "href": {
           "type": "string",
           "default": "ws",
-          "enum": ["ws"],
+          "enum": [
+            "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readproperty",
+              "writeproperty"
+            ]
+          }
+        }
+      }
+    },
+    "prop_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": [
+            "ws"
+          ],
           "options": {
             "hidden": true
           }
@@ -978,7 +1047,9 @@
         "href": {
           "type": "string",
           "default": "http",
-          "enum": ["http"],
+          "enum": [
+            "http"
+          ],
           "options": {
             "hidden": true
           }
@@ -1017,7 +1088,9 @@
         "href": {
           "type": "string",
           "default": "ws",
-          "enum": ["ws"],
+          "enum": [
+            "ws"
+          ],
           "options": {
             "hidden": true
           }
