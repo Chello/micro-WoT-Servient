@@ -48,11 +48,11 @@
     {%- do protocols['events'].update({event['name']: []}) -%}
     {%- for item in td['events'][event['name']]['forms'] if 'href' in item -%}
         {% if item['href'] == 'ws' %}
-        {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
+        {%- do item.update(href='" + urlSocket + "/events/" + event' + i | string + '_name + "' ) -%}
         {%- do global.update({'isWS':True}) -%}
         {%- do protocols['events'][event['name']].append('ws') -%}
         {% elif item['href'] == 'http' %}
-        {%- do item.update(href='" + urlSocket + "/events/" + event' + i | string + '_name + "' ) -%}
+        {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
         {%- do protocols['events'][event['name']].append('http') -%}
         {% endif %}
@@ -929,7 +929,7 @@ const String http_events_endpoint[http_events_num] = { {{ req|join(', ') }} };
 {% set req = [] %}
 {% set request = [] %}
 {% for event in protocols['events'] if 'ws' in protocols['events'][event] %}
-    {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties'] + template['numactions']) | string) %}
         {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
 {% endfor %}
 const int ws_events_num = {{ req|length }};
@@ -1806,6 +1806,16 @@ bool handleInputType(String value, String schema) {
     {% endif %}
     {% endif %}
     return validInput;
+}
+
+void emitEvent(String txt, String event_endpoint) {
+    {{ defineVariable('String', 'endpoint', ['"/"', '+', 'thingName', '+', '"/events/"', '+ event_endpoint']) }}
+    {% if global['isHTTP'] %}
+    hlp->sendLongPollTXT(txt, endpoint);
+    {% endif %}
+    {% if global['isWS'] %}
+    wsb->sendWebSocketTXT(txt, endpoint);
+    {% endif %}
 }
 
 // Action functions

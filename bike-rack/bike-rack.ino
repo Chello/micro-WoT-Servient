@@ -395,6 +395,10 @@ bool handleInputType(String value, String schema) {
     return validInput;
 }
 
+void emitEvent(String txt, String event_endpoint) {
+    hlp->sendLongPollTXT(txt, event_endpoint);
+}
+
 // Action functions
 bool isParkFree(int rack_num) {
 	return property0_value[rack_num].as<bool>();
