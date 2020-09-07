@@ -694,11 +694,13 @@
       },
       "properties": {
         "contentType": {
-          "const": "application/json",
+          "type": "string",
+          "title": "Content meta type",
           "default": "application/json",
-          "options": {
-            "hidden": true
-          }
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
         },
         "href": {
           "type": "string",
@@ -749,11 +751,13 @@
       },
       "properties": {
         "contentType": {
-          "const": "application/json",
+          "type": "string",
+          "title": "Content meta type",
           "default": "application/json",
-          "options": {
-            "hidden": true
-          }
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
         },
         "href": {
           "type": "string",
@@ -1097,11 +1101,13 @@
       },
       "properties": {
         "contentType": {
-          "const": "application/json",
+          "type": "string",
+          "title": "Content meta type",
           "default": "application/json",
-          "options": {
-            "hidden": true
-          }
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
         },
         "href": {
           "type": "string",
@@ -1138,11 +1144,13 @@
       },
       "properties": {
         "contentType": {
-          "const": "application/json",
+          "type": "string",
+          "title": "Content meta type",
           "default": "application/json",
-          "options": {
-            "hidden": true
-          }
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
         },
         "href": {
           "type": "string",
@@ -1179,11 +1187,13 @@
       },
       "properties": {
         "contentType": {
-          "const": "application/json",
+          "type": "string",
+          "title": "Content meta type",
           "default": "application/json",
-          "options": {
-            "hidden": true
-          }
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
         },
         "href": {
           "type": "string",
