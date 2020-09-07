@@ -1,5 +1,5 @@
 {
-  "title": "Thing",
+  "title": "Thing Description",
   "type": "object",
   "id": "root",
   "required": [
@@ -79,46 +79,22 @@
       "minItems": 1,
       "maxItems": 1,
       "items": {
-        "title": "",
-        "type": "object",
-        "required": [
-          "op",
-          "contentType",
-          "href"
-        ],
-        "properties": {
-          "contentType": {
-            "const": "application/json",
-            "default": "application/json",
-            "options": {
-              "hidden": true
-            }
+        "title": "Protocol",
+        "headerTemplate": "Protocol #{{i}}",
+        "anyOf": [
+          {
+            "title": "HTTP",
+            "$ref": "#/definitions/td_http_form"
           },
-          "href": {
-            "default": "",
-            "const": "",
-            "options": {
-              "hidden": true
-            }
+          {
+            "title": "WebSocket",
+            "$ref": "#/definitions/td_ws_form"
           },
-          "op": {
-            "type": "array",
-            "format": "categories",
-            "name": "operations",
-            "description": "Operations supported by the Thing. You can choose one or more of them.",
-            "uniqueItems": true,
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "enum": [
-                "readallproperties",
-                "writeallproperties",
-                "readmultipleproperties",
-                "writemultipleproperties"
-              ]
-            }
+          {
+            "title": "CoAP",
+            "$ref": "#/definitions/td_coap_form"
           }
-        }
+        ]
       }
     },
     "useWS": {
@@ -193,10 +169,11 @@
       "items": {
         "type": "object",
         "title": "Thing property",
-        "headerTemplate": "{{self.propertyName}}",
+        "headerTemplate": "property{{i}}_value - {{self.propertyName}}",
         "required": [
           "propertyName",
           "type",
+          "items",
           "forms",
           "useWS",
           "observable",
@@ -216,44 +193,22 @@
             "minItems": 1,
             "maxItems": 1,
             "items": {
-              "title": "Operations",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
+              "title": "Protocol",
+              "headerTemplate": "Protocol #{{i}}",
+              "anyOf": [
+                {
+                  "title": "HTTP",
+                  "$ref": "#/definitions/prop_http_form"
                 },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
+                {
+                  "title": "WebSocket",
+                  "$ref": "#/definitions/prop_ws_form"
                 },
-                "op": {
-                  "type": "array",
-                  "format": "categories",
-                  "name": "operations",
-                  "description": "Operations supported by the property. You can choose one or more of them.",
-                  "uniqueItems": true,
-                  "items": {
-                    "minItems": 1,
-                    "type": "string",
-                    "enum": [
-                      "readproperty",
-                      "writeproperty"
-                    ]
-                  }
+                {
+                  "title": "CoAP",
+                  "$ref": "#/definitions/prop_coap_form"
                 }
-              }
+              ]
             }
           },
           "useWS": {
@@ -266,6 +221,7 @@
             "title": "Property type",
             "description": "Type of property",
             "type": "string",
+            "default": "array",
             "enum": [
               "boolean",
               "integer",
@@ -275,6 +231,37 @@
               "array",
               "null"
             ]
+          },
+          "items": {
+            "title": "Array type",
+            "type": "object",
+            "required": [
+              "type"
+            ],
+            "editable": false,
+            "options": {
+              "show_opt_in": true,
+              "disable_edit_json": true,
+              "disable_collapse": true,
+              "disable_properties": true
+            },
+            "properties": {
+              "type": {
+                "title": "Array type",
+                "description": "Type of array",
+                "type": "string",
+                "default": "null",
+                "enum": [
+                  "boolean",
+                  "integer",
+                  "number",
+                  "string",
+                  "object",
+                  "array",
+                  "null"
+                ]
+              }
+            }
           },
           "@type": {
             "type": "array",
@@ -318,7 +305,7 @@
       },
       "items": {
         "type": "object",
-        "headerTemplate": "{{self.actionName}}",
+        "headerTemplate": "{{self.actionName}}(...)",
         "title": "Thing action",
         "required": [
           "forms",
@@ -344,36 +331,22 @@
               "hidden": true
             },
             "items": {
-              "title": "Operations",
-              "type": "object",
-              "required": [
-                "op",
-                "contentType",
-                "href"
-              ],
-              "properties": {
-                "contentType": {
-                  "const": "application/json",
-                  "default": "application/json",
-                  "options": {
-                    "hidden": true
-                  }
+              "title": "Protocol",
+              "headerTemplate": "Protocol #{{i}}",
+              "anyOf": [
+                {
+                  "title": "HTTP",
+                  "$ref": "#/definitions/act_http_form"
                 },
-                "href": {
-                  "default": "",
-                  "const": "",
-                  "options": {
-                    "hidden": true
-                  }
+                {
+                  "title": "WebSocket",
+                  "$ref": "#/definitions/act_ws_form"
                 },
-                "op": {
-                  "default": "invokeaction",
-                  "const": "invokeaction",
-                  "options": {
-                    "hidden": true
-                  }
+                {
+                  "title": "CoAP",
+                  "$ref": "#/definitions/act_coap_form"
                 }
-              }
+              ]
             }
           },
           "useWS": {
@@ -403,8 +376,8 @@
                   "type": "string"
                 },
                 "type": {
-                  "title": "Action type",
-                  "description": "Type of action",
+                  "title": "Input type",
+                  "description": "Type of input",
                   "type": "string",
                   "enum": [
                     "boolean",
@@ -730,7 +703,7 @@
             "type": "array",
             "title": "Property meta-type",
             "options": {
-              "collapsed": true 
+              "collapsed": true
             },
             "items": {
               "type": "string"
@@ -743,6 +716,544 @@
           "description": {
             "title": "Event description",
             "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "event_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href",
+        "subprotocol"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true,
+        "hidden": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": [
+            "http"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "subprotocol": {
+          "type": "string",
+          "default": "longpoll",
+          "enum": [
+            "longpoll"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "No operations supported on HTTP Longpoll",
+          "uniqueItems": true,
+          "minItems": 0,
+          "maxItems": 0,
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "event_ws_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": [
+            "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Choose one or more operation supported.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "subscribeevent",
+              "unsubscribeevent"
+            ]
+          }
+        }
+      }
+    },
+    "td_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": [
+            "http"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
+            ]
+          }
+        }
+      }
+    },
+    "td_ws_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": [
+            "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
+            ]
+          }
+        }
+      }
+    },
+    "td_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
+            ]
+          }
+        }
+      }
+    },
+    "prop_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": [
+            "http"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readproperty",
+              "writeproperty"
+            ]
+          }
+        }
+      }
+    },
+    "prop_ws_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": [
+            "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readproperty",
+              "writeproperty"
+            ]
+          }
+        }
+      }
+    },
+    "prop_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readproperty",
+              "writeproperty"
+            ]
+          }
+        }
+      }
+    },
+    "act_http_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true,
+        "hidden": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "http",
+          "enum": [
+            "http"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "act_ws_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "hidden": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "ws",
+          "enum": [
+            "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "act_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "hidden": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
           }
         }
       }

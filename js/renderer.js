@@ -5,32 +5,107 @@ const {ace} = require(path.resolve('node_modules/ace-builds/src/ace'));
 window.$ = window.jQuery = require('jquery');
 require('jquery-ui-dist/jquery-ui');
 const cp = require("child_process");
+const {handlebars} = require("handlebars");
 
 var term = {};
 
 $(document).ready(function() {
-
     $('#footer').resizable();
     window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
+<<<<<<< HEAD
     var initial = "{\"title\":\"test4\",\"id\":\"test4\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readallproperties\",\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"useWS\":true,\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"readproperty\"]}],\"useWS\":true,\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"azione\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":\"invokeaction\"}],\"useWS\":true,\"input\":[{\"inputName\":\"in\",\"type\":\"string\"}],\"output\":{\"type\":\"string\"},\"body\":\"return \"{'input':'\" + in + \"'}\";\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evento1\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"},{\"eventName\":\"evento2\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"\",\"op\":[\"subscribeevent\"]}],\"useWS\":true,\"useLP\":true,\"actionsTriggered\":[\"azione\"],\"condition\":\"true\"}]}";
+=======
+    createEditor(undefined);
+    createBuilder(undefined);
+>>>>>>> coap-test-2
 
+    term = new CustomTerminal();
+
+    //set array onchange
+    editor.on('change',() => {
+        const watcherCallback = function (path) {
+            // console.log(`field with path: [${path}] changed to [${JSON.stringify(this.getEditor(path).getValue())}]`);
+            let re_prop_type = /root\.properties\.[\d+]\.type/;
+            // if respect the regex of properties change item type
+            if (re_prop_type.test(path)) {
+                let editorPath = path.replace('type', 'items');
+                if (this.getEditor(path).getValue() == 'array') {
+                    this.getEditor(editorPath).enable();
+                } else {
+                    this.getEditor(editorPath).disable();
+                }
+            }
+            
+        }
+        for (let key in editor.editors) {
+            if (editor.editors.hasOwnProperty(key) && key !== 'root') {
+                editor.watch(key, watcherCallback.bind(editor, key));
+            }
+        }
+    });
+});
+
+var createBuilder = function(initval) {
+    builder = new JSONEditor(document.getElementById('build_holder'),{
+        // Enable fetching schemas via ajax
+        ajax: true,
+<<<<<<< HEAD
+
+        //startval: initial,
+=======
+>>>>>>> coap-test-2
+        
+        startval: initval,
+        // The schema for the editor
+        schema: {
+            type: "object",
+<<<<<<< HEAD
+            $ref: "schemas/thing_desc.json",
+            //$ref: "embeddedWoTServient/thing-schema.json"
+=======
+            $ref: "schemas/build.json",
+>>>>>>> coap-test-2
+        },
+        
+        // Require all properties by default
+        required_by_default: false,
+<<<<<<< HEAD
+
+        object_layout: "table",
+=======
+>>>>>>> coap-test-2
+        //show checkbox for non-required opt
+        show_opt_in: true,
+        //set theme
+        theme: 'bootstrap4',
+        //show errors in editor
+        show_errors: "always",
+        //set icon library
+        iconlib: "fontawesome4"
+    });
+}
+
+<<<<<<< HEAD
+    builder = new JSONEditor(document.getElementById('build_holder'),{
+=======
+var createEditor = function(initval) {
     editor = new JSONEditor(document.getElementById('editor_holder'),{
+>>>>>>> coap-test-2
         // Enable fetching schemas via ajax
         ajax: true,
 
-        //startval: initial,
+        startval: initval,
         
         // The schema for the editor
         schema: {
             type: "object",
             $ref: "schemas/thing_desc.json",
-            //$ref: "embeddedWoTServient/thing-schema.json"
         },
         //are fields all required? no
         required_by_default: false,
 
-        object_layout: "table",
+        object_layout: "normal",
         //show checkbox for non-required opt
         show_opt_in: true,
         //show errors in editor
@@ -40,31 +115,8 @@ $(document).ready(function() {
         //set icon library
         iconlib: "fontawesome4"
     });
+}
 
-    builder = new JSONEditor(document.getElementById('build_holder'),{
-        // Enable fetching schemas via ajax
-        ajax: true,
-        
-        // The schema for the editor
-        schema: {
-            type: "object",
-            $ref: "schemas/build.json",
-        },
-        
-        // Require all properties by default
-        required_by_default: false,
-        //show checkbox for non-required opt
-        show_opt_in: true,
-        //set theme
-        theme: 'bootstrap4',
-        //show errors in editor
-        show_errors: "always",
-        //set icon library
-        iconlib: "fontawesome4"
-    });
-
-    term = new CustomTerminal();
-});
 
 /**
  * This function composes the json variables for both thing description and thing options.

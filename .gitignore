@@ -3,3 +3,5 @@ asd*
 tmp
 # test*
 libs_old
+*/*\.esp32\.esp32.*
+*vscode*

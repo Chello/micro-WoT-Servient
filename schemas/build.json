@@ -7,7 +7,16 @@
     "password",
     "portserver",
     "portsocket",
+<<<<<<< HEAD
     "libraries"
+=======
+    "portcoap",
+    "libraries",
+    "constants",
+    "globals",
+    "setup",
+    "loop"
+>>>>>>> coap-test-2
   ],
   "properties": {
     "ssid": {
@@ -35,11 +44,17 @@
       "pattern": "[0-9]",
       "default": "81"
     },
+    "portcoap": {
+      "type": "string",
+      "title": "CoAP port",
+      "pattern": "[0-9]",
+      "default": "5683"
+    },
     "libraries": {
       "type": "array",
       "format": "table",
       "title": "Arduino libraries",
-      "description": "",
+      "description": "Include libraries from Arduino repository.",
       "uniqueItems": true,
       "items": {
         "title": "Arduino libraries",
@@ -54,6 +69,7 @@
       "type": "array",
       "format": "table",
       "title": "Additional constants",
+      "description": "#define entries",
       "uniqueItems": true,
       "items": {
         "title": "Constants",
@@ -72,15 +88,15 @@
         "title": "Global variable",
         "properties": {
           "name": {
-            "title": "Variable name",
+            "title": "Name",
             "type": "string"
           },
           "type": {
-            "title": "Variable type",
+            "title": "Type",
             "type": "string"
           },
           "value": {
-            "title": "Variable value",
+            "title": "Value",
             "type": "string"
           }
         }
