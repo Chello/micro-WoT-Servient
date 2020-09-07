@@ -94,11 +94,15 @@ $("#load").on('click', function() {
             // if (err) throw err;
             JSZip.loadAsync(data).then(function(zip) {
                     zip.file('td.json').async("string").then(function (data) {
-                        editor.setValue(JSON.parse(data));
+                        // editor.setValue(JSON.parse(data));
+                        editor.destroy();
+                        createEditor(JSON.parse(data));
                     });
 
                     zip.file('build.json').async("string").then(function (data) {
-                        builder.setValue(JSON.parse(data));
+                        // builder.setValue(JSON.parse(data));
+                        builder.destroy();
+                        createBuilder(JSON.parse(data));
                     });
 
                 });

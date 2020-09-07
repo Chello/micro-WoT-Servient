@@ -12,60 +12,11 @@ const {handlebars} = require("handlebars");
 var term = {};
 
 $(document).ready(function() {
-
     $('#footer').resizable();
     window.ace.config.set("basePath", "node_modules/ace-builds/src/");
 
-    //var initial = JSON.parse("{\"title\":\"asdf\",\"id\":\"asdf\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"writeallproperties\",\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":[{\"propertyName\":\"proprieta\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}],\"actions\":[{\"actionName\":\"act\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":\"invokeaction\"}],\"input\":[{\"inputName\":\"in1\",\"type\":\"boolean\"}],\"output\":{\"type\":\"boolean\"},\"body\":\"return in1;\",\"safe\":false,\"idempotent\":false}],\"events\":[{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"http\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\"ws\",\"op\":[\"subscribeevent\",\"unsubscribeevent\"]}],\"actionsTriggered\":[\"act\"],\"condition\":\"true\",\"subscription\":[{\"subscriptionName\":\"sbs1\",\"type\":\"boolean\",\"value\":\"true\"}],\"data\":[{\"dataName\":\"dat1\",\"type\":\"boolean\",\"value\":\"true\"}],\"cancellation\":[{\"cancellationName\":\"cnc1\",\"type\":\"boolean\",\"value\":\"true\"}]}]}");
-    //var initial = "";
-
-    editor = new JSONEditor(document.getElementById('editor_holder'),{
-        // Enable fetching schemas via ajax
-        ajax: true,
-
-        //startval: initial,
-        
-        // The schema for the editor
-        schema: {
-            type: "object",
-            $ref: "schemas/thing_desc.json",
-        },
-        //are fields all required? no
-        required_by_default: false,
-
-        object_layout: "normal",
-        //show checkbox for non-required opt
-        show_opt_in: true,
-        //show errors in editor
-        show_errors: "always",
-        //set theme
-        theme: 'bootstrap4',
-        //set icon library
-        iconlib: "fontawesome4"
-    });
-
-    builder = new JSONEditor(document.getElementById('build_holder'),{
-        // Enable fetching schemas via ajax
-        ajax: true,
-        
-        // startval: insitbuild,
-        // The schema for the editor
-        schema: {
-            type: "object",
-            $ref: "schemas/build.json",
-        },
-        
-        // Require all properties by default
-        required_by_default: false,
-        //show checkbox for non-required opt
-        show_opt_in: true,
-        //set theme
-        theme: 'bootstrap4',
-        //show errors in editor
-        show_errors: "always",
-        //set icon library
-        iconlib: "fontawesome4"
-    });
+    createEditor(undefined);
+    createBuilder(undefined);
 
     term = new CustomTerminal();
 
@@ -92,6 +43,59 @@ $(document).ready(function() {
         }
     });
 });
+
+var createBuilder = function(initval) {
+    builder = new JSONEditor(document.getElementById('build_holder'),{
+        // Enable fetching schemas via ajax
+        ajax: true,
+        
+        startval: initval,
+        // The schema for the editor
+        schema: {
+            type: "object",
+            $ref: "schemas/build.json",
+        },
+        
+        // Require all properties by default
+        required_by_default: false,
+        //show checkbox for non-required opt
+        show_opt_in: true,
+        //set theme
+        theme: 'bootstrap4',
+        //show errors in editor
+        show_errors: "always",
+        //set icon library
+        iconlib: "fontawesome4"
+    });
+}
+
+var createEditor = function(initval) {
+    editor = new JSONEditor(document.getElementById('editor_holder'),{
+        // Enable fetching schemas via ajax
+        ajax: true,
+
+        startval: initval,
+        
+        // The schema for the editor
+        schema: {
+            type: "object",
+            $ref: "schemas/thing_desc.json",
+        },
+        //are fields all required? no
+        required_by_default: false,
+
+        object_layout: "normal",
+        //show checkbox for non-required opt
+        show_opt_in: true,
+        //show errors in editor
+        show_errors: "always",
+        //set theme
+        theme: 'bootstrap4',
+        //set icon library
+        iconlib: "fontawesome4"
+    });
+}
+
 
 /**
  * This function composes the json variables for both thing description and thing options.
