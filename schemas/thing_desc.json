@@ -96,6 +96,10 @@
           {
             "title": "WebSocket",
             "$ref": "#/definitions/td_ws_form"
+          },
+          {
+            "title": "CoAP",
+            "$ref": "#/definitions/td_coap_form"
           }
         ]
       }
@@ -336,6 +340,10 @@
                 {
                   "title": "WebSocket",
                   "$ref": "#/definitions/act_ws_form"
+                },
+                {
+                  "title": "CoAP",
+                  "$ref": "#/definitions/act_coap_form"
                 }
               ]
             }
@@ -877,6 +885,57 @@
         }
       }
     },
+    "td_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Operations supported by the Thing. You can choose one or more of them.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "readallproperties",
+              "writeallproperties",
+              "readmultipleproperties",
+              "writemultipleproperties"
+            ]
+          }
+        }
+      }
+    },
     "prop_http_form": {
       "type": "object",
       "required": [
@@ -997,9 +1056,9 @@
         },
         "href": {
           "type": "string",
-          "default": "ws",
+          "default": "coap",
           "enum": [
-            "ws"
+            "coap"
           ],
           "options": {
             "hidden": true
@@ -1090,6 +1149,47 @@
           "default": "ws",
           "enum": [
             "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "default": "invokeaction",
+          "const": "invokeaction",
+          "options": {
+            "hidden": true
+          }
+        }
+      }
+    },
+    "act_coap_form": {
+      "type": "object",
+      "name": "",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "hidden": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "const": "application/json",
+          "default": "application/json",
+          "options": {
+            "hidden": true
+          }
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
           ],
           "options": {
             "hidden": true

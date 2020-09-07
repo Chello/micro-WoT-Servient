@@ -8,6 +8,10 @@
     {%- do item.update(href='" + urlServer + "/all/properties') -%}
     {%- do global.update({'isHTTP':True}) -%}
     {%- do protocols['td'].append('http') -%}
+    {%- elif item['href'] == 'coap' -%}
+    {%- do item.update(href='" + urlCoap + "/all/properties') -%}
+    {%- do global.update({'isCOAP':True}) -%}
+    {%- do protocols['td'].append('coap') -%}
     {%- endif -%}
 {%- endfor %}    
 {#- EndPoint Properties #}
@@ -23,6 +27,10 @@
         {%- do item.update(href='" + urlServer + "/properties/" + property' + (i -1) | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
         {%- do protocols['properties'][property['name']].append('http') -%}
+        {%- elif item['href'] == 'coap' -%}
+        {%- do item.update(href='" + urlCoap + "/properties/" + property' + (i -1) | string + '_name + "' ) -%}
+        {%- do global.update({'isCOAP':True}) -%}
+        {%- do protocols['properties'][property['name']].append('coap') -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}
@@ -39,6 +47,10 @@
         {%- do item.update(href='" + urlServer + "/actions/" + action' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
         {%- do protocols['actions'][action['name']].append('http') -%}
+        {%- elif item['href'] == 'coap' -%}
+        {%- do item.update(href='" + urlCoap + "/actions/" + action' + i | string + '_name + "' ) -%}
+        {%- do global.update({'isCOAP':True}) -%}
+        {%- do protocols['actions'][action['name']].append('coap') -%}
         {%- endif -%}
     {%- endfor -%}
 {%- endfor %}     
@@ -568,8 +580,10 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- set password = template['password'] -%}
 {%- set protocolServer = 'http' -%}
 {%- set protocolSocket = 'ws' -%}
+{%- set protocolCoap = 'coap' -%}
 {%- set portServer = template['portserver'] -%}
 {%- set portSocket = template['portsocket'] -%}
+{%- set portCoap = template['portcoap'] -%}
 {%- set ipServer = '192.168.1.5' -%}
 {%- set thingName = td['title'].lower() %}
 {%- set urlServer = protocolServer + "://" + ipServer + ":" + portServer + "/" + thingName -%}
@@ -586,6 +600,9 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% if global['isWS'] %}
 #include <embeddedWoT_WebSocket.h>
 {% endif %}
+{% if global['isCOAP'] %}
+#include <embeddedWoT_CoAP.h>
+{% endif %}
 {% if template['libraries'] | length > 0 %}
 {% for lib in template['libraries'] %}
 #include <{{ lib }}>
@@ -600,13 +617,20 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {% endfor %}
 {{ defineVariable('const char*', 'ssid', ssid) }}
 {{ defineVariable('const char*', 'password', password) }}
+{% if global['isHTTP'] %}
 {{ defineVariable('String', 'protocolServer', protocolServer) }}
 {{ defineVariable('int', 'portServer', portServer) }}
 {{ defineVariable('String', 'urlServer', '') }}
-{% if template['numevents'] != 0 or global['isWS'] %}
+{% endif %}
+{% if global['isWS'] %}
 {{ defineVariable('String', 'protocolSocket', protocolSocket) }}
 {{ defineVariable('int', 'portSocket', portSocket) }}
 {{ defineVariable('String', 'urlSocket', '') }}
+{% endif %}
+{% if global['isCOAP'] %}
+{{ defineVariable('String', 'protocolCoap', protocolCoap) }}
+{{ defineVariable('int', 'portCoap', portCoap) }}
+{{ defineVariable('String', 'urlCoap', '') }}
 {% endif %}
 
 {{ defineVariable('String', 'thingName', thingName) }}
@@ -814,6 +838,10 @@ embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 embeddedWoT_WebSocket *wsb;
 {% endif %}
+{% if global['isCOAP'] %}
+//CoAP object handler
+embeddedWoT_CoAP *coap;
+{% endif %}
 
 {% for var in template['globals'] %}
 {% set i = loop.index %}
@@ -886,6 +914,17 @@ const int ws_actions_num = {{ req|length }};
 const String ws_actions_endpoint[ws_actions_num] = { {{ req|join(', ') }} };
 actions_handler ws_actions_callback[ws_actions_num] = { {{ request|join(', ') }} };
 
+//CoAP - actions
+{% set req = [] %}
+{% set request = [] %}
+{% for action in protocols['actions'] if 'coap' in protocols['actions'][action] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties']) | string) %}
+        {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const int coap_actions_num = {{ req|length }};
+const String coap_actions_endpoint[coap_actions_num] = { {{ req|join(', ') }} };
+actions_handler coap_actions_callback[coap_actions_num] = { {{ request|join(', ') }} };
+
 //HTTP - Properties
 {% set req = [] %}
 {% set request = [] %}
@@ -915,6 +954,21 @@ properties_handler http_properties_callback[http_properties_num] = { {{ request|
 const int ws_properties_num = {{ req|length }};
 const String ws_properties_endpoint[ws_properties_num] = { {{ req|join(', ') }} };
 properties_handler ws_properties_callback[ws_properties_num] = { {{ request|join(', ') }} };
+
+//CoAP - Properties
+{% set req = [] %}
+{% set request = [] %}
+{% if 'coap' in protocols['td'] %}
+{% set req = ['req1', 'req2', 'req3'] %}
+{% set request = ['request1', 'request2', 'request3'] %}
+{% endif %}
+{% for property in protocols['properties'] if 'coap' in protocols['properties'][property] %}
+    {% do req.append('req' + (loop.index + 3) | string) %}
+    {% do request.append('request' + (loop.index + 3) | string) %}
+{% endfor %}
+const int coap_properties_num = {{ req|length }};
+const String coap_properties_endpoint[coap_properties_num] = { {{ req|join(', ') }} };
+properties_handler coap_properties_callback[coap_properties_num] = { {{ request|join(', ') }} };
 
 //HTTP - events
 {% set req = [] %}
@@ -1036,8 +1090,12 @@ void setup() {
     wsb->exposeEvents(ws_events_endpoint, ws_events_num);
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     {% endif %}
-    {% if global['isLP'] %}
-    alp = new AsyncLongPoll();
+    {% if global['isCOAP'] %}
+    coap = new embeddedWoT_CoAP(portCoap);
+
+    coap->exposeActions(coap_actions_endpoint, coap_actions_callback, coap_actions_num);
+    coap->exposeProperties(coap_properties_endpoint, coap_properties_callback, coap_properties_num);
+    coap->start();
     {% endif %}
     Serial.println("Server started");
     Serial.println(urlServer);
@@ -1051,9 +1109,13 @@ void loop() {
     {% if 'loop' in template %}
     {{ template['loop'] | replace('{', '\n\t{\n\t') | replace('}', '}\n\t') | replace(';', ';\n\t') }}
     {% endif %}
-    {% if template['numevents'] != 0 or global['isWS'] %}
+    {% if global['isWS'] %}
     // handle Requests via WebSocket
     wsb->loop();
+    {% endif %}
+    {% if global['isCOAP'] %}
+    // handle Requests via CoAP
+    coap->loop();
     {% endif %}
     {# server.handleClient(); #}
 }

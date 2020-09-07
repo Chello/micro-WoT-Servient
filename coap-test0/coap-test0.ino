@@ -4,7 +4,6 @@
 #include <embeddedWoT_WebSocket.h>
 #include <embeddedWoT_CoAP.h>
 
-
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
 String protocolServer = "http";
@@ -13,46 +12,48 @@ String urlServer = "";
 String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
+String protocolCoap = "coap";
 int portCoap = 5683;
+String urlCoap = "";
 
 String thingName = "coap-test0";
 String td = "";
 
 
-// document to handle Events Schemas in WebSocket
-DynamicJsonDocument es_doc(206);
+DynamicJsonDocument es_doc(20);
 // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 DeserializationError err;
 
 int properties_number = 1;
 int objectProperties_number = 0;
-int actions_number = 1;
+int actions_number = 2;
 int events_number = 1;
 
 // Properties
-const char* property1_name = "prop";
-bool property1_value = false;
-
+const char* property0_name = "parks";
+DynamicJsonDocument property0_jdoc(300);
+JsonArray property0_value = property0_jdoc.to<JsonArray>();
 
 // Actions
-const char* action1_name = "act1";
+const char* action1_name = "isParkFree";
 int action1_inputsNumber = 1;
-String action1_schema[1] = {"{\"name\":\"in\",\"type\":\"string\"}"};
+String action1_schema[1] = {"{\"name\":\"rack_num\",\"type\":\"integer\"}"};
+const char* action2_name = "changeParkState";
+int action2_inputsNumber = 1;
+String action2_schema[1] = {"{\"name\":\"park\",\"type\":\"integer\"}"};
 
 // Events
-const char* event1_name = "evt";
-String event1_subscriptionSchema[1] = {"{\"name\":\"sbs\",\"value\":\"true\"}"};
-String event1_dataSchema[1] = {"{\"name\":\"dt\",\"value\":\"false\"}"};
-String event1_cancellationSchema[1] = {"{\"name\":\"cnc\",\"value\":\"false\"}"};
-bool events_subscriptionSchema[1] = {true};
-bool events_dataSchema[1] = {true};
-bool events_cancellationSchema[1] = {true};
+const char* event1_name = "hasParkChanged";
+bool events_subscriptionSchema[1] = {false};
+bool events_dataSchema[1] = {false};
+bool events_cancellationSchema[1] = {false};
 
 // Endpoints
-String req6 = "/" + thingName + "/events/" + event1_name;
+String req7 = "/" + thingName + "/events/" + event1_name;
 String req5 = "/" + thingName + "/actions/" + action1_name;
-String req4 = "/" + thingName + "/properties/" + property1_name;
+String req6 = "/" + thingName + "/actions/" + action2_name;
+String req4 = "/" + thingName + "/properties/" + property0_name;
 String req3 = "/" + thingName + "/all/properties";
 String req2 = "/" + thingName;
 String req1 = "/";
@@ -65,6 +66,12 @@ embeddedWoT_WebSocket *wsb;
 //CoAP object handler
 embeddedWoT_CoAP *coap;
 
+const int GREENLED = 12;
+const int SENSOR0 = 14;
+const int REDLED = 33;
+const int SENSOR1 = 13;
+int sensor0_prev = LOW;
+int sensor1_prev = LOW;
 int i, j, k, n;
 
 String request1();
@@ -72,85 +79,54 @@ String request2();
 String request3();
 String request4();
 String request5(String body);
+String request6(String body);
 
 //HTTP - actions
-const int http_actions_num = 1;
-const String http_actions_endpoint[http_actions_num] = { req5 };
-actions_handler http_actions_callback[http_actions_num] = { request5 };
+const int http_actions_num = 2;
+const String http_actions_endpoint[http_actions_num] = { req5, req6 };
+actions_handler http_actions_callback[http_actions_num] = { request5, request6 };
 
 //WS - actions
-const int ws_actions_num = 1;
-const String ws_actions_endpoint[ws_actions_num] = { req5 };
-actions_handler ws_actions_callback[ws_actions_num] = { request5 };
+const int ws_actions_num = 0;
+const String ws_actions_endpoint[ws_actions_num] = {  };
+actions_handler ws_actions_callback[ws_actions_num] = {  };
+
+//CoAP - actions
+const int coap_actions_num = 0;
+const String coap_actions_endpoint[coap_actions_num] = {  };
+actions_handler coap_actions_callback[coap_actions_num] = {  };
 
 //HTTP - Properties
-const int http_properties_num = 4;
-const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
-properties_handler http_properties_callback[http_properties_num] = { request1, request2, request3, request4 };
+const int http_properties_num = 1;
+const String http_properties_endpoint[http_properties_num] = { req4 };
+properties_handler http_properties_callback[http_properties_num] = { request4 };
 
 //WS - Properties
 const int ws_properties_num = 4;
 const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req4 };
 properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
 
+//CoAP - Properties
+const int coap_properties_num = 3;
+const String coap_properties_endpoint[coap_properties_num] = { req1, req2, req3 };
+properties_handler coap_properties_callback[coap_properties_num] = { request1, request2, request3 };
+
 //HTTP - events
 const int http_events_num = 1;
-const String http_events_endpoint[http_events_num] = { req6 };
+const String http_events_endpoint[http_events_num] = { req7 };
 //WS - events
 const int ws_events_num = 1;
-const String ws_events_endpoint[ws_events_num] = { req5 };
+const String ws_events_endpoint[ws_events_num] = { req7 };
 
 void setup() {
     Serial.begin(115200);
     Serial.println();
 
     // events data
-    int schema_size = 0;
-    JsonArray arr;
-    JsonObject obj;
-
-    schema_size = sizeof(event1_subscriptionSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("subscription");
-    else
-        arr = es_doc[event1_name].createNestedArray("subscription");
-    for(i=0; i<schema_size; i++) {
-        DynamicJsonDocument tmp_doc(70);
-        deserializeJson(tmp_doc, event1_subscriptionSchema[i]);
-        JsonObject obj = arr.createNestedObject();
-        obj["name"] = tmp_doc["name"];
-        obj["value"] = tmp_doc["value"];
-    }
-
-    schema_size = sizeof(event1_dataSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("data");
-    else
-        arr = es_doc[event1_name].createNestedArray("data");
-    for(i=0; i<schema_size; i++) {
-        DynamicJsonDocument tmp_doc(70);
-        deserializeJson(tmp_doc, event1_dataSchema[i]);
-        JsonObject obj = arr.createNestedObject();
-        obj["name"] = tmp_doc["name"];
-        obj["value"] = tmp_doc["value"];
-    }
-
-    schema_size = sizeof(event1_cancellationSchema) / sizeof(String);
-    if(es_doc[event1_name].isNull())
-        arr = es_doc.createNestedObject(event1_name).createNestedArray("cancellation");
-    else
-        arr = es_doc[event1_name].createNestedArray("cancellation");
-    for(i=0; i<schema_size; i++) {
-        DynamicJsonDocument tmp_doc(70);
-        deserializeJson(tmp_doc, event1_cancellationSchema[i]);
-        JsonObject obj = arr.createNestedObject();
-        obj["name"] = tmp_doc["name"];
-        obj["value"] = tmp_doc["value"];
-    }
   
     connection(ssid, password);
     
-    td = "{\"title\":\"coap-test0\",\"id\":\"coap-test0\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"writeallproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readmultipleproperties\",\"writemultipleproperties\"]}],\"links\":[],\"properties\":{\"prop\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property1_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property1_name+"\",\"op\":[\"readproperty\",\"writeproperty\"]}],\"type\":\"boolean\",\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"act1\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"in\":{\"type\":\"string\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"evt\":{\"eventName\":\"evt\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"],\"subprotocol\":\"longpoll\"}],\"actionsTriggered\":[\"act1\"],\"condition\":\"true\",\"subscription\":{\"sbs\":{\"type\":\"boolean\",\"value\":\"true\"}},\"data\":{\"dt\":{\"type\":\"boolean\",\"value\":\"false\"}},\"cancellation\":{\"cnc\":{\"type\":\"boolean\",\"value\":\"false\"}}}}}";
+    td = "{\"title\":\"coap-test0\",\"id\":\"coap-test0\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlCoap+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -165,24 +141,84 @@ void setup() {
     wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
     wsb->exposeEvents(ws_events_endpoint, ws_events_num);
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
-
     coap = new embeddedWoT_CoAP(portCoap);
-    coap->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
-    coap->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
-    coap->start();
 
+    coap->exposeActions(coap_actions_endpoint, coap_actions_callback, coap_actions_num);
+    coap->exposeProperties(coap_properties_endpoint, coap_properties_callback, coap_properties_num);
+    coap->start();
     Serial.println("Server started");
     Serial.println(urlServer);
 
-    
+    property0_value[0] = false;
+	
+property0_value[1] = false;
+	
+property0_value[2] = false;
+	
+// This statement will declare pin 22 as digital output 
+pinMode(GREENLED, OUTPUT);
+	
+pinMode(REDLED, OUTPUT);
+	
+// This statement will declare pin 15 as digital input 
+pinMode(SENSOR0, INPUT);
+	
+pinMode(SENSOR1, INPUT);
+	
+
 }    
 
 void loop() {
-    
+    //get pushbutton state
+int state0 = digitalRead(SENSOR0);
+	
+int state1 = digitalRead(SENSOR1);
+	
+//Set semaphore status
+if (state0 == HIGH && state1 == HIGH) 
+	{
+	
+  digitalWrite(GREENLED, HIGH);
+	
+  digitalWrite(REDLED, LOW);
+	
+}
+	 else 
+	{
+	
+  digitalWrite(GREENLED, LOW);
+	 
+  digitalWrite(REDLED, HIGH);
+	
+}
+	
+
+//Change status of park 0
+if (state0 != sensor0_prev) 
+	{
+	
+  sensor0_prev = state0;
+	
+  emitEvent(changeParkState(0), "hasParkChanged");
+	
+}
+	
+
+//Change status of park 1
+if (state1 != sensor1_prev) 
+	{
+	
+  sensor1_prev = state1;
+	
+  emitEvent(changeParkState(1), "hasParkChanged");
+	
+}
+	
     // handle Requests via WebSocket
     wsb->loop();
+    // handle Requests via CoAP
     coap->loop();
-    }
+}
 
 void connection(const char* ssid, const char* password) {
     WiFi.begin(ssid, password);
@@ -219,12 +255,12 @@ String request2() {
 }
 
 String request3() {
-    DynamicJsonDocument tmp(220);
+    DynamicJsonDocument tmp(2020);
     String resp = "";
     JsonObject obj = tmp.createNestedObject();
 
     Serial.println("\nGET all properties");
-    obj[property1_name] = property1_value;
+    obj[property0_name] = property0_value;
     serializeJson(obj, resp);
 
     return resp;
@@ -232,9 +268,11 @@ String request3() {
 
 String request4() {
     String resp = "";
+    String tmp = "";
 
-    Serial.printf("\nGET %s value\n", property1_name);
-    resp = "{\"" + (String) property1_name + "\":" + property1_value + "}";
+    Serial.printf("\nGET %s value\n", property0_name);
+    serializeJson(property0_value, tmp);
+    resp = "{\"" + (String) property0_name + "\":" + tmp + "}";
     
     return resp;
 }
@@ -253,21 +291,21 @@ String request5(String body) {
         return resp;
     }
     else {
-        if(resp_doc["in"].isNull())
+        if(resp_doc["rack_num"].isNull())
             resp = "InvalidInput";
         else {
             bool validInput = true;
             String value = "";
 
             String action1_input[1] = {};    
-            String action1_input1_value = "";
+            int action1_input1_value = 0;
 
             i = 0;
             while(validInput and i<action1_inputsNumber) {
                 switch(i) {
                     case 0: {
                         value = "";
-                        serializeJson(resp_doc["in"], value);
+                        serializeJson(resp_doc["rack_num"], value);
                         action1_input[0] = value;
                         validInput = handleInputType(value,action1_schema[0]);
                     }
@@ -279,26 +317,65 @@ String request5(String body) {
 
             if(validInput) {
 
-                action1_input1_value = action1_input[0];
+                action1_input1_value = action1_input[0].toInt();
 
-                String output = act1(action1_input1_value);    
+                bool output = isParkFree(action1_input1_value);    
+                resp = (String) output;
+                String ws_msg = "";
+            }
+            else
+                resp = "InvalidInput";
+        }
+    }
+    return resp;
+}
+String request6(String body) {
+    DynamicJsonDocument resp_doc(200);
+    String resp = "";
+
+    Serial.printf("\nPOST invokeaction %s\n", action2_name);
+    Serial.printf("Body received: %s\n", body.c_str());
+    
+    err = deserializeJson(resp_doc, body);
+    if(err) {
+        Serial.printf("deserializeJson() failed with code %s", err.c_str());
+        resp = err.c_str();
+        return resp;
+    }
+    else {
+        if(resp_doc["park"].isNull())
+            resp = "InvalidInput";
+        else {
+            bool validInput = true;
+            String value = "";
+
+            String action2_input[1] = {};    
+            int action2_input1_value = 0;
+
+            i = 0;
+            while(validInput and i<action2_inputsNumber) {
+                switch(i) {
+                    case 0: {
+                        value = "";
+                        serializeJson(resp_doc["park"], value);
+                        action2_input[0] = value;
+                        validInput = handleInputType(value,action2_schema[0]);
+                    }
+                    break;
+
+                }
+                i++;
+            }    
+
+            if(validInput) {
+
+                action2_input1_value = action2_input[0].toInt();
+
+                String output = changeParkState(action2_input1_value);    
                 resp = (String) output;
                 String ws_msg = "";
 
-                // evt condition
-                String t_name = "";
-                DynamicJsonDocument tmp_doc(68);
-                JsonObject tmp_obj = tmp_doc.createNestedObject();
-
-                if(events_dataSchema[1]) {
-                    for(i=0; i<es_doc[event1_name]["data"].size(); i++) {
-                        t_name = "";
-                        serializeJson(es_doc[event1_name]["data"][i]["name"], t_name);
-                        t_name.replace("\"", "");
-                        tmp_obj[t_name] = es_doc[event1_name]["data"][i]["value"];
-                    }
-                    serializeJson(tmp_obj, ws_msg);
-                }
+                // hasParkChanged condition
                 if(true) {
                     hlp->sendLongPollTXT(ws_msg, http_events_endpoint[0]);
                     wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0]);
@@ -325,17 +402,49 @@ bool handleInputType(String value, String schema) {
     if(value[value.length()-1] == '"')    
         value.remove(value.length()-1);
     
-    if(type.equals("string")) {
-        if(value.equalsIgnoreCase("null")) 
-            validInput = false;
-    
+		if(type.equals("integer") || type.equals("number")) {
+        int dot_count = 0;
+        i = 0;
+        while(validInput && i<value.length()) {
+            if(!isDigit(value[i])) 
+                validInput = false;
+            else if(value[i] == '.')
+                if(i == 0 || i == value.length()-1 || dot_count > 1)
+                    validInput = false;
+                else 
+                    dot_count++;    
+            i++;          
+        } 
     }
     return validInput;
 }
 
+void emitEvent(String txt, String event_endpoint) {
+    String endpoint = "/" + thingName + "/events/" + event_endpoint;
+    hlp->sendLongPollTXT(txt, endpoint);
+    wsb->sendWebSocketTXT(txt, endpoint);
+}
+
 // Action functions
-String act1(String in) {
-	return "act1 sent " + in;
+bool isParkFree(int rack_num) {
+	return property0_value[rack_num].as<bool>();
+	
+}
+
+String changeParkState(int park) {
+	char s[25];
+	
+property0_value[park] = !property0_value[park];
+	
+sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
+	
+// s = "Changed park 1 to ";
+	
+// s += (property0_value[park]) ? "occupied" : "free";
+	
+Serial.println(s);
+	
+return s;
 	
 }
 
