@@ -12,12 +12,12 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "bike-rack";
+String thingName = "coap-test";
 String td = "";
 
 
 DynamicJsonDocument es_doc(20);
-// Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
+    // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 DeserializationError err;
 
@@ -85,6 +85,11 @@ const int ws_actions_num = 0;
 const String ws_actions_endpoint[ws_actions_num] = {  };
 actions_handler ws_actions_callback[ws_actions_num] = {  };
 
+//CoAP - actions
+const int coap_actions_num = 0;
+const String coap_actions_endpoint[coap_actions_num] = {  };
+actions_handler coap_actions_callback[coap_actions_num] = {  };
+
 //HTTP - Properties
 const int http_properties_num = 4;
 const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
@@ -94,6 +99,11 @@ properties_handler http_properties_callback[http_properties_num] = { request1, r
 const int ws_properties_num = 4;
 const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req4 };
 properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
+
+//CoAP - Properties
+const int coap_properties_num = 0;
+const String coap_properties_endpoint[coap_properties_num] = {  };
+properties_handler coap_properties_callback[coap_properties_num] = {  };
 
 //HTTP - events
 const int http_events_num = 1;
@@ -110,7 +120,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"safe\":true,\"idempotent\":false,\"output\":{\"type\":\"boolean\"}},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"coap-test\",\"id\":\"coap-test\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -132,7 +142,7 @@ void setup() {
 	
 property0_value[1] = false;
 	
-// property0_value[2] = false;
+property0_value[2] = false;
 	
 // This statement will declare pin 22 as digital output 
 pinMode(GREENLED, OUTPUT);
@@ -409,21 +419,19 @@ bool isParkFree(int rack_num) {
 }
 
 String changeParkState(int park) {
-	// char s[25];
+	char s[25];
 	
 property0_value[park] = !property0_value[park];
 	
-// sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
+sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
 	
-// // s = "Changed park 1 to ";
+// s = "Changed park 1 to ";
 	
-// // s += (property0_value[park]) ? "occupied" : "free";
+// s += (property0_value[park]) ? "occupied" : "free";
 	
-// Serial.println(s);
+Serial.println(s);
 	
-// return s;
-	
-return request4();
+return s;
 	
 }
 

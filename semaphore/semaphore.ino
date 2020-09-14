@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
 #include <embeddedWoT_WebSocket.h>
+#include <HTTPClient.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
@@ -12,7 +13,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "bike-rack";
+String thingName = "semaphore";
 String td = "";
 
 
@@ -23,21 +24,17 @@ DeserializationError err;
 
 int properties_number = 1;
 int objectProperties_number = 0;
-int actions_number = 2;
+int actions_number = 1;
 int events_number = 1;
 
 // Properties
-const char* property0_name = "parks";
-DynamicJsonDocument property0_jdoc(300);
-JsonArray property0_value = property0_jdoc.to<JsonArray>();
+const char* property0_name = "semaphore";
+bool property0_value = false;
 
 // Actions
-const char* action1_name = "isParkFree";
+const char* action1_name = "statusChanged";
 int action1_inputsNumber = 1;
-String action1_schema[1] = {"{\"name\":\"rack_num\",\"type\":\"integer\"}"};
-const char* action2_name = "changeParkState";
-int action2_inputsNumber = 1;
-String action2_schema[1] = {"{\"name\":\"park\",\"type\":\"integer\"}"};
+String action1_schema[1] = {"{\"name\":\"resp\",\"type\":\"string\"}"};
 
 // Events
 const char* event1_name = "hasParkChanged";
@@ -46,9 +43,8 @@ bool events_dataSchema[1] = {false};
 bool events_cancellationSchema[1] = {false};
 
 // Endpoints
-String req7 = "/" + thingName + "/events/" + event1_name;
+String req6 = "/" + thingName + "/events/" + event1_name;
 String req5 = "/" + thingName + "/actions/" + action1_name;
-String req6 = "/" + thingName + "/actions/" + action2_name;
 String req4 = "/" + thingName + "/properties/" + property0_name;
 String req3 = "/" + thingName + "/all/properties";
 String req2 = "/" + thingName;
@@ -61,11 +57,8 @@ embeddedWoT_HTTP_LongPoll *hlp;
 embeddedWoT_WebSocket *wsb;
 
 const int GREENLED = 12;
-const int SENSOR0 = 14;
 const int REDLED = 33;
-const int SENSOR1 = 13;
-int sensor0_prev = LOW;
-int sensor1_prev = LOW;
+const char* HTTPUrl = "http://192.168.1.106/bike-rack/events/hasParkChanged";
 int i, j, k, n;
 
 String request1();
@@ -73,12 +66,11 @@ String request2();
 String request3();
 String request4();
 String request5(String body);
-String request6(String body);
 
 //HTTP - actions
-const int http_actions_num = 2;
-const String http_actions_endpoint[http_actions_num] = { req5, req6 };
-actions_handler http_actions_callback[http_actions_num] = { request5, request6 };
+const int http_actions_num = 1;
+const String http_actions_endpoint[http_actions_num] = { req5 };
+actions_handler http_actions_callback[http_actions_num] = { request5 };
 
 //WS - actions
 const int ws_actions_num = 0;
@@ -97,10 +89,10 @@ properties_handler ws_properties_callback[ws_properties_num] = { request1, reque
 
 //HTTP - events
 const int http_events_num = 1;
-const String http_events_endpoint[http_events_num] = { req7 };
+const String http_events_endpoint[http_events_num] = { req6 };
 //WS - events
 const int ws_events_num = 1;
-const String ws_events_endpoint[ws_events_num] = { req7 };
+const String ws_events_endpoint[ws_events_num] = { req6 };
 
 void setup() {
     Serial.begin(115200);
@@ -110,7 +102,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"safe\":true,\"idempotent\":false,\"output\":{\"type\":\"boolean\"}},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"semaphore\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"resp\":{\"type\":\"string\"}},\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -128,9 +120,9 @@ void setup() {
     Serial.println("Server started");
     Serial.println(urlServer);
 
-    property0_value[0] = false;
+    // property0_value[0] = false;
 	
-property0_value[1] = false;
+// property0_value[1] = false;
 	
 // property0_value[2] = false;
 	
@@ -140,58 +132,74 @@ pinMode(GREENLED, OUTPUT);
 pinMode(REDLED, OUTPUT);
 	
 // This statement will declare pin 15 as digital input 
-pinMode(SENSOR0, INPUT);
+// pinMode(SENSOR0, INPUT);
 	
-pinMode(SENSOR1, INPUT);
+// pinMode(SENSOR1, INPUT);
 	
 
 }    
 
 void loop() {
-    //get pushbutton state
-int state0 = digitalRead(SENSOR0);
+    HTTPClient http1;
 	
-int state1 = digitalRead(SENSOR1);
+
+http1.begin(HTTPUrl);
 	
-//Set semaphore status
-if (state0 == HIGH && state1 == HIGH) 
+
+int httpResponseCode = http1.GET();
+	
+if (httpResponseCode>0) 
 	{
 	
-  digitalWrite(GREENLED, HIGH);
+  String payload = http1.getString();
 	
-  digitalWrite(REDLED, LOW);
+  
+  DynamicJsonDocument doc(200);
 	
-}
+  Serial.println(payload);
+	
+  deserializeJson(doc, payload);
+	
+  // extract the values
+  JsonObject obj = doc.as<JsonObject>();
+	
+  JsonArray array = obj["parks"];
+	
+  bool tot = true;
+	
+  for(JsonVariant v : array) 
+	{
+	
+    bool vas = v.as<bool>();
+	
+    tot &= vas;
+	
+  }
+	
+  if (tot) 
+	{
+	
+    Serial.println("Rosso");
+	
+    digitalWrite(GREENLED, LOW);
+	
+    digitalWrite(REDLED, HIGH);
+	
+  }
 	 else 
 	{
 	
-  digitalWrite(GREENLED, LOW);
-	 
-  digitalWrite(REDLED, HIGH);
+    Serial.println("Verde");
+	
+    digitalWrite(GREENLED, HIGH);
+	
+    digitalWrite(REDLED, LOW);
+	
+  }
 	
 }
 	
-
-//Change status of park 0
-if (state0 != sensor0_prev) 
-	{
-	
-  sensor0_prev = state0;
-	
-  emitEvent(changeParkState(0), "hasParkChanged");
-	
-}
-	
-
-//Change status of park 1
-if (state1 != sensor1_prev) 
-	{
-	
-  sensor1_prev = state1;
-	
-  emitEvent(changeParkState(1), "hasParkChanged");
-	
-}
+// http1.end();
 	
     // handle Requests via WebSocket
     wsb->loop();
@@ -232,7 +240,7 @@ String request2() {
 }
 
 String request3() {
-    DynamicJsonDocument tmp(2020);
+    DynamicJsonDocument tmp(2220);
     String resp = "";
     JsonObject obj = tmp.createNestedObject();
 
@@ -245,11 +253,9 @@ String request3() {
 
 String request4() {
     String resp = "";
-    String tmp = "";
 
     Serial.printf("\nGET %s value\n", property0_name);
-    serializeJson(property0_value, tmp);
-    resp = "{\"" + (String) property0_name + "\":" + tmp + "}";
+    resp = "{\"" + (String) property0_name + "\":" + property0_value + "}";
     
     return resp;
 }
@@ -268,21 +274,21 @@ String request5(String body) {
         return resp;
     }
     else {
-        if(resp_doc["rack_num"].isNull())
+        if(resp_doc["resp"].isNull())
             resp = "InvalidInput";
         else {
             bool validInput = true;
             String value = "";
 
             String action1_input[1] = {};    
-            int action1_input1_value = 0;
+            String action1_input1_value = "";
 
             i = 0;
             while(validInput and i<action1_inputsNumber) {
                 switch(i) {
                     case 0: {
                         value = "";
-                        serializeJson(resp_doc["rack_num"], value);
+                        serializeJson(resp_doc["resp"], value);
                         action1_input[0] = value;
                         validInput = handleInputType(value,action1_schema[0]);
                     }
@@ -294,62 +300,10 @@ String request5(String body) {
 
             if(validInput) {
 
-                action1_input1_value = action1_input[0].toInt();
+                action1_input1_value = action1_input[0];
 
-                bool output = isParkFree(action1_input1_value);    
-                resp = (String) output;
-                String ws_msg = "";
-            }
-            else
-                resp = "InvalidInput";
-        }
-    }
-    return resp;
-}
-String request6(String body) {
-    DynamicJsonDocument resp_doc(200);
-    String resp = "";
-
-    Serial.printf("\nPOST invokeaction %s\n", action2_name);
-    Serial.printf("Body received: %s\n", body.c_str());
-    
-    err = deserializeJson(resp_doc, body);
-    if(err) {
-        Serial.printf("deserializeJson() failed with code %s", err.c_str());
-        resp = err.c_str();
-        return resp;
-    }
-    else {
-        if(resp_doc["park"].isNull())
-            resp = "InvalidInput";
-        else {
-            bool validInput = true;
-            String value = "";
-
-            String action2_input[1] = {};    
-            int action2_input1_value = 0;
-
-            i = 0;
-            while(validInput and i<action2_inputsNumber) {
-                switch(i) {
-                    case 0: {
-                        value = "";
-                        serializeJson(resp_doc["park"], value);
-                        action2_input[0] = value;
-                        validInput = handleInputType(value,action2_schema[0]);
-                    }
-                    break;
-
-                }
-                i++;
-            }    
-
-            if(validInput) {
-
-                action2_input1_value = action2_input[0].toInt();
-
-                String output = changeParkState(action2_input1_value);    
-                resp = (String) output;
+                statusChanged(action1_input1_value); 
+                resp = "";
                 String ws_msg = "";
 
                 // hasParkChanged condition
@@ -379,19 +333,10 @@ bool handleInputType(String value, String schema) {
     if(value[value.length()-1] == '"')    
         value.remove(value.length()-1);
     
-		if(type.equals("integer") || type.equals("number")) {
-        int dot_count = 0;
-        i = 0;
-        while(validInput && i<value.length()) {
-            if(!isDigit(value[i])) 
-                validInput = false;
-            else if(value[i] == '.')
-                if(i == 0 || i == value.length()-1 || dot_count > 1)
-                    validInput = false;
-                else 
-                    dot_count++;    
-            i++;          
-        } 
+    if(type.equals("string")) {
+        if(value.equalsIgnoreCase("null")) 
+            validInput = false;
+    
     }
     return validInput;
 }
@@ -403,27 +348,8 @@ void emitEvent(String txt, String event_endpoint) {
 }
 
 // Action functions
-bool isParkFree(int rack_num) {
-	return property0_value[rack_num].as<bool>();
-	
-}
-
-String changeParkState(int park) {
-	// char s[25];
-	
-property0_value[park] = !property0_value[park];
-	
-// sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
-	
-// // s = "Changed park 1 to ";
-	
-// // s += (property0_value[park]) ? "occupied" : "free";
-	
-// Serial.println(s);
-	
-// return s;
-	
-return request4();
+void statusChanged(String resp) {
+	return;
 	
 }
 

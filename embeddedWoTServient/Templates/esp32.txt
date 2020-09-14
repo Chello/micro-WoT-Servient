@@ -818,7 +818,7 @@ embeddedWoT_WebSocket *wsb;
 {% for var in template['globals'] %}
 {% set i = loop.index %}
 {% if not(var['isArray']) %}
-{% if 'value' in var %}
+{% if 'value' in var and var['value'] != '' %}
 {{ defineVariable(var['type'], var['name'], var['value']) }}
 {% else %}
 {{ defineVariable(var['type'], var['name'], 'iv') }}
@@ -1133,7 +1133,7 @@ String request{{ i+3 }}() {
     {{ setVariable(False, 'serializeJson(property' + (i -1) | string + '_value, tmp)') }}
     {{ setVariable(True, 'resp', '{\\"" + (String) property' + (i -1) | string + '_name + "\\":" + tmp + "}') }}
     {% else %}
-    {{ setVariable(True, 'resp', '{\\"" + (String) property' + (i -1) | string + '_name + "\\":" + property' + i | string + '_value + "}') }}
+    {{ setVariable(True, 'resp', '{\\"" + (String) property' + (i -1) | string + '_name + "\\":" + property' + (i -1) | string + '_value + "}') }}
     {% endif %}
     
     return resp;
