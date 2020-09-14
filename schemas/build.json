@@ -133,6 +133,6 @@
       },
       "title": "Additional loop() code",
       "description": "Code will be added to void loop() function"
-    }
+   }
   }
 }

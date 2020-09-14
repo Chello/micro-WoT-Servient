@@ -5,3 +5,5 @@ tmp
 libs_old
 */*\.esp32\.esp32.*
 *vscode*
+coap-test*
+lib
