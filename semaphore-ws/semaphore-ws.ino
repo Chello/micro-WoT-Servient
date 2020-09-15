@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
 #include <embeddedWoT_WebSocket.h>
-#include <HTTPClient.h>
+#include <WebSocketsClient.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
@@ -33,8 +33,8 @@ bool property0_value = false;
 
 // Actions
 const char* action1_name = "statusChanged";
-int action1_inputsNumber = 1;
-String action1_schema[1] = {"{\"name\":\"resp\",\"type\":\"string\"}"};
+int action1_inputsNumber = 0;
+String action1_schema[0] = {};
 
 // Events
 const char* event1_name = "hasParkChanged";
@@ -59,6 +59,7 @@ embeddedWoT_WebSocket *wsb;
 const int GREENLED = 12;
 const int REDLED = 33;
 const char* HTTPUrl = "http://192.168.1.106/bike-rack/events/hasParkChanged";
+WebSocketsClient webSocket;
 int i, j, k, n;
 
 String request1();
@@ -68,19 +69,19 @@ String request4();
 String request5(String body);
 
 //HTTP - actions
-const int http_actions_num = 0;
-const String http_actions_endpoint[http_actions_num] = {  };
-actions_handler http_actions_callback[http_actions_num] = {  };
+const int http_actions_num = 1;
+const String http_actions_endpoint[http_actions_num] = { req5 };
+actions_handler http_actions_callback[http_actions_num] = { request5 };
 
 //WS - actions
-const int ws_actions_num = 1;
-const String ws_actions_endpoint[ws_actions_num] = { req5 };
-actions_handler ws_actions_callback[ws_actions_num] = { request5 };
+const int ws_actions_num = 0;
+const String ws_actions_endpoint[ws_actions_num] = {  };
+actions_handler ws_actions_callback[ws_actions_num] = {  };
 
 //HTTP - Properties
-const int http_properties_num = 1;
-const String http_properties_endpoint[http_properties_num] = { req4 };
-properties_handler http_properties_callback[http_properties_num] = { request4 };
+const int http_properties_num = 4;
+const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
+properties_handler http_properties_callback[http_properties_num] = { request1, request2, request3, request4 };
 
 //WS - Properties
 const int ws_properties_num = 4;
@@ -102,7 +103,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"semaphore-ws\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"resp\":{\"type\":\"string\"}},\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"semaphore-ws\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -121,110 +122,128 @@ void setup() {
     Serial.println(urlServer);
 
     // property0_value[0] = false;
-	
 // property0_value[1] = false;
-	
 // property0_value[2] = false;
-	
 // This statement will declare pin 22 as digital output 
 pinMode(GREENLED, OUTPUT);
-	
 pinMode(REDLED, OUTPUT);
-	
 // This statement will declare pin 15 as digital input 
 // pinMode(SENSOR0, INPUT);
-	
 // pinMode(SENSOR1, INPUT);
-	
 
+// server address, port and URL
+	webSocket.begin("192.168.1.106", 81, "/bike-rack/events/hasParkChanged");
+
+	// event handler
+	webSocket.onEvent(webSocketEvent);
+
+	// use HTTP Basic Authorization this is optional remove if not needed
+//	webSocket.setAuthorization("user", "Password");
+
+	// try ever 5000 again if connection has failed
+	webSocket.setReconnectInterval(5000);
 }    
 
-void loop() {
-    Serial.println("Speriamo0");
-	
-HTTPClient http;
-	
-Serial.println("Speriamo0.1");
-	
-
-http.begin(HTTPUrl);
-	
-Serial.println("Speriamo0.2");
-	
-
-int httpResponseCode = http.GET();
-	
-Serial.println("Speriamo1");
-	
-if (httpResponseCode>0) 
-	{
-	
-  String payload = http.getString();
-	
-  
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   DynamicJsonDocument doc(600);
-	
-  // http.end();
-	
-  Serial.println("Speriamo2");
-	
-  Serial.println(payload);
-	
-  deserializeJson(doc, payload);
-	
-  // extract the values
-  JsonObject obj = doc.as<JsonObject>();
-	
-  JsonArray array = obj["parks"];
-	
-  bool tot = true;
-	
-  for(JsonVariant v : array) 
-	{
-	
-    Serial.println("Speriamo3-4");
-	
-    bool vas = v.as<bool>();
-	
-    tot = tot && vas;
-	
+  JsonObject obj;
+  JsonArray array;
+  JsonVariant v;
+  DeserializationError err;
+  bool vas, tot;
+  
+  switch(type) {
+    case WStype_DISCONNECTED:
+      Serial.printf("[WSc] Disconnected!\n");
+      break;
+     case WStype_CONNECTED:
+      Serial.printf("[WSc] Connected to url: %s\n", payload);
+
+      // send message to server when Connected
+      webSocket.sendTXT("{}");
+      break;
+    case WStype_TEXT:
+      Serial.printf("[WSc] get text: %s\n", payload);
+      err = deserializeJson(doc, payload);
+      // extract the values
+      if (!err) {
+        obj = doc.as<JsonObject>();
+        array = obj["parks"];
+        tot = true;
+        for(v : array) {
+          vas = v.as<bool>();
+          tot = tot && vas;
+        }
+      } else tot = false;
+      if (tot) {
+        Serial.println("Rosso");
+        digitalWrite(GREENLED, LOW);
+        digitalWrite(REDLED, HIGH);   
+      } else {
+        Serial.println("Verde");
+        digitalWrite(GREENLED, HIGH);
+        digitalWrite(REDLED, LOW);
+      }
+
+      // send message to server
+      // webSocket.sendTXT("message here");
+      break;
+    case WStype_BIN:
+    case WStype_ERROR:      
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+      break;
+    }
   }
-	
-  Serial.println("Speriamo5");
-	
-  if (tot) 
-	{
-	
-    Serial.println("Rosso");
-	
-    digitalWrite(GREENLED, LOW);
-	
-    digitalWrite(REDLED, HIGH);
-	   
-  }
-	 else 
-	{
-	
-    Serial.println("Verde");
-	
-    digitalWrite(GREENLED, HIGH);
-	
-    digitalWrite(REDLED, LOW);
-	
-  }
-	
-  Serial.println("Speriamo6");
-	
-  doc.clear();
-	
-}
-	
-Serial.println("Speriamo7");
-	
-// http.end();
-	
-Serial.println("Speriamo8");
-	
+
+void loop() {
+    webSocket.loop();
+
+
+// Serial.println("Speriamo0");
+// HTTPClient http;
+// Serial.println("Speriamo0.1");
+
+// http.begin(HTTPUrl);
+// Serial.println("Speriamo0.2");
+
+// int httpResponseCode = http.GET();
+// Serial.println("Speriamo1");
+// if (httpResponseCode>0) {
+//   String payload = http.getString();
+  
+//   DynamicJsonDocument doc(600);
+//   // http.end();
+//   Serial.println("Speriamo2");
+//   Serial.println(payload);
+//   deserializeJson(doc, payload);
+//   // extract the values
+//   JsonObject obj = doc.as<JsonObject>();
+//   JsonArray array = obj["parks"];
+//   bool tot = true;
+//   for(JsonVariant v : array) {
+//     Serial.println("Speriamo3-4");
+//     bool vas = v.as<bool>();
+//     tot = tot && vas;
+//   }
+//   Serial.println("Speriamo5");
+//   if (tot) {
+//     Serial.println("Rosso");
+//     digitalWrite(GREENLED, LOW);
+//     digitalWrite(REDLED, HIGH);   
+//   } else {
+//     Serial.println("Verde");
+//     digitalWrite(GREENLED, HIGH);
+//     digitalWrite(REDLED, LOW);
+//   }
+//   Serial.println("Speriamo6");
+//   doc.clear();
+// }
+// Serial.println("Speriamo7");
+// // http.end();
+// Serial.println("Speriamo8");
     // handle Requests via WebSocket
     wsb->loop();
 }
@@ -286,7 +305,7 @@ String request4() {
 }
 
 String request5(String body) {
-    DynamicJsonDocument resp_doc(200);
+    DynamicJsonDocument resp_doc(20);
     String resp = "";
 
     Serial.printf("\nPOST invokeaction %s\n", action1_name);
@@ -299,45 +318,13 @@ String request5(String body) {
         return resp;
     }
     else {
-        if(resp_doc["resp"].isNull())
-            resp = "InvalidInput";
-        else {
-            bool validInput = true;
-            String value = "";
-
-            String action1_input[1] = {};    
-            String action1_input1_value = "";
-
-            i = 0;
-            while(validInput and i<action1_inputsNumber) {
-                switch(i) {
-                    case 0: {
-                        value = "";
-                        serializeJson(resp_doc["resp"], value);
-                        action1_input[0] = value;
-                        validInput = handleInputType(value,action1_schema[0]);
-                    }
-                    break;
-
-                }
-                i++;
-            }    
-
-            if(validInput) {
-
-                action1_input1_value = action1_input[0];
-
-                statusChanged(action1_input1_value); 
-                resp = "";
-                String ws_msg = "";
-
-                // hasParkChanged condition
-                if(true) {
-                    wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0]);
-                }
-            }
-            else
-                resp = "InvalidInput";
+        statusChanged(); 
+        resp = "";
+        // hasParkChanged condition
+        String ws_msg = "";
+         if(true) {
+            wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0]);
+            
         }
     }
     return resp;
@@ -345,7 +332,7 @@ String request5(String body) {
 
 // handle Input Types
 bool handleInputType(String value, String schema) {   
-	DynamicJsonDocument schema_doc(200);
+	DynamicJsonDocument schema_doc(20);
     bool validInput = true;
 
     deserializeJson(schema_doc, schema);
@@ -357,11 +344,6 @@ bool handleInputType(String value, String schema) {
     if(value[value.length()-1] == '"')    
         value.remove(value.length()-1);
     
-    if(type.equals("string")) {
-        if(value.equalsIgnoreCase("null")) 
-            validInput = false;
-    
-    }
     return validInput;
 }
 
@@ -372,7 +354,7 @@ void emitEvent(String txt, String event_endpoint) {
 }
 
 // Action functions
-void statusChanged(String resp) {
+void statusChanged() {
 	return;
 	
 }

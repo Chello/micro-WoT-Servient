@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
 #include <embeddedWoT_WebSocket.h>
-#include <HTTPClient.h>
+#include <ArduinoHttpClient.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
@@ -58,7 +58,9 @@ embeddedWoT_WebSocket *wsb;
 
 const int GREENLED = 12;
 const int REDLED = 33;
-const char* HTTPUrl = "http://192.168.1.106/bike-rack/events/hasParkChanged";
+const char* HTTPUrl = "192.168.1.106";
+WiFiClient wifi;
+HttpClient client = HttpClient(wifi, HTTPUrl, 80);
 int i, j, k, n;
 
 String request1();
@@ -140,91 +142,45 @@ pinMode(REDLED, OUTPUT);
 }    
 
 void loop() {
-    Serial.println("Speriamo0");
+    // HttpClient client = HttpClient(wifi, HTTPUrl, 80);
 	
-HTTPClient http;
+Serial.println("Speriamo-1");
 	
-Serial.println("Speriamo0.1");
+// client.beginRequest();
 	
-
-http.begin(HTTPUrl);
+Serial.println("Speriamo0");
 	
-Serial.println("Speriamo0.2");
-	
-
-int httpResponseCode = http.GET();
+client.get("/");
 	
 Serial.println("Speriamo1");
 	
-if (httpResponseCode>0) 
-	{
+client.sendBasicAuth("username", "password");
+	 // send the username and password for authentication
+client.endRequest();
 	
-  String payload = http.getString();
+Serial.println("Speriamo2");
 	
-  
-  DynamicJsonDocument doc(600);
+// read the status code and body of the response
+int statusCode = client.responseStatusCode();
 	
-  // http.end();
+Serial.println("Speriamo3");
 	
-  Serial.println("Speriamo2");
+String response = client.responseBody();
 	
-  Serial.println(payload);
+
+Serial.print("Status code: ");
 	
-  deserializeJson(doc, payload);
+Serial.println(statusCode);
 	
-  // extract the values
-  JsonObject obj = doc.as<JsonObject>();
+Serial.print("Response: ");
 	
-  JsonArray array = obj["parks"];
+Serial.println(response);
 	
-  bool tot = true;
+Serial.println("Wait five seconds");
 	
-  for(JsonVariant v : array) 
-	{
+delay(5000);
 	
-    Serial.println("Speriamo3-4");
-	
-    bool vas = v.as<bool>();
-	
-    tot = tot && vas;
-	
-  }
-	
-  Serial.println("Speriamo5");
-	
-  if (tot) 
-	{
-	
-    Serial.println("Rosso");
-	
-    digitalWrite(GREENLED, LOW);
-	
-    digitalWrite(REDLED, HIGH);
-	   
-  }
-	 else 
-	{
-	
-    Serial.println("Verde");
-	
-    digitalWrite(GREENLED, HIGH);
-	
-    digitalWrite(REDLED, LOW);
-	
-  }
-	
-  Serial.println("Speriamo6");
-	
-  doc.clear();
-	
-}
-	
-Serial.println("Speriamo7");
-	
-// http.end();
-	
-Serial.println("Speriamo8");
-	
+
     // handle Requests via WebSocket
     wsb->loop();
 }

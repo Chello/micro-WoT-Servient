@@ -1043,13 +1043,17 @@ void setup() {
     Serial.println(urlServer);
     {% if 'setup' in template %}
 
-    {{ template['setup'] | replace('{', '\n\t{\n\t') | replace('}', '}\n\t') | replace(';', ';\n\t') }}
+    {{ template['setup'] }}
     {% endif %}
 }    
 
+{% if 'code' in template %}
+{{ template['code'] }}
+{% endif %}
+
 void loop() {
     {% if 'loop' in template %}
-    {{ template['loop'] | replace('{', '\n\t{\n\t') | replace('}', '}\n\t') | replace(';', ';\n\t') }}
+    {{ template['loop'] }}
     {% endif %}
     {% if template['numevents'] != 0 or global['isWS'] %}
     // handle Requests via WebSocket
