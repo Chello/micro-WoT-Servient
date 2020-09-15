@@ -12,7 +12,8 @@
     "constants",
     "globals",
     "setup",
-    "loop"
+    "loop",
+    "code"
   ],
   "options": {
     "disable_edit_json": true,
@@ -133,6 +134,20 @@
       },
       "title": "Additional loop() code",
       "description": "Code will be added to void loop() function"
-   }
+    },
+    "code": {
+      "type": "string",
+      "format": "c++",
+      "options": {
+        "ace": {
+          "theme": "ace/theme/twilight",
+          "tabSize": 2,
+          "useSoftTabs": true,
+          "wrap": true
+        }
+      },
+      "title": "Additional code",
+      "description": "Code will be added to the project"
+    }
   }
 }

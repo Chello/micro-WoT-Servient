@@ -60,9 +60,9 @@ embeddedWoT_HTTP_LongPoll *hlp;
 //WebSocket object handler
 embeddedWoT_WebSocket *wsb;
 
-const int GREENLED = 33;
+const int GREENLED = 12;
 const int SENSOR0 = 14;
-const int REDLED = 12;
+const int REDLED = 33;
 const int SENSOR1 = 13;
 int sensor0_prev = LOW;
 int sensor1_prev = LOW;
@@ -99,8 +99,8 @@ properties_handler ws_properties_callback[ws_properties_num] = { request1, reque
 const int http_events_num = 1;
 const String http_events_endpoint[http_events_num] = { req7 };
 //WS - events
-const int ws_events_num = 0;
-const String ws_events_endpoint[ws_events_num] = {  };
+const int ws_events_num = 1;
+const String ws_events_endpoint[ws_events_num] = { req7 };
 
 void setup() {
     Serial.begin(115200);
@@ -110,7 +110,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"safe\":true,\"idempotent\":false,\"output\":{\"type\":\"boolean\"}},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -132,7 +132,7 @@ void setup() {
 	
 property0_value[1] = false;
 	
-property0_value[2] = false;
+// property0_value[2] = false;
 	
 // This statement will declare pin 22 as digital output 
 pinMode(GREENLED, OUTPUT);
@@ -178,7 +178,7 @@ if (state0 != sensor0_prev)
 	
   sensor0_prev = state0;
 	
-  changeParkState(0);
+  emitEvent(changeParkState(0), "hasParkChanged");
 	
 }
 	
@@ -189,7 +189,7 @@ if (state1 != sensor1_prev)
 	
   sensor1_prev = state1;
 	
-  changeParkState(1);
+  emitEvent(changeParkState(1), "hasParkChanged");
 	
 }
 	
@@ -355,6 +355,7 @@ String request6(String body) {
                 // hasParkChanged condition
                 if(true) {
                     hlp->sendLongPollTXT(ws_msg, http_events_endpoint[0]);
+                    wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0]);
                 }
             }
             else
@@ -396,7 +397,9 @@ bool handleInputType(String value, String schema) {
 }
 
 void emitEvent(String txt, String event_endpoint) {
-    hlp->sendLongPollTXT(txt, event_endpoint);
+    String endpoint = "/" + thingName + "/events/" + event_endpoint;
+    hlp->sendLongPollTXT(txt, endpoint);
+    wsb->sendWebSocketTXT(txt, endpoint);
 }
 
 // Action functions
@@ -406,19 +409,21 @@ bool isParkFree(int rack_num) {
 }
 
 String changeParkState(int park) {
-	char s[25];
+	// char s[25];
 	
 property0_value[park] = !property0_value[park];
 	
-sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
+// sprintf(s, "Park %d is now %s", park, (property0_value[park]) ? "occupied" : "free");
 	
-// s = "Changed park 1 to ";
+// // s = "Changed park 1 to ";
 	
-// s += (property0_value[park]) ? "occupied" : "free";
+// // s += (property0_value[park]) ? "occupied" : "free";
 	
-Serial.println(s);
+// Serial.println(s);
 	
-return s;
+// return s;
+	
+return request4();
 	
 }
 

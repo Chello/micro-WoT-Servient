@@ -17,7 +17,7 @@ String td = "";
 
 
 DynamicJsonDocument es_doc(20);
-// Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
+    // Json Array to store the ip addresses of clients connected to WebSocket channel for Events requests   
 JsonArray ipe_arr;
 DeserializationError err;
 

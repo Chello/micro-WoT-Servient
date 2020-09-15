@@ -1816,7 +1816,7 @@ def flash(ctx):
         baudRate = 115200
         if(not(click.confirm('\nUse the default baud rate (115200)?', default=True))):
             baudRate = click.prompt('Baud rate', type=int)
-        c = 'screen %s %d' % (serialPort, baudRate)
+        c = 'konsole -e "/usr/bin/screen %s %d"' % (serialPort, baudRate)
         sp.Popen(shlex.split(c), universal_newlines=True, stdout=sp.PIPE) 
 
 if __name__ == "__main__":
