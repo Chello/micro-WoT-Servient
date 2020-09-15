@@ -13,7 +13,7 @@ String protocolSocket = "ws";
 int portSocket = 81;
 String urlSocket = "";
 
-String thingName = "semaphore";
+String thingName = "semaphore0";
 String td = "";
 
 DynamicJsonDocument es_doc(20);
@@ -87,8 +87,8 @@ const String ws_properties_endpoint[ws_properties_num] = {req1, req2, req3, req4
 properties_handler ws_properties_callback[ws_properties_num] = {request1, request2, request3, request4};
 
 //HTTP - events
-const int http_events_num = 1;
-const String http_events_endpoint[http_events_num] = {req6};
+const int http_events_num = 0;
+const String http_events_endpoint[http_events_num] = {};
 //WS - events
 const int ws_events_num = 1;
 const String ws_events_endpoint[ws_events_num] = {req6};
@@ -102,7 +102,7 @@ void setup()
 
     connection(ssid, password);
 
-    td = "{\"title\":\"semaphore\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/properties/" + property0_name + "\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/properties/" + property0_name + "\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/actions/" + action1_name + "\",\"op\":\"invokeaction\"}],\"input\":{\"resp\":{\"type\":\"string\"}},\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/events/" + event1_name + "\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/events/" + event1_name + "\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"semaphore0\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/properties/" + property0_name + "\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/properties/" + property0_name + "\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlServer + "/actions/" + action1_name + "\",\"op\":\"invokeaction\"}],\"input\":{\"resp\":{\"type\":\"string\"}},\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\"" + urlSocket + "/events/" + event1_name + "\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -130,7 +130,7 @@ void setup()
     pinMode(GREENLED, OUTPUT);
 
     pinMode(REDLED, OUTPUT);
-
+    
     // This statement will declare pin 15 as digital input
     // pinMode(SENSOR0, INPUT);
 
@@ -140,10 +140,13 @@ void setup()
 void loop()
 {
     HTTPClient http;
-
+    int httpResponseCode;
+    Serial.println("Speriamo0");
     http.begin(HTTPUrl);
+    Serial.println("Speriamo0.1");
+    // Serial.println("Speriamo0.2");
 
-    int httpResponseCode = http.GET();
+    httpResponseCode = http.GET();
 
     Serial.println("Speriamo1");
 
@@ -151,9 +154,10 @@ void loop()
     {
 
         String payload = http.getString();
-        http.end();
 
-        DynamicJsonDocument doc(100);
+        DynamicJsonDocument doc(600);
+
+        // http.end();
 
         Serial.println("Speriamo2");
 
@@ -200,7 +204,9 @@ void loop()
         }
 
         Serial.println("Speriamo6");
-        doc.clear();
+
+        //   doc.clear();
+        // delay(500);
     }
 
     Serial.println("Speriamo7");
@@ -210,7 +216,8 @@ void loop()
     Serial.println("Speriamo8");
 
     // handle Requests via WebSocket
-    // wsb->loop();
+    wsb->loop();
+    Serial.println("Speriamo9");
 }
 
 void connection(const char *ssid, const char *password)
@@ -222,6 +229,7 @@ void connection(const char *ssid, const char *password)
 
     while (WiFi.status() != WL_CONNECTED)
     {
+        WiFi.begin(ssid, password);
         delay(1000);
         Serial.print(".");
     }
@@ -330,7 +338,6 @@ String request5(String body)
                 // hasParkChanged condition
                 if (true)
                 {
-                    hlp->sendLongPollTXT(ws_msg, http_events_endpoint[0]);
                     wsb->sendWebSocketTXT(ws_msg, ws_events_endpoint[0]);
                 }
             }
