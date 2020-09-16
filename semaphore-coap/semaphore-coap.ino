@@ -1,13 +1,19 @@
 
 #include <ArduinoJson.h>
-#include <embeddedWoT_CoAP.h>
-#include <WebSocketsClient.h>
+#include "Arduino.h"
+#include <WiFi.h>
+#include <embeddedWoT_HTTP_LongPoll.h>
+#include <embeddedWoT_WebSocket.h>
+#include <coap-simple.h>
 
 const char* ssid = "Rachelli-net";
 const char* password = "3eKLtrdFwfQXgpv!";
-String protocolCoap = "coap";
-int portCoap = 5683;
-String urlCoap = "";
+String protocolServer = "http";
+int portServer = 80;
+String urlServer = "";
+String protocolSocket = "ws";
+int portSocket = 81;
+String urlSocket = "";
 
 String thingName = "semaphore-coap";
 String td = "";
@@ -47,13 +53,16 @@ String req2 = "/" + thingName;
 String req1 = "/";
 
 IPAddress ipS;
-//CoAP object handler
-embeddedWoT_CoAP *coap;
+//Longpoll object handler
+embeddedWoT_HTTP_LongPoll *hlp;
+//WebSocket object handler
+embeddedWoT_WebSocket *wsb;
 
 const int GREENLED = 12;
 const int REDLED = 33;
 const char* HTTPUrl = "http://192.168.1.106/bike-rack/events/hasParkChanged";
-WebSocketsClient webSocket;
+WiFiUDP Udp;
+Coap coap(Udp);
 int i, j, k, n;
 
 String request1();
@@ -63,9 +72,9 @@ String request4();
 String request5(String body);
 
 //HTTP - actions
-const int http_actions_num = 0;
-const String http_actions_endpoint[http_actions_num] = {  };
-actions_handler http_actions_callback[http_actions_num] = {  };
+const int http_actions_num = 1;
+const String http_actions_endpoint[http_actions_num] = { req5 };
+actions_handler http_actions_callback[http_actions_num] = { request5 };
 
 //WS - actions
 const int ws_actions_num = 0;
@@ -73,31 +82,36 @@ const String ws_actions_endpoint[ws_actions_num] = {  };
 actions_handler ws_actions_callback[ws_actions_num] = {  };
 
 //CoAP - actions
-const int coap_actions_num = 1;
-const String coap_actions_endpoint[coap_actions_num] = { req5 };
-actions_handler coap_actions_callback[coap_actions_num] = { request5 };
+const int coap_actions_num = 0;
+const String coap_actions_endpoint[coap_actions_num] = {  };
+actions_handler coap_actions_callback[coap_actions_num] = {  };
 
 //HTTP - Properties
-const int http_properties_num = 0;
-const String http_properties_endpoint[http_properties_num] = {  };
-properties_handler http_properties_callback[http_properties_num] = {  };
+const int http_properties_num = 4;
+const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
+properties_handler http_properties_callback[http_properties_num] = { request1, request2, request3, request4 };
 
 //WS - Properties
-const int ws_properties_num = 0;
-const String ws_properties_endpoint[ws_properties_num] = {  };
-properties_handler ws_properties_callback[ws_properties_num] = {  };
+const int ws_properties_num = 4;
+const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req4 };
+properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
 
 //CoAP - Properties
-const int coap_properties_num = 4;
-const String coap_properties_endpoint[coap_properties_num] = { req1, req2, req3, req4 };
-properties_handler coap_properties_callback[coap_properties_num] = { request1, request2, request3, request4 };
+const int coap_properties_num = 0;
+const String coap_properties_endpoint[coap_properties_num] = {  };
+properties_handler coap_properties_callback[coap_properties_num] = {  };
 
 //HTTP - events
 const int http_events_num = 0;
 const String http_events_endpoint[http_events_num] = {  };
+
 //WS - events
 const int ws_events_num = 1;
 const String ws_events_endpoint[ws_events_num] = { req6 };
+
+//CoAP - events
+const int coap_events_num = 0;
+const String coap_events_endpoint[coap_events_num] = {  };
 
 void setup() {
     Serial.begin(115200);
@@ -107,15 +121,24 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"semaphore-coap\",\"id\":\"semaphore\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlCoap+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlCoap+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlCoap+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"semaphore-coap\",\"id\":\"semaphore-coap\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"semaphore\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"boolean\",\"items\":{\"type\":\"boolean\"},\"observable\":true,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"statusChanged\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"safe\":true,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"statusChanged\"],\"condition\":\"true\"}}}";
 
-    coap = new embeddedWoT_CoAP(portCoap);
+    hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
-    coap->exposeActions(coap_actions_endpoint, coap_actions_callback, coap_actions_num);
-    coap->exposeProperties(coap_properties_endpoint, coap_properties_callback, coap_properties_num);
-    coap->start();
+    hlp->exposeActions(http_actions_endpoint, http_actions_callback, http_actions_num);
+    hlp->exposeEvents(http_events_endpoint, http_events_num);
+    hlp->exposeProperties(http_properties_endpoint, http_properties_callback, http_properties_num);
+
+    hlp->begin();
+    wsb = new embeddedWoT_WebSocket(portSocket);
+
+    wsb->bindEventSchema(es_doc);
+    wsb->exposeActions(ws_actions_endpoint, ws_actions_callback, ws_actions_num);
+    wsb->exposeEvents(ws_events_endpoint, ws_events_num);
+    wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     Serial.println("Server started");
     Serial.println(urlServer);
+    Serial.println(urlSocket);
 
     // property0_value[0] = false;
 // property0_value[1] = false;
@@ -128,74 +151,97 @@ pinMode(REDLED, OUTPUT);
 // pinMode(SENSOR1, INPUT);
 
 // server address, port and URL
-	webSocket.begin("192.168.1.106", 81, "/bike-rack/events/hasParkChanged");
+// 	webSocket.begin("192.168.1.106", 81, "/bike-rack/events/hasParkChanged");
 
-	// event handler
-	webSocket.onEvent(webSocketEvent);
+// 	// event handler
+// 	webSocket.onEvent(webSocketEvent);
 
-	// use HTTP Basic Authorization this is optional remove if not needed
-//	webSocket.setAuthorization("user", "Password");
+// 	// use HTTP Basic Authorization this is optional remove if not needed
+// //	webSocket.setAuthorization("user", "Password");
 
-	// try ever 5000 again if connection has failed
-	webSocket.setReconnectInterval(5000);
+// 	// try ever 5000 again if connection has failed
+// 	webSocket.setReconnectInterval(5000);
+coap.response(callback_response);
+coap.start();
 }    
 
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
-  DynamicJsonDocument doc(600);
-  JsonObject obj;
-  JsonArray array;
-  JsonVariant v;
-  DeserializationError err;
-  bool vas, tot;
+// CoAP client response callback
+void callback_response(CoapPacket &packet, IPAddress ip, int port) {
+  Serial.println("[Coap Response got]");
+
+  char p[packet.payloadlen + 1];
+  memcpy(p, packet.payload, packet.payloadlen);
+  p[packet.payloadlen] = NULL;
+
+  Serial.println(p);
+}
+
+
+
+
+// void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+//   DynamicJsonDocument doc(600);
+//   JsonObject obj;
+//   JsonArray array;
+//   JsonVariant v;
+//   DeserializationError err;
+//   bool vas, tot;
   
-  switch(type) {
-    case WStype_DISCONNECTED:
-      Serial.printf("[WSc] Disconnected!\n");
-      break;
-     case WStype_CONNECTED:
-      Serial.printf("[WSc] Connected to url: %s\n", payload);
+//   switch(type) {
+//     case WStype_DISCONNECTED:
+//       Serial.printf("[WSc] Disconnected!\n");
+//       break;
+//     case WStype_CONNECTED:
+//       Serial.printf("[WSc] Connected to url: %s\n", payload);
 
-      // send message to server when Connected
-      webSocket.sendTXT("{}");
-      break;
-    case WStype_TEXT:
-      Serial.printf("[WSc] get text: %s\n", payload);
-      err = deserializeJson(doc, payload);
-      // extract the values
-      if (!err) {
-        obj = doc.as<JsonObject>();
-        array = obj["parks"];
-        tot = true;
-        for(v : array) {
-          vas = v.as<bool>();
-          tot = tot && vas;
-        }
-      } else tot = false;
-      if (tot) {
-        Serial.println("Rosso");
-        digitalWrite(GREENLED, LOW);
-        digitalWrite(REDLED, HIGH);   
-      } else {
-        Serial.println("Verde");
-        digitalWrite(GREENLED, HIGH);
-        digitalWrite(REDLED, LOW);
-      }
+//       // send message to server when Connected
+//       webSocket.sendTXT("{}");
+//       break;
+//     case WStype_TEXT:
+//       Serial.printf("[WSc] get text: %s\n", payload);
+//       err = deserializeJson(doc, payload);
+//       // extract the values
+//       if (!err) {
+//         obj = doc.as<JsonObject>();
+//         array = obj["parks"];
+//         tot = true;
+//         for(v : array) {
+//           vas = v.as<bool>();
+//           tot = tot && vas;
+//         }
+//       } else tot = false;
+//       if (tot) {
+//         Serial.println("Rosso");
+//         digitalWrite(GREENLED, LOW);
+//         digitalWrite(REDLED, HIGH);   
+//       } else {
+//         Serial.println("Verde");
+//         digitalWrite(GREENLED, HIGH);
+//         digitalWrite(REDLED, LOW);
+//       }
 
-      // send message to server
-      // webSocket.sendTXT("message here");
-      break;
-    case WStype_BIN:
-    case WStype_ERROR:      
-    case WStype_FRAGMENT_TEXT_START:
-    case WStype_FRAGMENT_BIN_START:
-    case WStype_FRAGMENT:
-    case WStype_FRAGMENT_FIN:
-      break;
-    }
-  }
+//       // send message to server
+//       // webSocket.sendTXT("message here");
+//       break;
+//     case WStype_BIN:
+//     case WStype_ERROR:      
+//     case WStype_FRAGMENT_TEXT_START:
+//     case WStype_FRAGMENT_BIN_START:
+//     case WStype_FRAGMENT:
+//     case WStype_FRAGMENT_FIN:
+//       break;
+//     }
+//   }
 
 void loop() {
-    webSocket.loop();
+    Serial.println("Eh io l'ho mandato...");
+int msgid = coap.get(IPAddress(192, 168, 1, 106), 5683, "bike-rack-coap/events/hasParkChanged");
+
+Serial.println(msgid);
+delay(4000);
+
+
+coap.loop();
 
 
 // Serial.println("Speriamo0");
@@ -240,8 +286,8 @@ void loop() {
 // Serial.println("Speriamo7");
 // // http.end();
 // Serial.println("Speriamo8");
-    // handle Requests via CoAP
-    coap->loop();
+    // handle Requests via WebSocket
+    wsb->loop();
 }
 
 void connection(const char* ssid, const char* password) {
@@ -345,6 +391,8 @@ bool handleInputType(String value, String schema) {
 
 void emitEvent(String txt, String event_endpoint) {
     String endpoint = "/" + thingName + "/events/" + event_endpoint;
+    hlp->sendLongPollTXT(txt, endpoint);
+    wsb->sendWebSocketTXT(txt, endpoint);
 }
 
 // Action functions

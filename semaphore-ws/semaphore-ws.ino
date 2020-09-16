@@ -1,5 +1,7 @@
 
 #include <ArduinoJson.h>
+#include "Arduino.h"
+#include <WiFi.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
 #include <embeddedWoT_WebSocket.h>
 #include <WebSocketsClient.h>
@@ -78,6 +80,11 @@ const int ws_actions_num = 0;
 const String ws_actions_endpoint[ws_actions_num] = {  };
 actions_handler ws_actions_callback[ws_actions_num] = {  };
 
+//CoAP - actions
+const int coap_actions_num = 0;
+const String coap_actions_endpoint[coap_actions_num] = {  };
+actions_handler coap_actions_callback[coap_actions_num] = {  };
+
 //HTTP - Properties
 const int http_properties_num = 4;
 const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
@@ -88,12 +95,22 @@ const int ws_properties_num = 4;
 const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req4 };
 properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
 
+//CoAP - Properties
+const int coap_properties_num = 0;
+const String coap_properties_endpoint[coap_properties_num] = {  };
+properties_handler coap_properties_callback[coap_properties_num] = {  };
+
 //HTTP - events
 const int http_events_num = 0;
 const String http_events_endpoint[http_events_num] = {  };
+
 //WS - events
 const int ws_events_num = 1;
 const String ws_events_endpoint[ws_events_num] = { req6 };
+
+//CoAP - events
+const int coap_events_num = 0;
+const String coap_events_endpoint[coap_events_num] = {  };
 
 void setup() {
     Serial.begin(115200);
@@ -120,6 +137,7 @@ void setup() {
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     Serial.println("Server started");
     Serial.println(urlServer);
+    Serial.println(urlSocket);
 
     // property0_value[0] = false;
 // property0_value[1] = false;
