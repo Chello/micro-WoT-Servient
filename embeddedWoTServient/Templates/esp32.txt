@@ -67,6 +67,10 @@
         {%- do item.update(href='" + urlServer + "/events/" + event' + i | string + '_name + "' ) -%}
         {%- do global.update({'isHTTP':True}) -%}
         {%- do protocols['events'][event['name']].append('http') -%}
+        {% elif item['href'] == 'coap' %}
+        {%- do item.update(href='" + urlCoap + "/events/" + event' + i | string + '_name + "' ) -%}
+        {%- do global.update({'isCOAP':True}) -%}
+        {%- do protocols['events'][event['name']].append('coap') -%}
         {% endif %}
     {%- endfor -%}
 {%- endfor %}   
@@ -594,6 +598,8 @@ String {{ interactionName }}_opRequired[{{ interaction['required'] | length }}] 
 {%- do capacity.update({'maxSchema':20}) -%}
 {%- do capacity.update({'maxInputSchema':0}) -%}
 #include <ArduinoJson.h>
+#include "Arduino.h"
+#include <WiFi.h>
 {% if global['isHTTP'] %}
 #include <embeddedWoT_HTTP_LongPoll.h>
 {% endif %}
@@ -979,6 +985,7 @@ properties_handler coap_properties_callback[coap_properties_num] = { {{ request|
 {% endfor %}
 const int http_events_num = {{ req|length }};
 const String http_events_endpoint[http_events_num] = { {{ req|join(', ') }} };
+
 //WS - events
 {% set req = [] %}
 {% set request = [] %}
@@ -988,6 +995,16 @@ const String http_events_endpoint[http_events_num] = { {{ req|join(', ') }} };
 {% endfor %}
 const int ws_events_num = {{ req|length }};
 const String ws_events_endpoint[ws_events_num] = { {{ req|join(', ') }} };
+
+//CoAP - events
+{% set req = [] %}
+{% set request = [] %}
+{% for event in protocols['events'] if 'coap' in protocols['events'][event] %}
+    {% do req.append('req' + (loop.index + 3 + template['numproperties'] + template['numactions']) | string) %}
+        {% do request.append('request' + (loop.index + 3 + template['numproperties']) | string) %}
+{% endfor %}
+const int coap_events_num = {{ req|length }};
+const String coap_events_endpoint[coap_events_num] = { {{ req|join(', ') }} };
 
 void setup() {
     Serial.begin(115200);
@@ -1093,12 +1110,22 @@ void setup() {
     {% if global['isCOAP'] %}
     coap = new embeddedWoT_CoAP(portCoap);
 
+    coap->bindEventSchema(es_doc);
     coap->exposeActions(coap_actions_endpoint, coap_actions_callback, coap_actions_num);
     coap->exposeProperties(coap_properties_endpoint, coap_properties_callback, coap_properties_num);
+    coap->exposeEvents(coap_events_endpoint, coap_events_num);
     coap->start();
     {% endif %}
     Serial.println("Server started");
+    {% if global['isHTTP'] %}
     Serial.println(urlServer);
+    {% endif %}
+    {% if global['isWS'] %}
+    Serial.println(urlSocket);
+    {% endif %}
+    {% if global['isCOAP'] %}
+    Serial.println(urlCoap);
+    {% endif %}
     {% if 'setup' in template %}
 
     {{ template['setup'] }}
@@ -1141,9 +1168,14 @@ void connection(const char* ssid, const char* password) {
     ipS = WiFi.localIP();
     Serial.println(ipS);
 
+    {% if global['isHTTP'] %}
     urlServer = protocolServer + "://" + ipS.toString() + ":" + portServer + "/" + thingName;
-    {% if template['numevents'] != 0 or global['isWS'] %}
+    {% endif %}
+    {% if global['isWS'] %}
     urlSocket = protocolSocket + "://" + ipS.toString() + ":" + portSocket + "/" + thingName;
+    {% endif %}
+    {% if global['isCOAP'] %}
+    urlCoap = protocolCoap + "://" + ipS.toString() + ":" + portCoap + "/" + thingName;
     {% endif %}
 }
 
@@ -1152,7 +1184,13 @@ String request1() {
     {{ defineVariable('String', 'resp', 'iv') }}
 
     Serial.println("\nGET Thing URL");
+    {% if global['isHTTP'] %}
     {{ setVariable(True, 'resp', '[\\"" + urlServer + "\\"]') }}
+    {% elif global['isWS'] %}
+    {{ setVariable(True, 'resp', '[\\"" + urlSocket + "\\"]') }}
+    {% elif global['isCOAP'] %}
+    {{ setVariable(True, 'resp', '[\\"" + urlCoap + "\\"]') }}
+    {% endif %}
     return resp;
 }
 
@@ -1882,6 +1920,9 @@ void emitEvent(String txt, String event_endpoint) {
     {% endif %}
     {% if global['isWS'] %}
     wsb->sendWebSocketTXT(txt, endpoint);
+    {% endif %}
+    {% if global['isCOAP'] %}
+    coap->sendCoAPTXT(txt, endpoint);
     {% endif %}
 }
 

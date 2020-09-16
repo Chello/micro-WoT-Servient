@@ -491,6 +491,10 @@
                 {
                   "$ref": "#/definitions/event_ws_form",
                   "title": "WebSocket"
+                },
+                {
+                  "$ref": "#/definitions/event_coap_form",
+                  "title": "CoAP"
                 }
               ]
             }
@@ -764,6 +768,57 @@
           "default": "ws",
           "enum": [
             "ws"
+          ],
+          "options": {
+            "hidden": true
+          }
+        },
+        "op": {
+          "type": "array",
+          "format": "categories",
+          "name": "operations",
+          "title": "Operations",
+          "description": "Choose one or more operation supported.",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "enum": [
+              "subscribeevent",
+              "unsubscribeevent"
+            ]
+          }
+        }
+      }
+    },
+    "event_coap_form": {
+      "type": "object",
+      "required": [
+        "op",
+        "contentType",
+        "href"
+      ],
+      "options": {
+        "disable_edit_json": true,
+        "disable_collapse": true,
+        "disable_properties": true
+      },
+      "properties": {
+        "contentType": {
+          "type": "string",
+          "title": "Content meta type",
+          "default": "application/json",
+          "enum": [
+            "application/json",
+            "text/html"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "default": "coap",
+          "enum": [
+            "coap"
           ],
           "options": {
             "hidden": true
