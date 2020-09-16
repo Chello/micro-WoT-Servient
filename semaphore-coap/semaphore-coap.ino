@@ -163,6 +163,12 @@ pinMode(REDLED, OUTPUT);
 // 	webSocket.setReconnectInterval(5000);
 coap.response(callback_response);
 coap.start();
+
+delay(4000);
+Serial.println("Eh io l'ho mandato...");
+int msgid = coap.get(IPAddress(192, 168, 1, 106), 5683, "bike-rack-coap/events/hasParkChanged");
+
+Serial.println(msgid);
 }    
 
 // CoAP client response callback
@@ -172,73 +178,39 @@ void callback_response(CoapPacket &packet, IPAddress ip, int port) {
   char p[packet.payloadlen + 1];
   memcpy(p, packet.payload, packet.payloadlen);
   p[packet.payloadlen] = NULL;
-
-  Serial.println(p);
-}
-
-
-
-
-// void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
-//   DynamicJsonDocument doc(600);
-//   JsonObject obj;
-//   JsonArray array;
-//   JsonVariant v;
-//   DeserializationError err;
-//   bool vas, tot;
   
-//   switch(type) {
-//     case WStype_DISCONNECTED:
-//       Serial.printf("[WSc] Disconnected!\n");
-//       break;
-//     case WStype_CONNECTED:
-//       Serial.printf("[WSc] Connected to url: %s\n", payload);
-
-//       // send message to server when Connected
-//       webSocket.sendTXT("{}");
-//       break;
-//     case WStype_TEXT:
-//       Serial.printf("[WSc] get text: %s\n", payload);
-//       err = deserializeJson(doc, payload);
-//       // extract the values
-//       if (!err) {
-//         obj = doc.as<JsonObject>();
-//         array = obj["parks"];
-//         tot = true;
-//         for(v : array) {
-//           vas = v.as<bool>();
-//           tot = tot && vas;
-//         }
-//       } else tot = false;
-//       if (tot) {
-//         Serial.println("Rosso");
-//         digitalWrite(GREENLED, LOW);
-//         digitalWrite(REDLED, HIGH);   
-//       } else {
-//         Serial.println("Verde");
-//         digitalWrite(GREENLED, HIGH);
-//         digitalWrite(REDLED, LOW);
-//       }
-
-//       // send message to server
-//       // webSocket.sendTXT("message here");
-//       break;
-//     case WStype_BIN:
-//     case WStype_ERROR:      
-//     case WStype_FRAGMENT_TEXT_START:
-//     case WStype_FRAGMENT_BIN_START:
-//     case WStype_FRAGMENT:
-//     case WStype_FRAGMENT_FIN:
-//       break;
-//     }
-//   }
+  DynamicJsonDocument doc(600);
+  // http.end();
+  // Serial.println("Speriamo2");
+  Serial.println(p);
+  deserializeJson(doc, p);
+  // extract the values
+  JsonObject obj = doc.as<JsonObject>();
+  JsonArray array = obj["parks"];
+  bool tot = true;
+  for(JsonVariant v : array) {
+    // Serial.println("Speriamo3-4");
+    bool vas = v.as<bool>();
+    tot = tot && vas;
+  }
+  // Serial.println("Speriamo5");
+  if (tot) {
+    Serial.println("Rosso");
+    digitalWrite(GREENLED, LOW);
+    digitalWrite(REDLED, HIGH);   
+  } else {
+    Serial.println("Verde");
+    digitalWrite(GREENLED, HIGH);
+    digitalWrite(REDLED, LOW);
+  }
+  // Serial.println("Speriamo6");
+  doc.clear();
+}
+// Serial.println("Speriamo7");
 
 void loop() {
-    Serial.println("Eh io l'ho mandato...");
-int msgid = coap.get(IPAddress(192, 168, 1, 106), 5683, "bike-rack-coap/events/hasParkChanged");
-
-Serial.println(msgid);
-delay(4000);
+    
+delay(40);
 
 
 coap.loop();
