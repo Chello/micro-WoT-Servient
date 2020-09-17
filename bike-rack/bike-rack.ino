@@ -1,5 +1,7 @@
 
 #include <ArduinoJson.h>
+#include "Arduino.h"
+#include <WiFi.h>
 #include <embeddedWoT_HTTP_LongPoll.h>
 #include <embeddedWoT_WebSocket.h>
 
@@ -85,6 +87,11 @@ const int ws_actions_num = 0;
 const String ws_actions_endpoint[ws_actions_num] = {  };
 actions_handler ws_actions_callback[ws_actions_num] = {  };
 
+//CoAP - actions
+const int coap_actions_num = 0;
+const String coap_actions_endpoint[coap_actions_num] = {  };
+actions_handler coap_actions_callback[coap_actions_num] = {  };
+
 //HTTP - Properties
 const int http_properties_num = 4;
 const String http_properties_endpoint[http_properties_num] = { req1, req2, req3, req4 };
@@ -95,12 +102,22 @@ const int ws_properties_num = 4;
 const String ws_properties_endpoint[ws_properties_num] = { req1, req2, req3, req4 };
 properties_handler ws_properties_callback[ws_properties_num] = { request1, request2, request3, request4 };
 
+//CoAP - Properties
+const int coap_properties_num = 0;
+const String coap_properties_endpoint[coap_properties_num] = {  };
+properties_handler coap_properties_callback[coap_properties_num] = {  };
+
 //HTTP - events
 const int http_events_num = 1;
 const String http_events_endpoint[http_events_num] = { req7 };
+
 //WS - events
 const int ws_events_num = 1;
 const String ws_events_endpoint[ws_events_num] = { req7 };
+
+//CoAP - events
+const int coap_events_num = 0;
+const String coap_events_endpoint[coap_events_num] = {  };
 
 void setup() {
     Serial.begin(115200);
@@ -110,7 +127,7 @@ void setup() {
   
     connection(ssid, password);
     
-    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"safe\":true,\"idempotent\":false,\"output\":{\"type\":\"boolean\"}},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
+    td = "{\"title\":\"bike-rack\",\"id\":\"bike-rack\",\"@context\":[\"https://www.w3.org/2019/wot/td/v1\"],\"security\":\"nosec_sc\",\"securityDefinitions\":{\"nosec_sc\":{\"scheme\":\"nosec\"}},\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/all/properties\",\"op\":[\"readallproperties\",\"readmultipleproperties\"]}],\"links\":[],\"properties\":{\"parks\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/properties/"+property0_name+"\",\"op\":[\"readproperty\"]}],\"type\":\"array\",\"items\":{\"type\":\"boolean\"},\"observable\":false,\"readOnly\":true,\"writeOnly\":true}},\"actions\":{\"isParkFree\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action1_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"rack_num\":{\"type\":\"integer\"}},\"output\":{\"type\":\"boolean\"},\"safe\":true,\"idempotent\":false},\"changeParkState\":{\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/actions/"+action2_name+"\",\"op\":\"invokeaction\"}],\"input\":{\"park\":{\"type\":\"integer\"}},\"output\":{\"type\":\"string\"},\"safe\":false,\"idempotent\":false}},\"events\":{\"hasParkChanged\":{\"eventName\":\"hasParkChanged\",\"forms\":[{\"contentType\":\"application/json\",\"href\":\""+urlServer+"/events/"+event1_name+"\",\"subprotocol\":\"longpoll\",\"op\":[]},{\"contentType\":\"application/json\",\"href\":\""+urlSocket+"/events/"+event1_name+"\",\"op\":[\"subscribeevent\"]}],\"actionsTriggered\":[\"changeParkState\"],\"condition\":\"true\"}}}";
 
     hlp = new embeddedWoT_HTTP_LongPoll(portServer);
 
@@ -127,72 +144,46 @@ void setup() {
     wsb->exposeProperties(ws_properties_endpoint, ws_properties_callback, ws_properties_num);
     Serial.println("Server started");
     Serial.println(urlServer);
+    Serial.println(urlSocket);
 
     property0_value[0] = false;
-	
 property0_value[1] = false;
-	
 // property0_value[2] = false;
-	
 // This statement will declare pin 22 as digital output 
 pinMode(GREENLED, OUTPUT);
-	
 pinMode(REDLED, OUTPUT);
-	
 // This statement will declare pin 15 as digital input 
 pinMode(SENSOR0, INPUT);
-	
 pinMode(SENSOR1, INPUT);
-	
 
 }    
+
+
 
 void loop() {
     //get pushbutton state
 int state0 = digitalRead(SENSOR0);
-	
 int state1 = digitalRead(SENSOR1);
-	
 //Set semaphore status
-if (state0 == HIGH && state1 == HIGH) 
-	{
-	
+if (state0 == HIGH && state1 == HIGH) {
   digitalWrite(GREENLED, HIGH);
-	
   digitalWrite(REDLED, LOW);
-	
-}
-	 else 
-	{
-	
-  digitalWrite(GREENLED, LOW);
-	 
+} else {
+  digitalWrite(GREENLED, LOW); 
   digitalWrite(REDLED, HIGH);
-	
 }
-	
 
 //Change status of park 0
-if (state0 != sensor0_prev) 
-	{
-	
+if (state0 != sensor0_prev) {
   sensor0_prev = state0;
-	
   emitEvent(changeParkState(0), "hasParkChanged");
-	
 }
-	
 
 //Change status of park 1
-if (state1 != sensor1_prev) 
-	{
-	
+if (state1 != sensor1_prev) {
   sensor1_prev = state1;
-	
   emitEvent(changeParkState(1), "hasParkChanged");
-	
 }
-	
     // handle Requests via WebSocket
     wsb->loop();
 }
@@ -206,6 +197,7 @@ void connection(const char* ssid, const char* password) {
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
         Serial.print(".");
+        WiFi.begin(ssid, password);
     }
 
     Serial.println("\nConnected");
