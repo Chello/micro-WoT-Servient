@@ -4,11 +4,12 @@
 
 ## How does it work?
 
-This module provides an Electron-made GUI for [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient). User can provide all the metadata included in W3C WoT Thing Descriptions via forms on GUI and store them in a JSON Thing Description file. 
-The project can also build a scripting file including the Thing logic. This scripting file is executed by microcontrollers and it has the .ino extension.
-This project can also compile the built .ino project and upload to the prototipying board, calling the WoTServient CLI and showing it to a built-in terminal.
+This module provides an Electron-made GUI for [WoT-microcontroller-servient project](https://github.com/UniBO-PRISMLab/WoT-microcontroller-servient) by Daniele Rossi. User can provide all the metadata included in W3C WoT Thing Descriptions via forms on GUI and store them in a JSON Thing Description file. 
+The project can also build a scripting file including the Thing logic. This scripting file is compiled and flashed into a microcontroller.
+The sketch has .ino extension (like Arduino IDE).
+This project can also compile the built .ino project and upload to the prototipying board, calling the Servient Builder and showing it to a built-in terminal.
 
-The **only supported** embedded systems are NodeMCU ESP8266 and ESP32. 
+The **only supported** embedded system is Espressif ESP32 (an extra compatibility support is provided for NodeMCU ESP8266)
 
 ## Prerequisites
 This package is only supported by Linux systems.
@@ -63,12 +64,12 @@ npm start
 
 - HTTP :heavy_check_mark:
 - WebSocket :heavy_check_mark:
+- CoAP :heavy_check_mark:
 
 **MediaType Support**
 
-- JSON :heavy_check_mark:
+- JSON :heavy_check_mark: 
+- Plain Text :heavy_check_mark: 
 
 ## License
 WoT-microcontroller-servient-GUI is released under the MIT License.
-
-
