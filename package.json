@@ -24,7 +24,7 @@
     "ace-builds": "1.4.11",
     "bootstrap": "4.5.0",
     "font-awesome": "4.7.0",
-    "handlebars": "^4.7.6",
+    "handlebars": "^4.7.7",
     "jquery": "^3.5.1",
     "jquery-ui-dist": "1.12.1",
     "jszip": "3.5.0",
