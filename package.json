@@ -27,7 +27,7 @@
     "handlebars": "^4.7.6",
     "jquery": "^3.5.1",
     "jquery-ui-dist": "1.12.1",
-    "jszip": "3.5.0",
+    "jszip": "3.7.0",
     "xterm": "^4.6.0"
   }
 }
